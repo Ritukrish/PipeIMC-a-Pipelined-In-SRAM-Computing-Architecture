@@ -9,7 +9,7 @@
 class TraceGenerator {
 public:
 
-    // Generate matrix multiplication operations
+    // Generate matrix-multiplication operations
     static std::vector<InSramOp> generate_matmul(int iterations);
 
     // Generate stencil operations
