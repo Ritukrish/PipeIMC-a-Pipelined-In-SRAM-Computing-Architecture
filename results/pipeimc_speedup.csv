@@ -1,0 +1,4 @@
+Kernel,Design_1_Baseline,Design_2_Pipelined,Design_3_Renaming,Design_4_Fine_Grained
+matmul,1.0,1.184,1.184,1.5291
+stencil,1.0,1.0987,1.0987,1.0987
+kmeans,1.0,1.0681,1.0681,1.0681

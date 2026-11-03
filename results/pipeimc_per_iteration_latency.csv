@@ -1,0 +1,5 @@
+Design,Matmul_Cycles_Per_Iter,Stencil_Cycles_Per_Iter,KMeans_Cycles_Per_Iter
+Design 1: Baseline,341,245,204
+Design 2: Pipelined,288,223,191
+Design 3: Renaming,288,223,191
+Design 4: Fine-Grained,223,223,191

@@ -1,0 +1,4 @@
+Kernel,Iterations,Total_Operations,Design_1_Baseline,Design_2_Pipelined,Design_3_Renaming,Design_4_Fine_Grained
+matmul,256,1280,87297,73729,73729,57089
+stencil,256,1280,62721,57089,57089,57089
+kmeans,256,1024,52225,48897,48897,48897

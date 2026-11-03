@@ -1,0 +1,15 @@
+Design,Operation_ID,Start_Cycle,Duration_Cycles,End_Cycle,Stage_Type
+Baseline,O1_Loads,0,40,40,Memory
+Baseline,O1_MUL_Calc,40,105,145,Compute
+Baseline,O2_Loads,145,40,185,Memory
+Baseline,O2_MUL_Calc,185,105,290,Compute
+Baseline,O3_ADD,290,9,299,Compute
+Baseline,O4_ADD_Store,299,29,328,Memory_Compute
+Baseline,B_Branch,328,13,341,Branch
+Fine_Grained,O1_Loads,0,40,40,Memory
+Fine_Grained,O1_MUL_Calc,40,105,145,Compute
+Fine_Grained,O2_Loads_Overlapped,40,40,80,Memory_Overlapped
+Fine_Grained,O2_MUL_Calc,145,45,190,Compute
+Fine_Grained,O3_ADD,190,9,199,Compute
+Fine_Grained,O4_ADD_Store,199,11,210,Memory_Compute
+Fine_Grained,B_Branch,210,13,223,Branch
