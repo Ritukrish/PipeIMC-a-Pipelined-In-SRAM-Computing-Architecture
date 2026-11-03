@@ -27,7 +27,7 @@ public:
         return OpCode::ADD;
     }
 
-    // Write any trace vector to a human-readable CSV .trace file
+    // Write any trace vector to a human-readable CSV trace file
     static void saveTraceToFile(const std::string& filename, const std::vector<TraceOp>& trace) {
         std::ofstream out(filename);
         out << "# ID, Label, OpCode, rd, rs1, rs2, rs1_is_mem, rs2_is_mem, rd_is_mem, is_branch\n";
