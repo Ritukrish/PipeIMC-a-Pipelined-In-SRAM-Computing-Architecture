@@ -1,69 +1,130 @@
-CXX      := g++
-CXXFLAGS := -std=c++17 -O2 -Wall -Wextra
 
-TARGET   := pipeimc_sim
-SRCS     := main.cpp matmul.cpp stencil.cpp kmeans.cpp
-OBJS     := $(SRCS:.cpp=.o)
+# ============================================================
+# PipeIMC Simulator Makefile
+# ============================================================
 
-# Default CLI variables (can be overridden from terminal: e.g. make run KERNEL=matmul MODE=fine_grained)
-KERNEL   ?= all
-MODE     ?= all
-ITERS    ?= 32
+CXX = g++
+CXXFLAGS = -O3 -std=c++17 -Wall -Wextra
 
-.PHONY: all clean run help \
-        matmul stencil kmeans knn \
-        baseline pipelined renaming fine_grained
+TARGET = build/pipeimc
 
-all: $(TARGET)
+SRC_DIR = src
+RESULT_DIR = results
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+SOURCES = \
+	$(SRC_DIR)/main.cpp \
+	$(SRC_DIR)/sim_engine.cpp \
+	$(SRC_DIR)/model_baseline.cpp \
+	$(SRC_DIR)/model_pipelined.cpp \
+	$(SRC_DIR)/model_renaming.cpp \
+	$(SRC_DIR)/model_fine_grained.cpp \
+	$(SRC_DIR)/trace_generator.cpp \
+	$(SRC_DIR)/functional.cpp
 
-%.o: %.cpp types.hpp kernels.hpp rename_unit.hpp simulator.hpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+HEADERS = \
+	$(SRC_DIR)/sim_engine.hpp \
+	$(SRC_DIR)/sim_op.hpp \
+	$(SRC_DIR)/trace_generator.hpp \
+	$(SRC_DIR)/model_baseline.hpp \
+	$(SRC_DIR)/model_pipelined.hpp \
+	$(SRC_DIR)/model_renaming.hpp \
+	$(SRC_DIR)/model_fine_grained.hpp \
+	$(SRC_DIR)/functional.hpp
 
-# Generic parameterized run: make run KERNEL=matmul MODE=renaming
-run: $(TARGET)
-	./$(TARGET) --kernel $(KERNEL) --mode $(MODE) --iters $(ITERS)
+ITERATIONS = 256
+N = 16
 
-# Shortcut targets by Kernel (runs all 4 modes on the chosen kernel)
-matmul: $(TARGET)
-	./$(TARGET) --kernel matmul --mode $(MODE) --iters $(ITERS)
+# ============================================================
+# Default target
+# ============================================================
 
-stencil: $(TARGET)
-	./$(TARGET) --kernel stencil --mode $(MODE) --iters $(ITERS)
+.PHONY: all compile matmul stencil kmeans experiments func func_matmul func_stencil func_kmeans clean help
 
-kmeans: $(TARGET)
-	./$(TARGET) --kernel kmeans --mode $(MODE) --iters $(ITERS)
+all: experiments func
 
-knn: $(TARGET)
-	./$(TARGET) --kernel knn --mode $(MODE) --iters $(ITERS)
+# ============================================================
+# Compile
+# ============================================================
 
-# Shortcut targets by Optimization Mode (runs chosen mode across selected kernel(s))
-baseline: $(TARGET)
-	./$(TARGET) --kernel $(KERNEL) --mode baseline --iters $(ITERS)
+compile: $(TARGET)
 
-pipelined: $(TARGET)
-	./$(TARGET) --kernel $(KERNEL) --mode pipelined --iters $(ITERS)
+$(TARGET): $(SOURCES) $(HEADERS)
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET)
 
-renaming: $(TARGET)
-	./$(TARGET) --kernel $(KERNEL) --mode renaming --iters $(ITERS)
+# ============================================================
+# Create results directory
+# ============================================================
 
-fine_grained: $(TARGET)
-	./$(TARGET) --kernel $(KERNEL) --mode fine_grained --iters $(ITERS)
+$(RESULT_DIR):
+	mkdir -p $(RESULT_DIR)
+
+# ============================================================
+# Run individual kernels
+# ============================================================
+
+matmul: $(TARGET) | $(RESULT_DIR)
+	./$(TARGET) matmul $(ITERATIONS)
+
+stencil: $(TARGET) | $(RESULT_DIR)
+	./$(TARGET) stencil $(ITERATIONS)
+
+kmeans: $(TARGET) | $(RESULT_DIR)
+	./$(TARGET) kmeans $(ITERATIONS)
+
+# ============================================================
+# Run all kernels
+# ============================================================
+
+experiments: matmul stencil kmeans
+	@echo ""
+	@echo "========================================"
+	@echo " All PipeIMC experiments completed"
+	@echo " Check the results/ directory"
+	@echo "========================================"
+
+# ============================================================
+# Functional + timing in ONE run: the engine spends the Table III cycles
+# on each IMC operation and computes the real ALU result when they elapse
+# ============================================================
+
+func_matmul: $(TARGET) | $(RESULT_DIR)
+	./$(TARGET) matmul --func --n $(N)
+
+func_stencil: $(TARGET) | $(RESULT_DIR)
+	./$(TARGET) stencil --func --n $(N)
+
+func_kmeans: $(TARGET) | $(RESULT_DIR)
+	./$(TARGET) kmeans --func --n $(N)
+
+func: func_matmul func_stencil func_kmeans
+	@echo ""
+	@echo "========================================"
+	@echo " All functional simulations completed"
+	@echo " Check the results/ directory"
+	@echo "========================================"
+
+# ============================================================
+# Clean generated files
+# ============================================================
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf build
+	rm -f $(RESULT_DIR)/pipeimc_*.log
+
+# ============================================================
+# Help
+# ============================================================
 
 help:
-	@echo "======================================================================"
-	@echo " PipeIMC Simulator Makefile Commands:"
-	@echo "   make                                  -> Compile pipeimc_sim"
-	@echo "   make run                              -> Run all kernels & all 4 modes"
-	@echo "   make run KERNEL=matmul MODE=pipelined -> Run specific kernel & mode"
-	@echo "   make matmul                           -> Run matmul on all 4 modes"
-	@echo "   make matmul MODE=fine_grained         -> Run matmul with fine-grained issue"
-	@echo "   make stencil MODE=renaming            -> Run stencil with register renaming"
-	@echo "   make kmeans MODE=baseline             -> Run kmeans on in-order baseline"
-	@echo "   make knn MODE=fine_grained            -> Run knn with fine-grained issue"
-	@echo "======================================================================"
+	@echo "PipeIMC Simulator Commands"
+	@echo "--------------------------"
+	@echo "make compile    - Compile simulator"
+	@echo "make matmul     - Run MATMUL"
+	@echo "make stencil    - Run STENCIL"
+	@echo "make kmeans     - Run KMEANS"
+	@echo "make experiments- Run all kernels (timing only)"
+	@echo "make func       - Functional run of matmul, stencil, kmeans (real ALU at the end of each phase, one timeline)   (N=16)"
+	@echo "make func_matmul / func_stencil / func_kmeans - one kernel"
+	@echo "make clean      - Remove generated files"
+	@echo "make all        - Run everything (timing + functional)"

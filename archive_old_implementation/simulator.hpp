@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <stdexcept>
+#include "logger.hpp"
 
 struct ActiveJob {
     int op_id = -1;
@@ -86,6 +87,53 @@ public:
 
     int coarseMemLatency() const {
         return T_ADDR_STEP + cfg.mem_visit_latency + T_WB_STEP;
+    }
+
+    static const char* phaseName(PhaseType phase) {
+        switch (phase) {
+            case PhaseType::LOAD_PHASE_1: return "load 1";
+            case PhaseType::LOAD_PHASE_2: return "load 2";
+            case PhaseType::CALC_PHASE: return "compute";
+            case PhaseType::STORE_PHASE: return "store";
+            case PhaseType::NONE: return "idle";
+        }
+        return "unknown";
+    }
+
+    static std::string describeJob(int op_id, const std::string& label,
+                                   PhaseType phase, int remaining_cycles) {
+        return "#" + std::to_string(op_id) + " " + label + " [" + phaseName(phase) +
+               ", " + std::to_string(remaining_cycles) + " cycles left]";
+    }
+
+    void logCycleActivity(uint64_t cycle) const {
+        std::string port0;
+        if (port0_mem_job.phase != PhaseType::NONE) {
+            port0 = "Memory: " + describeJob(port0_mem_job.op_id, port0_mem_job.label,
+                                             port0_mem_job.phase, port0_mem_job.remaining_cycles);
+        }
+        if (port0_calc_job.phase != PhaseType::NONE) {
+            if (!port0.empty()) port0 += "; ";
+            port0 += port0_calc_job.frozen ? "Compute (frozen): " : "Compute: ";
+            port0 += describeJob(port0_calc_job.op_id, port0_calc_job.label,
+                                 port0_calc_job.phase, port0_calc_job.remaining_cycles);
+        }
+        if (port0.empty()) port0 = "IDLE";
+
+        std::string port1 = port1_calc_job.phase == PhaseType::NONE
+            ? "IDLE"
+            : "Compute: " + describeJob(port1_calc_job.op_id, port1_calc_job.label,
+                                        port1_calc_job.phase, port1_calc_job.remaining_cycles);
+
+        std::string memory_visits;
+        for (const auto& visit : mem_visit_queue) {
+            if (!memory_visits.empty()) memory_visits += "; ";
+            memory_visits += describeJob(visit.op_id, visit.label, visit.phase,
+                                         visit.remaining_cycles);
+        }
+        if (memory_visits.empty()) memory_visits = "none";
+
+        ExecutionLogger::get_instance().log_cycle_activity(cycle, port0, port1, memory_visits);
     }
 
     void executeFunctionalCalc(const OpTableEntry& O) {
@@ -183,7 +231,7 @@ public:
         }
     }
 
-    void runDispatcher() {
+    void runDispatcher(uint64_t cycle) {
         if (isInOrder()) {
             if (op_table.empty() || port0_mem_job.phase != PhaseType::NONE || port0_calc_job.phase != PhaseType::NONE) return;
             auto& O = op_table[0];
@@ -195,11 +243,13 @@ public:
                 O.calc = PhaseState::ON_FLY;
                 int lat = getCalcLatency(O.trace_op.op, cfg, false);
                 port0_calc_job = {O.trace_op.id, O.trace_op.label, P, lat, false, false};
+                LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched In-Order Calc Phase to Port 0");
             } else {
                 if (P == PhaseType::LOAD_PHASE_1) O.load1 = PhaseState::ON_FLY;
                 if (P == PhaseType::LOAD_PHASE_2) O.load2 = PhaseState::ON_FLY;
                 if (P == PhaseType::STORE_PHASE)  O.store = PhaseState::ON_FLY;
                 port0_mem_job = {O.trace_op.id, O.trace_op.label, P, coarseMemLatency(), false, false};
+                LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched In-Order Memory Phase");
             }
             return;
         }
@@ -210,18 +260,21 @@ public:
                     O.load1_sub = MemSubStep::IN_WB;
                     port0_mem_job = {O.trace_op.id, O.trace_op.label, PhaseType::LOAD_PHASE_1, T_WB_STEP, true, false};
                     if (port0_calc_job.phase != PhaseType::NONE) port0_calc_job.frozen = true;
+                    LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched Writeback Step for Load 1");
                     return;
                 }
                 if (O.load2_sub == MemSubStep::NEED_WB) {
                     O.load2_sub = MemSubStep::IN_WB;
                     port0_mem_job = {O.trace_op.id, O.trace_op.label, PhaseType::LOAD_PHASE_2, T_WB_STEP, true, false};
                     if (port0_calc_job.phase != PhaseType::NONE) port0_calc_job.frozen = true;
+                    LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched Writeback Step for Load 2");
                     return;
                 }
                 if (O.store_sub == MemSubStep::NEED_WB) {
                     O.store_sub = MemSubStep::IN_WB;
                     port0_mem_job = {O.trace_op.id, O.trace_op.label, PhaseType::STORE_PHASE, T_WB_STEP, true, false};
                     if (port0_calc_job.phase != PhaseType::NONE) port0_calc_job.frozen = true;
+                    LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched Writeback Step for Store");
                     return;
                 }
             }
@@ -289,19 +342,22 @@ public:
                 if (useFineGrained() && port0_calc_job.phase != PhaseType::NONE) {
                     port0_calc_job.frozen = true;
                 }
+                LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched Memory Phase to Port 0");
             } else {
                 O.calc = PhaseState::ON_FLY;
                 int lat = getCalcLatency(O.trace_op.op, cfg, useRenaming());
                 if (p0_can_calc) {
                     port0_calc_job = {O.trace_op.id, O.trace_op.label, schedulePhase, lat, false, false};
+                    LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched Calc Phase to Port 0");
                 } else {
                     port1_calc_job = {O.trace_op.id, O.trace_op.label, schedulePhase, lat, false, false};
+                    LOG_CYCLE(cycle, "Dispatch", -1, O.trace_op.id, "Dispatched Calc Phase to Port 1");
                 }
             }
         }
     }
 
-    void finishMemoryPhase(int op_id, PhaseType P) {
+    void finishMemoryPhase(int op_id, PhaseType P, uint64_t cycle) {
         for (auto& O : op_table) {
             if (O.trace_op.id == op_id) {
                 if (P == PhaseType::LOAD_PHASE_1) {
@@ -322,6 +378,7 @@ public:
                         stats.computed_output = sram_wordlines[O.phys_rd];
                     }
                 }
+                LOG_CYCLE(cycle, "Memory", -1, op_id, "Memory Phase Completed");
                 break;
             }
         }
@@ -346,11 +403,14 @@ public:
                 throw std::runtime_error("Watchdog triggered: deadlock in pipeline!");
             }
 
+            logCycleActivity(stats.total_cycles);
+
             // 1. Commit Stage
             for (auto& O : op_table) {
                 if (!O.committed && O.allPhasesDone()) {
                     O.committed = true;
-                    if (useRenaming()) renamer.commitOp(O);
+                    if (useRenaming()) renamer.commitOp(O, stats.total_cycles);
+                    LOG_CYCLE(stats.total_cycles, "Commit", -1, O.trace_op.id, "Operation Committed and Evicted");
                     if (O.trace_op.is_branch) branch_stall = false;
                     watchdog_last_commit = stats.total_cycles;
                     break;
@@ -389,7 +449,7 @@ public:
                         port0_mem_job = {};
                         if (port0_calc_job.phase != PhaseType::NONE) port0_calc_job.frozen = false;
                     } else {
-                        finishMemoryPhase(port0_mem_job.op_id, port0_mem_job.phase);
+                        finishMemoryPhase(port0_mem_job.op_id, port0_mem_job.phase, stats.total_cycles);
                         port0_mem_job = {};
                         if (port0_calc_job.phase != PhaseType::NONE) port0_calc_job.frozen = false;
                     }
@@ -404,6 +464,7 @@ public:
                             executeFunctionalCalc(O);
                         }
                     }
+                    LOG_CYCLE(stats.total_cycles, "Calc", -1, port0_calc_job.op_id, "Calc Phase Completed on Port 0");
                     port0_calc_job = {};
                 }
             }
@@ -419,6 +480,7 @@ public:
                             executeFunctionalCalc(O);
                         }
                     }
+                    LOG_CYCLE(stats.total_cycles, "Calc", -1, port1_calc_job.op_id, "Calc Phase Completed on Port 1");
                     port1_calc_job = {};
                 }
             }
@@ -441,7 +503,9 @@ public:
                     entry.calc  = PhaseState::PENDING;
                     entry.store = next_op.rd_is_mem  ? PhaseState::PENDING : PhaseState::SKIPPED;
 
-                    if (useRenaming()) renamer.renameOp(entry);
+                    if (useRenaming()) renamer.renameOp(entry, stats.total_cycles);
+                    LOG_CYCLE(stats.total_cycles, "Fetch", -1, next_op.id, "Fetched into Operation Table");
+                    
                     op_table.push_back(entry);
                     fetch_idx++;
                     if (next_op.is_branch) branch_stall = true;
@@ -451,7 +515,7 @@ public:
             }
 
             // 6. Run Dispatcher
-            runDispatcher();
+            runDispatcher(stats.total_cycles);
             stats.total_cycles++;
         }
 
