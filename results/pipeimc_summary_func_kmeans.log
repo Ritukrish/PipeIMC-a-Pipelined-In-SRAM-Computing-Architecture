@@ -1,0 +1,22 @@
+
+========================================================
+       PipeIMC Simulator Results
+========================================================
+Kernel           : kmeans
+Size n            : 16
+Total Operations : 260
+--------------------------------------------------------
+Architectural Design                Cycles          Speedup
+--------------------------------------------------------
+Design 1: In-Order Baseline         7234            1.00x
+Design 2: Pipelined                 6414            1.13x
+Design 3: Pipelined + Renaming      6026            1.20x
+Design 4: Fine-Grained Issue        4074            1.78x
+========================================================
+Functional check (real ALU results vs host reference), 256 output elements per design:
+  Design 1: In-Order Baseline: PASS (256/256 correct)
+  Design 2: Pipelined: PASS (256/256 correct)
+  Design 3: Pipelined + Renaming: PASS (256/256 correct)
+  Design 4: Fine-Grained Issue: PASS (256/256 correct)
+  labels[0..]: 3 1 0 1 2 1 1 2
+========================================================
