@@ -295,7 +295,7 @@ uint64_t SimEngine::run(
     // ------------------------------------------------------------
     // 6. Main simulation loop
     // ------------------------------------------------------------
-    // The loop executes five distinct stages in reverse order to ensure realistic data flow.
+    // The loop executes five distinct stages: fetch, dispatch, calculation completion, memory completion, commit.
     while (
         (exec ? exec->has_next() : fetch_ptr < trace.size()) ||
         !op_table.empty() ||
@@ -307,133 +307,7 @@ uint64_t SimEngine::run(
         cycle++;
 
         // ========================================================
-        // STAGE 1: COMPLETE CALCULATION EVENTS
-        // ========================================================
-
-        for (auto it = pending_events.begin();
-             it != pending_events.end();) {
-
-            if (cycle < it->completion_cycle) {
-                ++it;
-                continue;
-            }
-
-            for (auto& entry : op_table) {
-                if (entry.op.op_id != it->op_id)
-                    continue;
-
-                if (it->type == EventType::CALC_COMPLETE) {
-                    entry.calc_on_fly = false;
-                    entry.calc_done = true;
-
-                    if (uses_renaming &&
-                        entry.phys_dest > 0) {
-                        phys_ready[entry.phys_dest] = true;
-                    }
-
-                    // Execution-driven: the real ALU operation is computed NOW,
-                    // after the calculation cycles have elapsed.
-                    std::string detail;
-                    if (exec)
-                        detail = exec->calc_done(entry.op, entry.phys_src1,
-                                                 entry.phys_src2, entry.phys_dest);
-
-                    if (log_out) {
-                        *log_out
-                            << "Cycle " << cycle
-                            << " | [CALC COMPLETE] Op "
-                            << entry.op.op_id
-                            << (detail.empty() ? "" : " | " + detail)
-                            << "\n";
-                    }
-                }
-
-                break;
-            }
-
-            it = pending_events.erase(it);
-        }
-
-        // ========================================================
-        // STAGE 2: MEMORY PHASE COMPLETION
-        // ========================================================
-
-        if (memory_task.active) {
-
-            // In fine-grained mode, reserve Port 0 for the
-            // writeback interval after memory visiting.
-            if (
-                memory_task.fine_grained &&
-                !memory_task.writeback_reserved &&
-                cycle >= memory_task.visit_end_cycle
-            ) {
-                port0_busy_until =
-                    memory_task.completion_cycle;
-
-                memory_task.writeback_reserved = true;
-
-                if (log_out) {
-                    *log_out
-                        << "Cycle " << cycle
-                        << " | [MEMORY WRITEBACK START] Op "
-                        << memory_task.op_id
-                        << "\n";
-                }
-            }
-
-            if (cycle >= memory_task.completion_cycle) {
-                complete_memory_phase();
-            }
-        }
-
-        // ========================================================
-        // STAGE 3: IN-ORDER COMMIT
-        // ========================================================
-
-        while (!op_table.empty()) {
-            auto& head = op_table.front();
-
-            const bool loads_finished =
-                (head.loads_completed >= head.loads_needed);
-
-            const bool calc_finished =
-                (!head.op.has_calc || head.calc_done);
-
-            const bool store_finished =
-                (!head.op.has_store || head.store_done);
-
-            if (!(loads_finished &&
-                  calc_finished &&
-                  store_finished)) {
-                break;
-            }
-
-            if (log_out && head.op.op_id <= 10) {
-                *log_out
-                    << "Cycle " << cycle
-                    << " | [COMMIT] Op "
-                    << head.op.op_id
-                    << " retired.\n";
-            }
-
-            if (uses_renaming) {
-                // Release source references first.
-                release_source_usage(head.phys_src1);
-                release_source_usage(head.phys_src2);
-
-                // The previous architectural mapping is no
-                // longer needed by this committed instruction.
-                release_physical_register(head.old_phys_dest);
-            }
-
-            if (head.op.affects_control_flow)
-                warp_branch_stall = false;
-
-            op_table.pop_front();
-        }
-
-        // ========================================================
-        // STAGE 4: FETCH AND DECODE
+        // STAGE 1: FETCH AND DECODE
         // ========================================================
 
         if (
@@ -527,7 +401,7 @@ uint64_t SimEngine::run(
         }
 
         // ========================================================
-        // STAGE 5: DISPATCH
+        // STAGE 2: DISPATCH
         // ========================================================
 
         for (size_t i = 0; i < op_table.size(); ++i) {
@@ -833,6 +707,132 @@ uint64_t SimEngine::run(
                     continue;
                 }
             }
+        }
+
+        // ========================================================
+        // STAGE 3: COMPLETE CALCULATION EVENTS
+        // ========================================================
+
+        for (auto it = pending_events.begin();
+             it != pending_events.end();) {
+
+            if (cycle < it->completion_cycle) {
+                ++it;
+                continue;
+            }
+
+            for (auto& entry : op_table) {
+                if (entry.op.op_id != it->op_id)
+                    continue;
+
+                if (it->type == EventType::CALC_COMPLETE) {
+                    entry.calc_on_fly = false;
+                    entry.calc_done = true;
+
+                    if (uses_renaming &&
+                        entry.phys_dest > 0) {
+                        phys_ready[entry.phys_dest] = true;
+                    }
+
+                    // Execution-driven: the real ALU operation is computed NOW,
+                    // after the calculation cycles have elapsed.
+                    std::string detail;
+                    if (exec)
+                        detail = exec->calc_done(entry.op, entry.phys_src1,
+                                                 entry.phys_src2, entry.phys_dest);
+
+                    if (log_out) {
+                        *log_out
+                            << "Cycle " << cycle
+                            << " | [CALC COMPLETE] Op "
+                            << entry.op.op_id
+                            << (detail.empty() ? "" : " | " + detail)
+                            << "\n";
+                    }
+                }
+
+                break;
+            }
+
+            it = pending_events.erase(it);
+        }
+
+        // ========================================================
+        // STAGE 4: MEMORY PHASE COMPLETION
+        // ========================================================
+
+        if (memory_task.active) {
+
+            // In fine-grained mode, reserve Port 0 for the
+            // writeback interval after memory visiting.
+            if (
+                memory_task.fine_grained &&
+                !memory_task.writeback_reserved &&
+                cycle >= memory_task.visit_end_cycle
+            ) {
+                port0_busy_until =
+                    memory_task.completion_cycle;
+
+                memory_task.writeback_reserved = true;
+
+                if (log_out) {
+                    *log_out
+                        << "Cycle " << cycle
+                        << " | [MEMORY WRITEBACK START] Op "
+                        << memory_task.op_id
+                        << "\n";
+                }
+            }
+
+            if (cycle >= memory_task.completion_cycle) {
+                complete_memory_phase();
+            }
+        }
+
+        // ========================================================
+        // STAGE 5: IN-ORDER COMMIT
+        // ========================================================
+
+        while (!op_table.empty()) {
+            auto& head = op_table.front();
+
+            const bool loads_finished =
+                (head.loads_completed >= head.loads_needed);
+
+            const bool calc_finished =
+                (!head.op.has_calc || head.calc_done);
+
+            const bool store_finished =
+                (!head.op.has_store || head.store_done);
+
+            if (!(loads_finished &&
+                  calc_finished &&
+                  store_finished)) {
+                break;
+            }
+
+            if (log_out && head.op.op_id <= 10) {
+                *log_out
+                    << "Cycle " << cycle
+                    << " | [COMMIT] Op "
+                    << head.op.op_id
+                    << " retired.\n";
+            }
+
+            if (uses_renaming) {
+                // Release source references first.
+                release_source_usage(head.phys_src1);
+                release_source_usage(head.phys_src2);
+
+                // The previous architectural mapping is no
+                // longer needed by this committed instruction.
+                release_physical_register(head.old_phys_dest);
+            }
+
+            if (head.op.affects_control_flow)
+                warp_branch_stall = false;
+
+            op_table.pop_front();
         }
     }
 

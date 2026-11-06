@@ -8,10 +8,10 @@ Total Operations : 172
 --------------------------------------------------------
 Architectural Design                Cycles          Speedup
 --------------------------------------------------------
-Design 1: In-Order Baseline         6154            1.00x
-Design 2: Pipelined                 5339            1.15x
-Design 3: Pipelined + Renaming      4934            1.25x
-Design 4: Fine-Grained Issue        4995            1.23x
+Design 1: In-Order Baseline         6390            1.00x
+Design 2: Pipelined                 5402            1.18x
+Design 3: Pipelined + Renaming      4967            1.29x
+Design 4: Fine-Grained Issue        5204            1.23x
 ========================================================
 Functional check (real ALU results vs host reference), 256 output elements per design:
   Design 1: In-Order Baseline: PASS (256/256 correct)
