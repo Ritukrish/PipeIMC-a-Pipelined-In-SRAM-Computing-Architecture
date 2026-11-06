@@ -1,0 +1,2876 @@
+============================================================
+             PipeIMC Simulation Cycle Trace
+============================================================
+Kernel      : matmul (functional run)
+Size n      : 16
+Operations  : (counted during execution)
+============================================================
+
+IMC program (22 static operations):
+  pc0  r6 := IMC(r0, #16, ADD)
+  pc1  r5 := IMC(r0, #0, ADD)
+  pc2  r1 := IMC(r0, #0, ADD)
+  pc3  r14 := IMC(r30, #64, MUL)
+  pc4  r15 := IMC(r31, #2, SLL)
+  pc5  r7 := IMC(r14, #0, ADD)
+  pc6  r8 := IMC(r15, #1024, ADD)
+  pc7  r9 := IMC(r15, #0, ADD)
+  pc8  r10 := IMC(r14, #1024, ADD)
+  pc9  r11 := IMC(r14, r15, ADD)
+  pc10  r11 := IMC(r11, #2048, ADD)
+  pc11  r2 := IMC([r7], [r8], MUL)
+  pc12  r3 := IMC([r9], [r10], MUL)
+  pc13  r4 := IMC(r2, r3, ADD)
+  pc14  r1 := IMC(r1, r4, ADD)
+  pc15  r7 := IMC(r7, #4, ADD)
+  pc16  r8 := IMC(r8, #64, ADD)
+  pc17  r9 := IMC(r9, #64, ADD)
+  pc18  r10 := IMC(r10, #4, ADD)
+  pc19  r5 := IMC(r5, #1, ADD)
+  pc20  BRANCH(r5 != r6) -> pc11
+  pc21  [r11] := IMC(r1, #0, ADD)
+
+INPUT DATA (the values the kernel computes on; signed 32-bit words):
+  A (n x n, row-major)  [16 x 16]
+         -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1      -3       4
+          0      -4       3      -1      -5       2      -2       5       1      -3       4       0      -4       3      -1      -5
+          2      -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1      -3
+          4       0      -4       3      -1      -5       2      -2       5       1      -3       4       0      -4       3      -1
+         -5       2      -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1
+         -3       4       0      -4       3      -1      -5       2      -2       5       1      -3       4       0      -4       3
+         -1      -5       2      -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5
+          1      -3       4       0      -4       3      -1      -5       2      -2       5       1      -3       4       0      -4
+          3      -1      -5       2      -2       5       1      -3       4       0      -4       3      -1      -5       2      -2
+          5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1      -3       4       0
+         -4       3      -1      -5       2      -2       5       1      -3       4       0      -4       3      -1      -5       2
+         -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1      -3       4
+          0      -4       3      -1      -5       2      -2       5       1      -3       4       0      -4       3      -1      -5
+          2      -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1      -3
+          4       0      -4       3      -1      -5       2      -2       5       1      -3       4       0      -4       3      -1
+         -5       2      -2       5       1      -3       4       0      -4       3      -1      -5       2      -2       5       1
+  B (n x n, row-major)  [16 x 16]
+         -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0
+         -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1
+          4       0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2
+          3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3
+          2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0      -4
+          1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4
+          0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3
+         -1       4       0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2
+         -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0      -4       1
+         -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0
+         -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1
+          4       0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2
+          3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3
+          2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4       0      -4
+          1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3      -1       4
+          0      -4       1      -3       2      -2       3      -1       4       0      -4       1      -3       2      -2       3
+
+Each line below is one clock-cycle event. At [CALC COMPLETE] the real ALU operation is computed,
+after the Table III calculation cycles have elapsed; loads/stores read/write the real memory.
+
+
+################ Design 1: In-Order Baseline ################
+Cycle 1 | [FETCH] Op 1
+Cycle 1 | [CALC START] Op 1 | Port 0 | Latency: 9
+Cycle 2 | [FETCH] Op 2
+Cycle 3 | [FETCH] Op 3
+Cycle 4 | [FETCH] Op 4
+Cycle 5 | [FETCH] Op 5
+Cycle 6 | [FETCH] Op 6
+Cycle 7 | [FETCH] Op 7
+Cycle 8 | [FETCH] Op 8
+Cycle 9 | [FETCH] Op 9
+Cycle 10 | [FETCH] Op 10
+Cycle 10 | [CALC COMPLETE] Op 1 | pc0 r6 := IMC(r0, #16, ADD) : 0, 16 => 16
+Cycle 10 | [COMMIT] Op 1 retired.
+Cycle 11 | [FETCH] Op 11
+Cycle 11 | [CALC START] Op 2 | Port 0 | Latency: 9
+Cycle 12 | [FETCH] Op 12
+Cycle 13 | [FETCH] Op 13
+Cycle 14 | [FETCH] Op 14
+Cycle 15 | [FETCH] Op 15
+Cycle 16 | [FETCH] Op 16
+Cycle 17 | [FETCH] Op 17
+Cycle 20 | [CALC COMPLETE] Op 2 | pc1 r5 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 20 | [COMMIT] Op 2 retired.
+Cycle 21 | [FETCH] Op 18
+Cycle 21 | [CALC START] Op 3 | Port 0 | Latency: 9
+Cycle 30 | [CALC COMPLETE] Op 3 | pc2 r1 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 30 | [COMMIT] Op 3 retired.
+Cycle 31 | [FETCH] Op 19
+Cycle 31 | [CALC START] Op 4 | Port 0 | Latency: 105
+Cycle 136 | [CALC COMPLETE] Op 4 | pc3 r14 := IMC(r30, #64, MUL) : 0, 64 => 0
+Cycle 136 | [COMMIT] Op 4 retired.
+Cycle 137 | [FETCH] Op 20
+Cycle 137 | [CALC START] Op 5 | Port 0 | Latency: 82
+Cycle 219 | [CALC COMPLETE] Op 5 | pc4 r15 := IMC(r31, #2, SLL) : 0, 2 => 0
+Cycle 219 | [COMMIT] Op 5 retired.
+Cycle 220 | [FETCH] Op 21
+Cycle 220 | [CALC START] Op 6 | Port 0 | Latency: 9
+Cycle 229 | [CALC COMPLETE] Op 6 | pc5 r7 := IMC(r14, #0, ADD) : 0, 0 => 0
+Cycle 229 | [COMMIT] Op 6 retired.
+Cycle 230 | [CALC START] Op 7 | Port 0 | Latency: 9
+Cycle 239 | [CALC COMPLETE] Op 7 | pc6 r8 := IMC(r15, #1024, ADD) : 0, 1024 => 1024
+Cycle 239 | [COMMIT] Op 7 retired.
+Cycle 240 | [CALC START] Op 8 | Port 0 | Latency: 9
+Cycle 249 | [CALC COMPLETE] Op 8 | pc7 r9 := IMC(r15, #0, ADD) : 0, 0 => 0
+Cycle 249 | [COMMIT] Op 8 retired.
+Cycle 250 | [CALC START] Op 9 | Port 0 | Latency: 9
+Cycle 259 | [CALC COMPLETE] Op 9 | pc8 r10 := IMC(r14, #1024, ADD) : 0, 1024 => 1024
+Cycle 259 | [COMMIT] Op 9 retired.
+Cycle 260 | [CALC START] Op 10 | Port 0 | Latency: 9
+Cycle 269 | [CALC COMPLETE] Op 10 | pc9 r11 := IMC(r14, r15, ADD) : 0, 0 => 0
+Cycle 269 | [COMMIT] Op 10 retired.
+Cycle 270 | [CALC START] Op 11 | Port 0 | Latency: 9
+Cycle 279 | [CALC COMPLETE] Op 11 | pc10 r11 := IMC(r11, #2048, ADD) : 0, 2048 => 2048
+Cycle 280 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 300 | [LOAD COMPLETE] Op 12 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 301 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 321 | [LOAD COMPLETE] Op 12 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 322 | [CALC START] Op 12 | Port 0 | Latency: 105
+Cycle 427 | [CALC COMPLETE] Op 12 | pc11 r2 := IMC([r7], [r8], MUL) : -2, -3 => 6
+Cycle 428 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 448 | [LOAD COMPLETE] Op 13 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 449 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 469 | [LOAD COMPLETE] Op 13 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 470 | [CALC START] Op 13 | Port 0 | Latency: 105
+Cycle 575 | [CALC COMPLETE] Op 13 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -3 => 6
+Cycle 576 | [CALC START] Op 14 | Port 0 | Latency: 9
+Cycle 585 | [CALC COMPLETE] Op 14 | pc13 r4 := IMC(r2, r3, ADD) : 6, 6 => 12
+Cycle 586 | [CALC START] Op 15 | Port 0 | Latency: 9
+Cycle 595 | [CALC COMPLETE] Op 15 | pc14 r1 := IMC(r1, r4, ADD) : 0, 12 => 12
+Cycle 596 | [CALC START] Op 16 | Port 0 | Latency: 9
+Cycle 605 | [CALC COMPLETE] Op 16 | pc15 r7 := IMC(r7, #4, ADD) : 0, 4 => 4
+Cycle 606 | [CALC START] Op 17 | Port 0 | Latency: 9
+Cycle 615 | [CALC COMPLETE] Op 17 | pc16 r8 := IMC(r8, #64, ADD) : 1024, 64 => 1088
+Cycle 616 | [CALC START] Op 18 | Port 0 | Latency: 9
+Cycle 625 | [CALC COMPLETE] Op 18 | pc17 r9 := IMC(r9, #64, ADD) : 0, 64 => 64
+Cycle 626 | [CALC START] Op 19 | Port 0 | Latency: 9
+Cycle 635 | [CALC COMPLETE] Op 19 | pc18 r10 := IMC(r10, #4, ADD) : 1024, 4 => 1028
+Cycle 636 | [CALC START] Op 20 | Port 0 | Latency: 9
+Cycle 645 | [CALC COMPLETE] Op 20 | pc19 r5 := IMC(r5, #1, ADD) : 0, 1 => 1
+Cycle 646 | [CALC START] Op 21 | Port 0 | Latency: 13
+Cycle 659 | [CALC COMPLETE] Op 21 | pc20 BRANCH(r5 != r6) -> pc11 : 1 != 16 => TAKEN
+Cycle 660 | [FETCH] Op 22
+Cycle 660 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 661 | [FETCH] Op 23
+Cycle 662 | [FETCH] Op 24
+Cycle 663 | [FETCH] Op 25
+Cycle 664 | [FETCH] Op 26
+Cycle 665 | [FETCH] Op 27
+Cycle 666 | [FETCH] Op 28
+Cycle 667 | [FETCH] Op 29
+Cycle 668 | [FETCH] Op 30
+Cycle 669 | [FETCH] Op 31
+Cycle 680 | [LOAD COMPLETE] Op 22 | Loads completed: 1/2 | load mem[4] = 5
+Cycle 681 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 701 | [LOAD COMPLETE] Op 22 | Loads completed: 2/2 | load mem[1088] = -4
+Cycle 702 | [CALC START] Op 22 | Port 0 | Latency: 105
+Cycle 807 | [CALC COMPLETE] Op 22 | pc11 r2 := IMC([r7], [r8], MUL) : 5, -4 => -20
+Cycle 808 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 828 | [LOAD COMPLETE] Op 23 | Loads completed: 1/2 | load mem[64] = 0
+Cycle 829 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 849 | [LOAD COMPLETE] Op 23 | Loads completed: 2/2 | load mem[1028] = 2
+Cycle 850 | [CALC START] Op 23 | Port 0 | Latency: 105
+Cycle 955 | [CALC COMPLETE] Op 23 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 2 => 0
+Cycle 956 | [CALC START] Op 24 | Port 0 | Latency: 9
+Cycle 965 | [CALC COMPLETE] Op 24 | pc13 r4 := IMC(r2, r3, ADD) : -20, 0 => -20
+Cycle 966 | [CALC START] Op 25 | Port 0 | Latency: 9
+Cycle 975 | [CALC COMPLETE] Op 25 | pc14 r1 := IMC(r1, r4, ADD) : 12, -20 => -8
+Cycle 976 | [CALC START] Op 26 | Port 0 | Latency: 9
+Cycle 985 | [CALC COMPLETE] Op 26 | pc15 r7 := IMC(r7, #4, ADD) : 4, 4 => 8
+Cycle 986 | [CALC START] Op 27 | Port 0 | Latency: 9
+Cycle 995 | [CALC COMPLETE] Op 27 | pc16 r8 := IMC(r8, #64, ADD) : 1088, 64 => 1152
+Cycle 996 | [CALC START] Op 28 | Port 0 | Latency: 9
+Cycle 1005 | [CALC COMPLETE] Op 28 | pc17 r9 := IMC(r9, #64, ADD) : 64, 64 => 128
+Cycle 1006 | [CALC START] Op 29 | Port 0 | Latency: 9
+Cycle 1015 | [CALC COMPLETE] Op 29 | pc18 r10 := IMC(r10, #4, ADD) : 1028, 4 => 1032
+Cycle 1016 | [CALC START] Op 30 | Port 0 | Latency: 9
+Cycle 1025 | [CALC COMPLETE] Op 30 | pc19 r5 := IMC(r5, #1, ADD) : 1, 1 => 2
+Cycle 1026 | [CALC START] Op 31 | Port 0 | Latency: 13
+Cycle 1039 | [CALC COMPLETE] Op 31 | pc20 BRANCH(r5 != r6) -> pc11 : 2 != 16 => TAKEN
+Cycle 1040 | [FETCH] Op 32
+Cycle 1040 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1041 | [FETCH] Op 33
+Cycle 1042 | [FETCH] Op 34
+Cycle 1043 | [FETCH] Op 35
+Cycle 1044 | [FETCH] Op 36
+Cycle 1045 | [FETCH] Op 37
+Cycle 1046 | [FETCH] Op 38
+Cycle 1047 | [FETCH] Op 39
+Cycle 1048 | [FETCH] Op 40
+Cycle 1049 | [FETCH] Op 41
+Cycle 1060 | [LOAD COMPLETE] Op 32 | Loads completed: 1/2 | load mem[8] = 1
+Cycle 1061 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1081 | [LOAD COMPLETE] Op 32 | Loads completed: 2/2 | load mem[1152] = 4
+Cycle 1082 | [CALC START] Op 32 | Port 0 | Latency: 105
+Cycle 1187 | [CALC COMPLETE] Op 32 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 4 => 4
+Cycle 1188 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1208 | [LOAD COMPLETE] Op 33 | Loads completed: 1/2 | load mem[128] = 2
+Cycle 1209 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1229 | [LOAD COMPLETE] Op 33 | Loads completed: 2/2 | load mem[1032] = -2
+Cycle 1230 | [CALC START] Op 33 | Port 0 | Latency: 105
+Cycle 1335 | [CALC COMPLETE] Op 33 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -2 => -4
+Cycle 1336 | [CALC START] Op 34 | Port 0 | Latency: 9
+Cycle 1345 | [CALC COMPLETE] Op 34 | pc13 r4 := IMC(r2, r3, ADD) : 4, -4 => 0
+Cycle 1346 | [CALC START] Op 35 | Port 0 | Latency: 9
+Cycle 1355 | [CALC COMPLETE] Op 35 | pc14 r1 := IMC(r1, r4, ADD) : -8, 0 => -8
+Cycle 1356 | [CALC START] Op 36 | Port 0 | Latency: 9
+Cycle 1365 | [CALC COMPLETE] Op 36 | pc15 r7 := IMC(r7, #4, ADD) : 8, 4 => 12
+Cycle 1366 | [CALC START] Op 37 | Port 0 | Latency: 9
+Cycle 1375 | [CALC COMPLETE] Op 37 | pc16 r8 := IMC(r8, #64, ADD) : 1152, 64 => 1216
+Cycle 1376 | [CALC START] Op 38 | Port 0 | Latency: 9
+Cycle 1385 | [CALC COMPLETE] Op 38 | pc17 r9 := IMC(r9, #64, ADD) : 128, 64 => 192
+Cycle 1386 | [CALC START] Op 39 | Port 0 | Latency: 9
+Cycle 1395 | [CALC COMPLETE] Op 39 | pc18 r10 := IMC(r10, #4, ADD) : 1032, 4 => 1036
+Cycle 1396 | [CALC START] Op 40 | Port 0 | Latency: 9
+Cycle 1405 | [CALC COMPLETE] Op 40 | pc19 r5 := IMC(r5, #1, ADD) : 2, 1 => 3
+Cycle 1406 | [CALC START] Op 41 | Port 0 | Latency: 13
+Cycle 1419 | [CALC COMPLETE] Op 41 | pc20 BRANCH(r5 != r6) -> pc11 : 3 != 16 => TAKEN
+Cycle 1420 | [FETCH] Op 42
+Cycle 1420 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1421 | [FETCH] Op 43
+Cycle 1422 | [FETCH] Op 44
+Cycle 1423 | [FETCH] Op 45
+Cycle 1424 | [FETCH] Op 46
+Cycle 1425 | [FETCH] Op 47
+Cycle 1426 | [FETCH] Op 48
+Cycle 1427 | [FETCH] Op 49
+Cycle 1428 | [FETCH] Op 50
+Cycle 1429 | [FETCH] Op 51
+Cycle 1440 | [LOAD COMPLETE] Op 42 | Loads completed: 1/2 | load mem[12] = -3
+Cycle 1441 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1461 | [LOAD COMPLETE] Op 42 | Loads completed: 2/2 | load mem[1216] = 3
+Cycle 1462 | [CALC START] Op 42 | Port 0 | Latency: 105
+Cycle 1567 | [CALC COMPLETE] Op 42 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 3 => -9
+Cycle 1568 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1588 | [LOAD COMPLETE] Op 43 | Loads completed: 1/2 | load mem[192] = 4
+Cycle 1589 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1609 | [LOAD COMPLETE] Op 43 | Loads completed: 2/2 | load mem[1036] = 3
+Cycle 1610 | [CALC START] Op 43 | Port 0 | Latency: 105
+Cycle 1715 | [CALC COMPLETE] Op 43 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 3 => 12
+Cycle 1716 | [CALC START] Op 44 | Port 0 | Latency: 9
+Cycle 1725 | [CALC COMPLETE] Op 44 | pc13 r4 := IMC(r2, r3, ADD) : -9, 12 => 3
+Cycle 1726 | [CALC START] Op 45 | Port 0 | Latency: 9
+Cycle 1735 | [CALC COMPLETE] Op 45 | pc14 r1 := IMC(r1, r4, ADD) : -8, 3 => -5
+Cycle 1736 | [CALC START] Op 46 | Port 0 | Latency: 9
+Cycle 1745 | [CALC COMPLETE] Op 46 | pc15 r7 := IMC(r7, #4, ADD) : 12, 4 => 16
+Cycle 1746 | [CALC START] Op 47 | Port 0 | Latency: 9
+Cycle 1755 | [CALC COMPLETE] Op 47 | pc16 r8 := IMC(r8, #64, ADD) : 1216, 64 => 1280
+Cycle 1756 | [CALC START] Op 48 | Port 0 | Latency: 9
+Cycle 1765 | [CALC COMPLETE] Op 48 | pc17 r9 := IMC(r9, #64, ADD) : 192, 64 => 256
+Cycle 1766 | [CALC START] Op 49 | Port 0 | Latency: 9
+Cycle 1775 | [CALC COMPLETE] Op 49 | pc18 r10 := IMC(r10, #4, ADD) : 1036, 4 => 1040
+Cycle 1776 | [CALC START] Op 50 | Port 0 | Latency: 9
+Cycle 1785 | [CALC COMPLETE] Op 50 | pc19 r5 := IMC(r5, #1, ADD) : 3, 1 => 4
+Cycle 1786 | [CALC START] Op 51 | Port 0 | Latency: 13
+Cycle 1799 | [CALC COMPLETE] Op 51 | pc20 BRANCH(r5 != r6) -> pc11 : 4 != 16 => TAKEN
+Cycle 1800 | [FETCH] Op 52
+Cycle 1800 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1801 | [FETCH] Op 53
+Cycle 1802 | [FETCH] Op 54
+Cycle 1803 | [FETCH] Op 55
+Cycle 1804 | [FETCH] Op 56
+Cycle 1805 | [FETCH] Op 57
+Cycle 1806 | [FETCH] Op 58
+Cycle 1807 | [FETCH] Op 59
+Cycle 1808 | [FETCH] Op 60
+Cycle 1809 | [FETCH] Op 61
+Cycle 1820 | [LOAD COMPLETE] Op 52 | Loads completed: 1/2 | load mem[16] = 4
+Cycle 1821 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1841 | [LOAD COMPLETE] Op 52 | Loads completed: 2/2 | load mem[1280] = 2
+Cycle 1842 | [CALC START] Op 52 | Port 0 | Latency: 105
+Cycle 1947 | [CALC COMPLETE] Op 52 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 2 => 8
+Cycle 1948 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1968 | [LOAD COMPLETE] Op 53 | Loads completed: 1/2 | load mem[256] = -5
+Cycle 1969 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1989 | [LOAD COMPLETE] Op 53 | Loads completed: 2/2 | load mem[1040] = -1
+Cycle 1990 | [CALC START] Op 53 | Port 0 | Latency: 105
+Cycle 2095 | [CALC COMPLETE] Op 53 | pc12 r3 := IMC([r9], [r10], MUL) : -5, -1 => 5
+Cycle 2096 | [CALC START] Op 54 | Port 0 | Latency: 9
+Cycle 2105 | [CALC COMPLETE] Op 54 | pc13 r4 := IMC(r2, r3, ADD) : 8, 5 => 13
+Cycle 2106 | [CALC START] Op 55 | Port 0 | Latency: 9
+Cycle 2115 | [CALC COMPLETE] Op 55 | pc14 r1 := IMC(r1, r4, ADD) : -5, 13 => 8
+Cycle 2116 | [CALC START] Op 56 | Port 0 | Latency: 9
+Cycle 2125 | [CALC COMPLETE] Op 56 | pc15 r7 := IMC(r7, #4, ADD) : 16, 4 => 20
+Cycle 2126 | [CALC START] Op 57 | Port 0 | Latency: 9
+Cycle 2135 | [CALC COMPLETE] Op 57 | pc16 r8 := IMC(r8, #64, ADD) : 1280, 64 => 1344
+Cycle 2136 | [CALC START] Op 58 | Port 0 | Latency: 9
+Cycle 2145 | [CALC COMPLETE] Op 58 | pc17 r9 := IMC(r9, #64, ADD) : 256, 64 => 320
+Cycle 2146 | [CALC START] Op 59 | Port 0 | Latency: 9
+Cycle 2155 | [CALC COMPLETE] Op 59 | pc18 r10 := IMC(r10, #4, ADD) : 1040, 4 => 1044
+Cycle 2156 | [CALC START] Op 60 | Port 0 | Latency: 9
+Cycle 2165 | [CALC COMPLETE] Op 60 | pc19 r5 := IMC(r5, #1, ADD) : 4, 1 => 5
+Cycle 2166 | [CALC START] Op 61 | Port 0 | Latency: 13
+Cycle 2179 | [CALC COMPLETE] Op 61 | pc20 BRANCH(r5 != r6) -> pc11 : 5 != 16 => TAKEN
+Cycle 2180 | [FETCH] Op 62
+Cycle 2180 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2181 | [FETCH] Op 63
+Cycle 2182 | [FETCH] Op 64
+Cycle 2183 | [FETCH] Op 65
+Cycle 2184 | [FETCH] Op 66
+Cycle 2185 | [FETCH] Op 67
+Cycle 2186 | [FETCH] Op 68
+Cycle 2187 | [FETCH] Op 69
+Cycle 2188 | [FETCH] Op 70
+Cycle 2189 | [FETCH] Op 71
+Cycle 2200 | [LOAD COMPLETE] Op 62 | Loads completed: 1/2 | load mem[20] = 0
+Cycle 2201 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2221 | [LOAD COMPLETE] Op 62 | Loads completed: 2/2 | load mem[1344] = 1
+Cycle 2222 | [CALC START] Op 62 | Port 0 | Latency: 105
+Cycle 2327 | [CALC COMPLETE] Op 62 | pc11 r2 := IMC([r7], [r8], MUL) : 0, 1 => 0
+Cycle 2328 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2348 | [LOAD COMPLETE] Op 63 | Loads completed: 1/2 | load mem[320] = -3
+Cycle 2349 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2369 | [LOAD COMPLETE] Op 63 | Loads completed: 2/2 | load mem[1044] = 4
+Cycle 2370 | [CALC START] Op 63 | Port 0 | Latency: 105
+Cycle 2475 | [CALC COMPLETE] Op 63 | pc12 r3 := IMC([r9], [r10], MUL) : -3, 4 => -12
+Cycle 2476 | [CALC START] Op 64 | Port 0 | Latency: 9
+Cycle 2485 | [CALC COMPLETE] Op 64 | pc13 r4 := IMC(r2, r3, ADD) : 0, -12 => -12
+Cycle 2486 | [CALC START] Op 65 | Port 0 | Latency: 9
+Cycle 2495 | [CALC COMPLETE] Op 65 | pc14 r1 := IMC(r1, r4, ADD) : 8, -12 => -4
+Cycle 2496 | [CALC START] Op 66 | Port 0 | Latency: 9
+Cycle 2505 | [CALC COMPLETE] Op 66 | pc15 r7 := IMC(r7, #4, ADD) : 20, 4 => 24
+Cycle 2506 | [CALC START] Op 67 | Port 0 | Latency: 9
+Cycle 2515 | [CALC COMPLETE] Op 67 | pc16 r8 := IMC(r8, #64, ADD) : 1344, 64 => 1408
+Cycle 2516 | [CALC START] Op 68 | Port 0 | Latency: 9
+Cycle 2525 | [CALC COMPLETE] Op 68 | pc17 r9 := IMC(r9, #64, ADD) : 320, 64 => 384
+Cycle 2526 | [CALC START] Op 69 | Port 0 | Latency: 9
+Cycle 2535 | [CALC COMPLETE] Op 69 | pc18 r10 := IMC(r10, #4, ADD) : 1044, 4 => 1048
+Cycle 2536 | [CALC START] Op 70 | Port 0 | Latency: 9
+Cycle 2545 | [CALC COMPLETE] Op 70 | pc19 r5 := IMC(r5, #1, ADD) : 5, 1 => 6
+Cycle 2546 | [CALC START] Op 71 | Port 0 | Latency: 13
+Cycle 2559 | [CALC COMPLETE] Op 71 | pc20 BRANCH(r5 != r6) -> pc11 : 6 != 16 => TAKEN
+Cycle 2560 | [FETCH] Op 72
+Cycle 2560 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2561 | [FETCH] Op 73
+Cycle 2562 | [FETCH] Op 74
+Cycle 2563 | [FETCH] Op 75
+Cycle 2564 | [FETCH] Op 76
+Cycle 2565 | [FETCH] Op 77
+Cycle 2566 | [FETCH] Op 78
+Cycle 2567 | [FETCH] Op 79
+Cycle 2568 | [FETCH] Op 80
+Cycle 2569 | [FETCH] Op 81
+Cycle 2580 | [LOAD COMPLETE] Op 72 | Loads completed: 1/2 | load mem[24] = -4
+Cycle 2581 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2601 | [LOAD COMPLETE] Op 72 | Loads completed: 2/2 | load mem[1408] = 0
+Cycle 2602 | [CALC START] Op 72 | Port 0 | Latency: 105
+Cycle 2707 | [CALC COMPLETE] Op 72 | pc11 r2 := IMC([r7], [r8], MUL) : -4, 0 => 0
+Cycle 2708 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2728 | [LOAD COMPLETE] Op 73 | Loads completed: 1/2 | load mem[384] = -1
+Cycle 2729 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2749 | [LOAD COMPLETE] Op 73 | Loads completed: 2/2 | load mem[1048] = 0
+Cycle 2750 | [CALC START] Op 73 | Port 0 | Latency: 105
+Cycle 2855 | [CALC COMPLETE] Op 73 | pc12 r3 := IMC([r9], [r10], MUL) : -1, 0 => 0
+Cycle 2856 | [CALC START] Op 74 | Port 0 | Latency: 9
+Cycle 2865 | [CALC COMPLETE] Op 74 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 2866 | [CALC START] Op 75 | Port 0 | Latency: 9
+Cycle 2875 | [CALC COMPLETE] Op 75 | pc14 r1 := IMC(r1, r4, ADD) : -4, 0 => -4
+Cycle 2876 | [CALC START] Op 76 | Port 0 | Latency: 9
+Cycle 2885 | [CALC COMPLETE] Op 76 | pc15 r7 := IMC(r7, #4, ADD) : 24, 4 => 28
+Cycle 2886 | [CALC START] Op 77 | Port 0 | Latency: 9
+Cycle 2895 | [CALC COMPLETE] Op 77 | pc16 r8 := IMC(r8, #64, ADD) : 1408, 64 => 1472
+Cycle 2896 | [CALC START] Op 78 | Port 0 | Latency: 9
+Cycle 2905 | [CALC COMPLETE] Op 78 | pc17 r9 := IMC(r9, #64, ADD) : 384, 64 => 448
+Cycle 2906 | [CALC START] Op 79 | Port 0 | Latency: 9
+Cycle 2915 | [CALC COMPLETE] Op 79 | pc18 r10 := IMC(r10, #4, ADD) : 1048, 4 => 1052
+Cycle 2916 | [CALC START] Op 80 | Port 0 | Latency: 9
+Cycle 2925 | [CALC COMPLETE] Op 80 | pc19 r5 := IMC(r5, #1, ADD) : 6, 1 => 7
+Cycle 2926 | [CALC START] Op 81 | Port 0 | Latency: 13
+Cycle 2939 | [CALC COMPLETE] Op 81 | pc20 BRANCH(r5 != r6) -> pc11 : 7 != 16 => TAKEN
+Cycle 2940 | [FETCH] Op 82
+Cycle 2940 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2941 | [FETCH] Op 83
+Cycle 2942 | [FETCH] Op 84
+Cycle 2943 | [FETCH] Op 85
+Cycle 2944 | [FETCH] Op 86
+Cycle 2945 | [FETCH] Op 87
+Cycle 2946 | [FETCH] Op 88
+Cycle 2947 | [FETCH] Op 89
+Cycle 2948 | [FETCH] Op 90
+Cycle 2949 | [FETCH] Op 91
+Cycle 2960 | [LOAD COMPLETE] Op 82 | Loads completed: 1/2 | load mem[28] = 3
+Cycle 2961 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2981 | [LOAD COMPLETE] Op 82 | Loads completed: 2/2 | load mem[1472] = -1
+Cycle 2982 | [CALC START] Op 82 | Port 0 | Latency: 105
+Cycle 3087 | [CALC COMPLETE] Op 82 | pc11 r2 := IMC([r7], [r8], MUL) : 3, -1 => -3
+Cycle 3088 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3108 | [LOAD COMPLETE] Op 83 | Loads completed: 1/2 | load mem[448] = 1
+Cycle 3109 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3129 | [LOAD COMPLETE] Op 83 | Loads completed: 2/2 | load mem[1052] = -4
+Cycle 3130 | [CALC START] Op 83 | Port 0 | Latency: 105
+Cycle 3235 | [CALC COMPLETE] Op 83 | pc12 r3 := IMC([r9], [r10], MUL) : 1, -4 => -4
+Cycle 3236 | [CALC START] Op 84 | Port 0 | Latency: 9
+Cycle 3245 | [CALC COMPLETE] Op 84 | pc13 r4 := IMC(r2, r3, ADD) : -3, -4 => -7
+Cycle 3246 | [CALC START] Op 85 | Port 0 | Latency: 9
+Cycle 3255 | [CALC COMPLETE] Op 85 | pc14 r1 := IMC(r1, r4, ADD) : -4, -7 => -11
+Cycle 3256 | [CALC START] Op 86 | Port 0 | Latency: 9
+Cycle 3265 | [CALC COMPLETE] Op 86 | pc15 r7 := IMC(r7, #4, ADD) : 28, 4 => 32
+Cycle 3266 | [CALC START] Op 87 | Port 0 | Latency: 9
+Cycle 3275 | [CALC COMPLETE] Op 87 | pc16 r8 := IMC(r8, #64, ADD) : 1472, 64 => 1536
+Cycle 3276 | [CALC START] Op 88 | Port 0 | Latency: 9
+Cycle 3285 | [CALC COMPLETE] Op 88 | pc17 r9 := IMC(r9, #64, ADD) : 448, 64 => 512
+Cycle 3286 | [CALC START] Op 89 | Port 0 | Latency: 9
+Cycle 3295 | [CALC COMPLETE] Op 89 | pc18 r10 := IMC(r10, #4, ADD) : 1052, 4 => 1056
+Cycle 3296 | [CALC START] Op 90 | Port 0 | Latency: 9
+Cycle 3305 | [CALC COMPLETE] Op 90 | pc19 r5 := IMC(r5, #1, ADD) : 7, 1 => 8
+Cycle 3306 | [CALC START] Op 91 | Port 0 | Latency: 13
+Cycle 3319 | [CALC COMPLETE] Op 91 | pc20 BRANCH(r5 != r6) -> pc11 : 8 != 16 => TAKEN
+Cycle 3320 | [FETCH] Op 92
+Cycle 3320 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3321 | [FETCH] Op 93
+Cycle 3322 | [FETCH] Op 94
+Cycle 3323 | [FETCH] Op 95
+Cycle 3324 | [FETCH] Op 96
+Cycle 3325 | [FETCH] Op 97
+Cycle 3326 | [FETCH] Op 98
+Cycle 3327 | [FETCH] Op 99
+Cycle 3328 | [FETCH] Op 100
+Cycle 3329 | [FETCH] Op 101
+Cycle 3340 | [LOAD COMPLETE] Op 92 | Loads completed: 1/2 | load mem[32] = -1
+Cycle 3341 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3361 | [LOAD COMPLETE] Op 92 | Loads completed: 2/2 | load mem[1536] = -2
+Cycle 3362 | [CALC START] Op 92 | Port 0 | Latency: 105
+Cycle 3467 | [CALC COMPLETE] Op 92 | pc11 r2 := IMC([r7], [r8], MUL) : -1, -2 => 2
+Cycle 3468 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3488 | [LOAD COMPLETE] Op 93 | Loads completed: 1/2 | load mem[512] = 3
+Cycle 3489 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3509 | [LOAD COMPLETE] Op 93 | Loads completed: 2/2 | load mem[1056] = 1
+Cycle 3510 | [CALC START] Op 93 | Port 0 | Latency: 105
+Cycle 3615 | [CALC COMPLETE] Op 93 | pc12 r3 := IMC([r9], [r10], MUL) : 3, 1 => 3
+Cycle 3616 | [CALC START] Op 94 | Port 0 | Latency: 9
+Cycle 3625 | [CALC COMPLETE] Op 94 | pc13 r4 := IMC(r2, r3, ADD) : 2, 3 => 5
+Cycle 3626 | [CALC START] Op 95 | Port 0 | Latency: 9
+Cycle 3635 | [CALC COMPLETE] Op 95 | pc14 r1 := IMC(r1, r4, ADD) : -11, 5 => -6
+Cycle 3636 | [CALC START] Op 96 | Port 0 | Latency: 9
+Cycle 3645 | [CALC COMPLETE] Op 96 | pc15 r7 := IMC(r7, #4, ADD) : 32, 4 => 36
+Cycle 3646 | [CALC START] Op 97 | Port 0 | Latency: 9
+Cycle 3655 | [CALC COMPLETE] Op 97 | pc16 r8 := IMC(r8, #64, ADD) : 1536, 64 => 1600
+Cycle 3656 | [CALC START] Op 98 | Port 0 | Latency: 9
+Cycle 3665 | [CALC COMPLETE] Op 98 | pc17 r9 := IMC(r9, #64, ADD) : 512, 64 => 576
+Cycle 3666 | [CALC START] Op 99 | Port 0 | Latency: 9
+Cycle 3675 | [CALC COMPLETE] Op 99 | pc18 r10 := IMC(r10, #4, ADD) : 1056, 4 => 1060
+Cycle 3676 | [CALC START] Op 100 | Port 0 | Latency: 9
+Cycle 3685 | [CALC COMPLETE] Op 100 | pc19 r5 := IMC(r5, #1, ADD) : 8, 1 => 9
+Cycle 3686 | [CALC START] Op 101 | Port 0 | Latency: 13
+Cycle 3699 | [CALC COMPLETE] Op 101 | pc20 BRANCH(r5 != r6) -> pc11 : 9 != 16 => TAKEN
+Cycle 3700 | [FETCH] Op 102
+Cycle 3700 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3701 | [FETCH] Op 103
+Cycle 3702 | [FETCH] Op 104
+Cycle 3703 | [FETCH] Op 105
+Cycle 3704 | [FETCH] Op 106
+Cycle 3705 | [FETCH] Op 107
+Cycle 3706 | [FETCH] Op 108
+Cycle 3707 | [FETCH] Op 109
+Cycle 3708 | [FETCH] Op 110
+Cycle 3709 | [FETCH] Op 111
+Cycle 3720 | [LOAD COMPLETE] Op 102 | Loads completed: 1/2 | load mem[36] = -5
+Cycle 3721 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3741 | [LOAD COMPLETE] Op 102 | Loads completed: 2/2 | load mem[1600] = -3
+Cycle 3742 | [CALC START] Op 102 | Port 0 | Latency: 105
+Cycle 3847 | [CALC COMPLETE] Op 102 | pc11 r2 := IMC([r7], [r8], MUL) : -5, -3 => 15
+Cycle 3848 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3868 | [LOAD COMPLETE] Op 103 | Loads completed: 1/2 | load mem[576] = 5
+Cycle 3869 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3889 | [LOAD COMPLETE] Op 103 | Loads completed: 2/2 | load mem[1060] = -3
+Cycle 3890 | [CALC START] Op 103 | Port 0 | Latency: 105
+Cycle 3995 | [CALC COMPLETE] Op 103 | pc12 r3 := IMC([r9], [r10], MUL) : 5, -3 => -15
+Cycle 3996 | [CALC START] Op 104 | Port 0 | Latency: 9
+Cycle 4005 | [CALC COMPLETE] Op 104 | pc13 r4 := IMC(r2, r3, ADD) : 15, -15 => 0
+Cycle 4006 | [CALC START] Op 105 | Port 0 | Latency: 9
+Cycle 4015 | [CALC COMPLETE] Op 105 | pc14 r1 := IMC(r1, r4, ADD) : -6, 0 => -6
+Cycle 4016 | [CALC START] Op 106 | Port 0 | Latency: 9
+Cycle 4025 | [CALC COMPLETE] Op 106 | pc15 r7 := IMC(r7, #4, ADD) : 36, 4 => 40
+Cycle 4026 | [CALC START] Op 107 | Port 0 | Latency: 9
+Cycle 4035 | [CALC COMPLETE] Op 107 | pc16 r8 := IMC(r8, #64, ADD) : 1600, 64 => 1664
+Cycle 4036 | [CALC START] Op 108 | Port 0 | Latency: 9
+Cycle 4045 | [CALC COMPLETE] Op 108 | pc17 r9 := IMC(r9, #64, ADD) : 576, 64 => 640
+Cycle 4046 | [CALC START] Op 109 | Port 0 | Latency: 9
+Cycle 4055 | [CALC COMPLETE] Op 109 | pc18 r10 := IMC(r10, #4, ADD) : 1060, 4 => 1064
+Cycle 4056 | [CALC START] Op 110 | Port 0 | Latency: 9
+Cycle 4065 | [CALC COMPLETE] Op 110 | pc19 r5 := IMC(r5, #1, ADD) : 9, 1 => 10
+Cycle 4066 | [CALC START] Op 111 | Port 0 | Latency: 13
+Cycle 4079 | [CALC COMPLETE] Op 111 | pc20 BRANCH(r5 != r6) -> pc11 : 10 != 16 => TAKEN
+Cycle 4080 | [FETCH] Op 112
+Cycle 4080 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4081 | [FETCH] Op 113
+Cycle 4082 | [FETCH] Op 114
+Cycle 4083 | [FETCH] Op 115
+Cycle 4084 | [FETCH] Op 116
+Cycle 4085 | [FETCH] Op 117
+Cycle 4086 | [FETCH] Op 118
+Cycle 4087 | [FETCH] Op 119
+Cycle 4088 | [FETCH] Op 120
+Cycle 4089 | [FETCH] Op 121
+Cycle 4100 | [LOAD COMPLETE] Op 112 | Loads completed: 1/2 | load mem[40] = 2
+Cycle 4101 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4121 | [LOAD COMPLETE] Op 112 | Loads completed: 2/2 | load mem[1664] = -4
+Cycle 4122 | [CALC START] Op 112 | Port 0 | Latency: 105
+Cycle 4227 | [CALC COMPLETE] Op 112 | pc11 r2 := IMC([r7], [r8], MUL) : 2, -4 => -8
+Cycle 4228 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4248 | [LOAD COMPLETE] Op 113 | Loads completed: 1/2 | load mem[640] = -4
+Cycle 4249 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4269 | [LOAD COMPLETE] Op 113 | Loads completed: 2/2 | load mem[1064] = 2
+Cycle 4270 | [CALC START] Op 113 | Port 0 | Latency: 105
+Cycle 4375 | [CALC COMPLETE] Op 113 | pc12 r3 := IMC([r9], [r10], MUL) : -4, 2 => -8
+Cycle 4376 | [CALC START] Op 114 | Port 0 | Latency: 9
+Cycle 4385 | [CALC COMPLETE] Op 114 | pc13 r4 := IMC(r2, r3, ADD) : -8, -8 => -16
+Cycle 4386 | [CALC START] Op 115 | Port 0 | Latency: 9
+Cycle 4395 | [CALC COMPLETE] Op 115 | pc14 r1 := IMC(r1, r4, ADD) : -6, -16 => -22
+Cycle 4396 | [CALC START] Op 116 | Port 0 | Latency: 9
+Cycle 4405 | [CALC COMPLETE] Op 116 | pc15 r7 := IMC(r7, #4, ADD) : 40, 4 => 44
+Cycle 4406 | [CALC START] Op 117 | Port 0 | Latency: 9
+Cycle 4415 | [CALC COMPLETE] Op 117 | pc16 r8 := IMC(r8, #64, ADD) : 1664, 64 => 1728
+Cycle 4416 | [CALC START] Op 118 | Port 0 | Latency: 9
+Cycle 4425 | [CALC COMPLETE] Op 118 | pc17 r9 := IMC(r9, #64, ADD) : 640, 64 => 704
+Cycle 4426 | [CALC START] Op 119 | Port 0 | Latency: 9
+Cycle 4435 | [CALC COMPLETE] Op 119 | pc18 r10 := IMC(r10, #4, ADD) : 1064, 4 => 1068
+Cycle 4436 | [CALC START] Op 120 | Port 0 | Latency: 9
+Cycle 4445 | [CALC COMPLETE] Op 120 | pc19 r5 := IMC(r5, #1, ADD) : 10, 1 => 11
+Cycle 4446 | [CALC START] Op 121 | Port 0 | Latency: 13
+Cycle 4459 | [CALC COMPLETE] Op 121 | pc20 BRANCH(r5 != r6) -> pc11 : 11 != 16 => TAKEN
+Cycle 4460 | [FETCH] Op 122
+Cycle 4460 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4461 | [FETCH] Op 123
+Cycle 4462 | [FETCH] Op 124
+Cycle 4463 | [FETCH] Op 125
+Cycle 4464 | [FETCH] Op 126
+Cycle 4465 | [FETCH] Op 127
+Cycle 4466 | [FETCH] Op 128
+Cycle 4467 | [FETCH] Op 129
+Cycle 4468 | [FETCH] Op 130
+Cycle 4469 | [FETCH] Op 131
+Cycle 4480 | [LOAD COMPLETE] Op 122 | Loads completed: 1/2 | load mem[44] = -2
+Cycle 4481 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4501 | [LOAD COMPLETE] Op 122 | Loads completed: 2/2 | load mem[1728] = 4
+Cycle 4502 | [CALC START] Op 122 | Port 0 | Latency: 105
+Cycle 4607 | [CALC COMPLETE] Op 122 | pc11 r2 := IMC([r7], [r8], MUL) : -2, 4 => -8
+Cycle 4608 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4628 | [LOAD COMPLETE] Op 123 | Loads completed: 1/2 | load mem[704] = -2
+Cycle 4629 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4649 | [LOAD COMPLETE] Op 123 | Loads completed: 2/2 | load mem[1068] = -2
+Cycle 4650 | [CALC START] Op 123 | Port 0 | Latency: 105
+Cycle 4755 | [CALC COMPLETE] Op 123 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -2 => 4
+Cycle 4756 | [CALC START] Op 124 | Port 0 | Latency: 9
+Cycle 4765 | [CALC COMPLETE] Op 124 | pc13 r4 := IMC(r2, r3, ADD) : -8, 4 => -4
+Cycle 4766 | [CALC START] Op 125 | Port 0 | Latency: 9
+Cycle 4775 | [CALC COMPLETE] Op 125 | pc14 r1 := IMC(r1, r4, ADD) : -22, -4 => -26
+Cycle 4776 | [CALC START] Op 126 | Port 0 | Latency: 9
+Cycle 4785 | [CALC COMPLETE] Op 126 | pc15 r7 := IMC(r7, #4, ADD) : 44, 4 => 48
+Cycle 4786 | [CALC START] Op 127 | Port 0 | Latency: 9
+Cycle 4795 | [CALC COMPLETE] Op 127 | pc16 r8 := IMC(r8, #64, ADD) : 1728, 64 => 1792
+Cycle 4796 | [CALC START] Op 128 | Port 0 | Latency: 9
+Cycle 4805 | [CALC COMPLETE] Op 128 | pc17 r9 := IMC(r9, #64, ADD) : 704, 64 => 768
+Cycle 4806 | [CALC START] Op 129 | Port 0 | Latency: 9
+Cycle 4815 | [CALC COMPLETE] Op 129 | pc18 r10 := IMC(r10, #4, ADD) : 1068, 4 => 1072
+Cycle 4816 | [CALC START] Op 130 | Port 0 | Latency: 9
+Cycle 4825 | [CALC COMPLETE] Op 130 | pc19 r5 := IMC(r5, #1, ADD) : 11, 1 => 12
+Cycle 4826 | [CALC START] Op 131 | Port 0 | Latency: 13
+Cycle 4839 | [CALC COMPLETE] Op 131 | pc20 BRANCH(r5 != r6) -> pc11 : 12 != 16 => TAKEN
+Cycle 4840 | [FETCH] Op 132
+Cycle 4840 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4841 | [FETCH] Op 133
+Cycle 4842 | [FETCH] Op 134
+Cycle 4843 | [FETCH] Op 135
+Cycle 4844 | [FETCH] Op 136
+Cycle 4845 | [FETCH] Op 137
+Cycle 4846 | [FETCH] Op 138
+Cycle 4847 | [FETCH] Op 139
+Cycle 4848 | [FETCH] Op 140
+Cycle 4849 | [FETCH] Op 141
+Cycle 4860 | [LOAD COMPLETE] Op 132 | Loads completed: 1/2 | load mem[48] = 5
+Cycle 4861 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4881 | [LOAD COMPLETE] Op 132 | Loads completed: 2/2 | load mem[1792] = 3
+Cycle 4882 | [CALC START] Op 132 | Port 0 | Latency: 105
+Cycle 4987 | [CALC COMPLETE] Op 132 | pc11 r2 := IMC([r7], [r8], MUL) : 5, 3 => 15
+Cycle 4988 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5008 | [LOAD COMPLETE] Op 133 | Loads completed: 1/2 | load mem[768] = 0
+Cycle 5009 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5029 | [LOAD COMPLETE] Op 133 | Loads completed: 2/2 | load mem[1072] = 3
+Cycle 5030 | [CALC START] Op 133 | Port 0 | Latency: 105
+Cycle 5135 | [CALC COMPLETE] Op 133 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 3 => 0
+Cycle 5136 | [CALC START] Op 134 | Port 0 | Latency: 9
+Cycle 5145 | [CALC COMPLETE] Op 134 | pc13 r4 := IMC(r2, r3, ADD) : 15, 0 => 15
+Cycle 5146 | [CALC START] Op 135 | Port 0 | Latency: 9
+Cycle 5155 | [CALC COMPLETE] Op 135 | pc14 r1 := IMC(r1, r4, ADD) : -26, 15 => -11
+Cycle 5156 | [CALC START] Op 136 | Port 0 | Latency: 9
+Cycle 5165 | [CALC COMPLETE] Op 136 | pc15 r7 := IMC(r7, #4, ADD) : 48, 4 => 52
+Cycle 5166 | [CALC START] Op 137 | Port 0 | Latency: 9
+Cycle 5175 | [CALC COMPLETE] Op 137 | pc16 r8 := IMC(r8, #64, ADD) : 1792, 64 => 1856
+Cycle 5176 | [CALC START] Op 138 | Port 0 | Latency: 9
+Cycle 5185 | [CALC COMPLETE] Op 138 | pc17 r9 := IMC(r9, #64, ADD) : 768, 64 => 832
+Cycle 5186 | [CALC START] Op 139 | Port 0 | Latency: 9
+Cycle 5195 | [CALC COMPLETE] Op 139 | pc18 r10 := IMC(r10, #4, ADD) : 1072, 4 => 1076
+Cycle 5196 | [CALC START] Op 140 | Port 0 | Latency: 9
+Cycle 5205 | [CALC COMPLETE] Op 140 | pc19 r5 := IMC(r5, #1, ADD) : 12, 1 => 13
+Cycle 5206 | [CALC START] Op 141 | Port 0 | Latency: 13
+Cycle 5219 | [CALC COMPLETE] Op 141 | pc20 BRANCH(r5 != r6) -> pc11 : 13 != 16 => TAKEN
+Cycle 5220 | [FETCH] Op 142
+Cycle 5220 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5221 | [FETCH] Op 143
+Cycle 5222 | [FETCH] Op 144
+Cycle 5223 | [FETCH] Op 145
+Cycle 5224 | [FETCH] Op 146
+Cycle 5225 | [FETCH] Op 147
+Cycle 5226 | [FETCH] Op 148
+Cycle 5227 | [FETCH] Op 149
+Cycle 5228 | [FETCH] Op 150
+Cycle 5229 | [FETCH] Op 151
+Cycle 5240 | [LOAD COMPLETE] Op 142 | Loads completed: 1/2 | load mem[52] = 1
+Cycle 5241 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5261 | [LOAD COMPLETE] Op 142 | Loads completed: 2/2 | load mem[1856] = 2
+Cycle 5262 | [CALC START] Op 142 | Port 0 | Latency: 105
+Cycle 5367 | [CALC COMPLETE] Op 142 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 2 => 2
+Cycle 5368 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5388 | [LOAD COMPLETE] Op 143 | Loads completed: 1/2 | load mem[832] = 2
+Cycle 5389 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5409 | [LOAD COMPLETE] Op 143 | Loads completed: 2/2 | load mem[1076] = -1
+Cycle 5410 | [CALC START] Op 143 | Port 0 | Latency: 105
+Cycle 5515 | [CALC COMPLETE] Op 143 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -1 => -2
+Cycle 5516 | [CALC START] Op 144 | Port 0 | Latency: 9
+Cycle 5525 | [CALC COMPLETE] Op 144 | pc13 r4 := IMC(r2, r3, ADD) : 2, -2 => 0
+Cycle 5526 | [CALC START] Op 145 | Port 0 | Latency: 9
+Cycle 5535 | [CALC COMPLETE] Op 145 | pc14 r1 := IMC(r1, r4, ADD) : -11, 0 => -11
+Cycle 5536 | [CALC START] Op 146 | Port 0 | Latency: 9
+Cycle 5545 | [CALC COMPLETE] Op 146 | pc15 r7 := IMC(r7, #4, ADD) : 52, 4 => 56
+Cycle 5546 | [CALC START] Op 147 | Port 0 | Latency: 9
+Cycle 5555 | [CALC COMPLETE] Op 147 | pc16 r8 := IMC(r8, #64, ADD) : 1856, 64 => 1920
+Cycle 5556 | [CALC START] Op 148 | Port 0 | Latency: 9
+Cycle 5565 | [CALC COMPLETE] Op 148 | pc17 r9 := IMC(r9, #64, ADD) : 832, 64 => 896
+Cycle 5566 | [CALC START] Op 149 | Port 0 | Latency: 9
+Cycle 5575 | [CALC COMPLETE] Op 149 | pc18 r10 := IMC(r10, #4, ADD) : 1076, 4 => 1080
+Cycle 5576 | [CALC START] Op 150 | Port 0 | Latency: 9
+Cycle 5585 | [CALC COMPLETE] Op 150 | pc19 r5 := IMC(r5, #1, ADD) : 13, 1 => 14
+Cycle 5586 | [CALC START] Op 151 | Port 0 | Latency: 13
+Cycle 5599 | [CALC COMPLETE] Op 151 | pc20 BRANCH(r5 != r6) -> pc11 : 14 != 16 => TAKEN
+Cycle 5600 | [FETCH] Op 152
+Cycle 5600 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5601 | [FETCH] Op 153
+Cycle 5602 | [FETCH] Op 154
+Cycle 5603 | [FETCH] Op 155
+Cycle 5604 | [FETCH] Op 156
+Cycle 5605 | [FETCH] Op 157
+Cycle 5606 | [FETCH] Op 158
+Cycle 5607 | [FETCH] Op 159
+Cycle 5608 | [FETCH] Op 160
+Cycle 5609 | [FETCH] Op 161
+Cycle 5620 | [LOAD COMPLETE] Op 152 | Loads completed: 1/2 | load mem[56] = -3
+Cycle 5621 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5641 | [LOAD COMPLETE] Op 152 | Loads completed: 2/2 | load mem[1920] = 1
+Cycle 5642 | [CALC START] Op 152 | Port 0 | Latency: 105
+Cycle 5747 | [CALC COMPLETE] Op 152 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 1 => -3
+Cycle 5748 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5768 | [LOAD COMPLETE] Op 153 | Loads completed: 1/2 | load mem[896] = 4
+Cycle 5769 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5789 | [LOAD COMPLETE] Op 153 | Loads completed: 2/2 | load mem[1080] = 4
+Cycle 5790 | [CALC START] Op 153 | Port 0 | Latency: 105
+Cycle 5895 | [CALC COMPLETE] Op 153 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 4 => 16
+Cycle 5896 | [CALC START] Op 154 | Port 0 | Latency: 9
+Cycle 5905 | [CALC COMPLETE] Op 154 | pc13 r4 := IMC(r2, r3, ADD) : -3, 16 => 13
+Cycle 5906 | [CALC START] Op 155 | Port 0 | Latency: 9
+Cycle 5915 | [CALC COMPLETE] Op 155 | pc14 r1 := IMC(r1, r4, ADD) : -11, 13 => 2
+Cycle 5916 | [CALC START] Op 156 | Port 0 | Latency: 9
+Cycle 5925 | [CALC COMPLETE] Op 156 | pc15 r7 := IMC(r7, #4, ADD) : 56, 4 => 60
+Cycle 5926 | [CALC START] Op 157 | Port 0 | Latency: 9
+Cycle 5935 | [CALC COMPLETE] Op 157 | pc16 r8 := IMC(r8, #64, ADD) : 1920, 64 => 1984
+Cycle 5936 | [CALC START] Op 158 | Port 0 | Latency: 9
+Cycle 5945 | [CALC COMPLETE] Op 158 | pc17 r9 := IMC(r9, #64, ADD) : 896, 64 => 960
+Cycle 5946 | [CALC START] Op 159 | Port 0 | Latency: 9
+Cycle 5955 | [CALC COMPLETE] Op 159 | pc18 r10 := IMC(r10, #4, ADD) : 1080, 4 => 1084
+Cycle 5956 | [CALC START] Op 160 | Port 0 | Latency: 9
+Cycle 5965 | [CALC COMPLETE] Op 160 | pc19 r5 := IMC(r5, #1, ADD) : 14, 1 => 15
+Cycle 5966 | [CALC START] Op 161 | Port 0 | Latency: 13
+Cycle 5979 | [CALC COMPLETE] Op 161 | pc20 BRANCH(r5 != r6) -> pc11 : 15 != 16 => TAKEN
+Cycle 5980 | [FETCH] Op 162
+Cycle 5980 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5981 | [FETCH] Op 163
+Cycle 5982 | [FETCH] Op 164
+Cycle 5983 | [FETCH] Op 165
+Cycle 5984 | [FETCH] Op 166
+Cycle 5985 | [FETCH] Op 167
+Cycle 5986 | [FETCH] Op 168
+Cycle 5987 | [FETCH] Op 169
+Cycle 5988 | [FETCH] Op 170
+Cycle 5989 | [FETCH] Op 171
+Cycle 6000 | [LOAD COMPLETE] Op 162 | Loads completed: 1/2 | load mem[60] = 4
+Cycle 6001 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 6021 | [LOAD COMPLETE] Op 162 | Loads completed: 2/2 | load mem[1984] = 0
+Cycle 6022 | [CALC START] Op 162 | Port 0 | Latency: 105
+Cycle 6127 | [CALC COMPLETE] Op 162 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 0 => 0
+Cycle 6128 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 6148 | [LOAD COMPLETE] Op 163 | Loads completed: 1/2 | load mem[960] = -5
+Cycle 6149 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 6169 | [LOAD COMPLETE] Op 163 | Loads completed: 2/2 | load mem[1084] = 0
+Cycle 6170 | [CALC START] Op 163 | Port 0 | Latency: 105
+Cycle 6275 | [CALC COMPLETE] Op 163 | pc12 r3 := IMC([r9], [r10], MUL) : -5, 0 => 0
+Cycle 6276 | [CALC START] Op 164 | Port 0 | Latency: 9
+Cycle 6285 | [CALC COMPLETE] Op 164 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 6286 | [CALC START] Op 165 | Port 0 | Latency: 9
+Cycle 6295 | [CALC COMPLETE] Op 165 | pc14 r1 := IMC(r1, r4, ADD) : 2, 0 => 2
+Cycle 6296 | [CALC START] Op 166 | Port 0 | Latency: 9
+Cycle 6305 | [CALC COMPLETE] Op 166 | pc15 r7 := IMC(r7, #4, ADD) : 60, 4 => 64
+Cycle 6306 | [CALC START] Op 167 | Port 0 | Latency: 9
+Cycle 6315 | [CALC COMPLETE] Op 167 | pc16 r8 := IMC(r8, #64, ADD) : 1984, 64 => 2048
+Cycle 6316 | [CALC START] Op 168 | Port 0 | Latency: 9
+Cycle 6325 | [CALC COMPLETE] Op 168 | pc17 r9 := IMC(r9, #64, ADD) : 960, 64 => 1024
+Cycle 6326 | [CALC START] Op 169 | Port 0 | Latency: 9
+Cycle 6335 | [CALC COMPLETE] Op 169 | pc18 r10 := IMC(r10, #4, ADD) : 1084, 4 => 1088
+Cycle 6336 | [CALC START] Op 170 | Port 0 | Latency: 9
+Cycle 6345 | [CALC COMPLETE] Op 170 | pc19 r5 := IMC(r5, #1, ADD) : 15, 1 => 16
+Cycle 6346 | [CALC START] Op 171 | Port 0 | Latency: 13
+Cycle 6359 | [CALC COMPLETE] Op 171 | pc20 BRANCH(r5 != r6) -> pc11 : 16 != 16 => not taken
+Cycle 6360 | [FETCH] Op 172
+Cycle 6360 | [CALC START] Op 172 | Port 0 | Latency: 9
+Cycle 6369 | [CALC COMPLETE] Op 172 | pc21 [r11] := IMC(r1, #0, ADD) : 2, 0 => 2
+Cycle 6370 | [STORE START] Op 172 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 6390 | [STORE COMPLETE] Op 172 | store mem[2048] = 2
+
+====================================
+SIMULATION COMPLETED
+Total Cycles: 6390
+====================================
+
+---------------- FINAL RESULT (Design 1: In-Order Baseline) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  C (n x n)  [16 x 16]
+          2     -12     -30     -36     -12     -46     -32      97      31      48     -10      16     -34     -43     -22     -52
+          7      12     -50     -19     -46     -25       8      -6      46      30      90     -27     -40     -12     -35     -35
+         96      -4     -36       7       3     -45     -18      -2     -55      69      24      36      35     -24     -17     -12
+         26      63       6       6     -30      -4     -38     -47      37     -51      41      28      83     -19     -37      17
+         17      -7     109     -33      -2      -1       3     -31      -8     -11     -79      81      -6      47       4       8
+        -74      39      31      44      43      19     -38       2     -36     -53      16     -47      21      31      62      16
+          4      -7      -4       2     104      -8       9     -39      -3       2     -53      -6     -44      58       1      40
+        -36      -9     -31      31       2      63      19      45     -79      11      -6     -83      34      -6      11       0
+        -15     -49       3      22     -39      -3      90      -8       5     -18       3       0     -25      -9     -17      21
+         12     -28     -45     -14     -52      14       2      33      40      58     -26       1     -12     -83      38     -18
+        -27     -48     -10     -41     -31      -9      -2     -15     110      -4      30      13     -62       3     -19     -45
+         40      13     -18     -37      -4     -51     -50      66     -13      13      41      54      -9     -31     -23     -44
+         36      91     -20     -38       7     -21     -37      -1       2     -41      69       2      39      18     -54      18
+         71      21      39      33       2       4     -18     -51     -54      43     -51      11      60      51       9     -13
+        -53      34      27      77      14      -9       7     -51     -16     -32      11     -51      54       2      34      61
+         -8     -45      58       2      42      30      21     -26     -16     -10     -91      56     -44      -4      39      52
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 6390
+
+################ Design 2: Pipelined ################
+Cycle 1 | [FETCH] Op 1
+Cycle 1 | [CALC START] Op 1 | Port 1 | Latency: 9
+Cycle 2 | [FETCH] Op 2
+Cycle 3 | [FETCH] Op 3
+Cycle 4 | [FETCH] Op 4
+Cycle 5 | [FETCH] Op 5
+Cycle 6 | [FETCH] Op 6
+Cycle 7 | [FETCH] Op 7
+Cycle 8 | [FETCH] Op 8
+Cycle 9 | [FETCH] Op 9
+Cycle 10 | [FETCH] Op 10
+Cycle 10 | [CALC START] Op 2 | Port 1 | Latency: 9
+Cycle 10 | [CALC COMPLETE] Op 1 | pc0 r6 := IMC(r0, #16, ADD) : 0, 16 => 16
+Cycle 10 | [COMMIT] Op 1 retired.
+Cycle 11 | [FETCH] Op 11
+Cycle 12 | [FETCH] Op 12
+Cycle 13 | [FETCH] Op 13
+Cycle 14 | [FETCH] Op 14
+Cycle 15 | [FETCH] Op 15
+Cycle 16 | [FETCH] Op 16
+Cycle 17 | [FETCH] Op 17
+Cycle 19 | [CALC START] Op 3 | Port 1 | Latency: 9
+Cycle 19 | [CALC COMPLETE] Op 2 | pc1 r5 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 19 | [COMMIT] Op 2 retired.
+Cycle 20 | [FETCH] Op 18
+Cycle 28 | [CALC START] Op 4 | Port 1 | Latency: 105
+Cycle 28 | [CALC COMPLETE] Op 3 | pc2 r1 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 28 | [COMMIT] Op 3 retired.
+Cycle 29 | [FETCH] Op 19
+Cycle 133 | [CALC START] Op 5 | Port 1 | Latency: 82
+Cycle 133 | [CALC COMPLETE] Op 4 | pc3 r14 := IMC(r30, #64, MUL) : 0, 64 => 0
+Cycle 133 | [COMMIT] Op 4 retired.
+Cycle 134 | [FETCH] Op 20
+Cycle 215 | [CALC START] Op 6 | Port 1 | Latency: 9
+Cycle 215 | [CALC COMPLETE] Op 5 | pc4 r15 := IMC(r31, #2, SLL) : 0, 2 => 0
+Cycle 215 | [COMMIT] Op 5 retired.
+Cycle 216 | [FETCH] Op 21
+Cycle 224 | [CALC START] Op 7 | Port 1 | Latency: 9
+Cycle 224 | [CALC COMPLETE] Op 6 | pc5 r7 := IMC(r14, #0, ADD) : 0, 0 => 0
+Cycle 224 | [COMMIT] Op 6 retired.
+Cycle 225 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 233 | [CALC START] Op 8 | Port 1 | Latency: 9
+Cycle 233 | [CALC COMPLETE] Op 7 | pc6 r8 := IMC(r15, #1024, ADD) : 0, 1024 => 1024
+Cycle 233 | [COMMIT] Op 7 retired.
+Cycle 242 | [CALC START] Op 9 | Port 1 | Latency: 9
+Cycle 242 | [CALC COMPLETE] Op 8 | pc7 r9 := IMC(r15, #0, ADD) : 0, 0 => 0
+Cycle 242 | [COMMIT] Op 8 retired.
+Cycle 245 | [LOAD COMPLETE] Op 12 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 246 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 251 | [CALC START] Op 10 | Port 1 | Latency: 9
+Cycle 251 | [CALC COMPLETE] Op 9 | pc8 r10 := IMC(r14, #1024, ADD) : 0, 1024 => 1024
+Cycle 251 | [COMMIT] Op 9 retired.
+Cycle 260 | [CALC START] Op 20 | Port 1 | Latency: 9
+Cycle 260 | [CALC COMPLETE] Op 10 | pc9 r11 := IMC(r14, r15, ADD) : 0, 0 => 0
+Cycle 260 | [COMMIT] Op 10 retired.
+Cycle 266 | [LOAD COMPLETE] Op 12 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 267 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 269 | [CALC START] Op 11 | Port 1 | Latency: 9
+Cycle 269 | [CALC COMPLETE] Op 20 | pc19 r5 := IMC(r5, #1, ADD) : 0, 1 => 1
+Cycle 278 | [CALC START] Op 12 | Port 1 | Latency: 105
+Cycle 278 | [CALC COMPLETE] Op 11 | pc10 r11 := IMC(r11, #2048, ADD) : 0, 2048 => 2048
+Cycle 287 | [LOAD COMPLETE] Op 13 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 288 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 308 | [LOAD COMPLETE] Op 13 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 383 | [CALC START] Op 13 | Port 1 | Latency: 105
+Cycle 383 | [CALC COMPLETE] Op 12 | pc11 r2 := IMC([r7], [r8], MUL) : -2, -3 => 6
+Cycle 488 | [CALC START] Op 16 | Port 1 | Latency: 9
+Cycle 488 | [CALC COMPLETE] Op 13 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -3 => 6
+Cycle 497 | [CALC START] Op 14 | Port 1 | Latency: 9
+Cycle 497 | [CALC COMPLETE] Op 16 | pc15 r7 := IMC(r7, #4, ADD) : 0, 4 => 4
+Cycle 506 | [CALC START] Op 17 | Port 1 | Latency: 9
+Cycle 506 | [CALC COMPLETE] Op 14 | pc13 r4 := IMC(r2, r3, ADD) : 6, 6 => 12
+Cycle 515 | [CALC START] Op 15 | Port 1 | Latency: 9
+Cycle 515 | [CALC COMPLETE] Op 17 | pc16 r8 := IMC(r8, #64, ADD) : 1024, 64 => 1088
+Cycle 524 | [CALC START] Op 18 | Port 1 | Latency: 9
+Cycle 524 | [CALC COMPLETE] Op 15 | pc14 r1 := IMC(r1, r4, ADD) : 0, 12 => 12
+Cycle 533 | [CALC START] Op 19 | Port 1 | Latency: 9
+Cycle 533 | [CALC COMPLETE] Op 18 | pc17 r9 := IMC(r9, #64, ADD) : 0, 64 => 64
+Cycle 542 | [CALC COMPLETE] Op 19 | pc18 r10 := IMC(r10, #4, ADD) : 1024, 4 => 1028
+Cycle 543 | [CALC START] Op 21 | Port 1 | Latency: 13
+Cycle 556 | [CALC COMPLETE] Op 21 | pc20 BRANCH(r5 != r6) -> pc11 : 1 != 16 => TAKEN
+Cycle 557 | [FETCH] Op 22
+Cycle 557 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 558 | [FETCH] Op 23
+Cycle 559 | [FETCH] Op 24
+Cycle 560 | [FETCH] Op 25
+Cycle 561 | [FETCH] Op 26
+Cycle 562 | [FETCH] Op 27
+Cycle 563 | [FETCH] Op 28
+Cycle 564 | [FETCH] Op 29
+Cycle 565 | [FETCH] Op 30
+Cycle 565 | [CALC START] Op 30 | Port 1 | Latency: 9
+Cycle 566 | [FETCH] Op 31
+Cycle 574 | [CALC COMPLETE] Op 30 | pc19 r5 := IMC(r5, #1, ADD) : 1, 1 => 2
+Cycle 577 | [LOAD COMPLETE] Op 22 | Loads completed: 1/2 | load mem[4] = 5
+Cycle 578 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 598 | [LOAD COMPLETE] Op 22 | Loads completed: 2/2 | load mem[1088] = -4
+Cycle 599 | [CALC START] Op 22 | Port 1 | Latency: 105
+Cycle 599 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 619 | [LOAD COMPLETE] Op 23 | Loads completed: 1/2 | load mem[64] = 0
+Cycle 620 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 640 | [LOAD COMPLETE] Op 23 | Loads completed: 2/2 | load mem[1028] = 2
+Cycle 704 | [CALC START] Op 23 | Port 1 | Latency: 105
+Cycle 704 | [CALC COMPLETE] Op 22 | pc11 r2 := IMC([r7], [r8], MUL) : 5, -4 => -20
+Cycle 809 | [CALC START] Op 26 | Port 1 | Latency: 9
+Cycle 809 | [CALC COMPLETE] Op 23 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 2 => 0
+Cycle 818 | [CALC START] Op 24 | Port 1 | Latency: 9
+Cycle 818 | [CALC COMPLETE] Op 26 | pc15 r7 := IMC(r7, #4, ADD) : 4, 4 => 8
+Cycle 827 | [CALC START] Op 27 | Port 1 | Latency: 9
+Cycle 827 | [CALC COMPLETE] Op 24 | pc13 r4 := IMC(r2, r3, ADD) : -20, 0 => -20
+Cycle 836 | [CALC START] Op 25 | Port 1 | Latency: 9
+Cycle 836 | [CALC COMPLETE] Op 27 | pc16 r8 := IMC(r8, #64, ADD) : 1088, 64 => 1152
+Cycle 845 | [CALC START] Op 28 | Port 1 | Latency: 9
+Cycle 845 | [CALC COMPLETE] Op 25 | pc14 r1 := IMC(r1, r4, ADD) : 12, -20 => -8
+Cycle 854 | [CALC START] Op 29 | Port 1 | Latency: 9
+Cycle 854 | [CALC COMPLETE] Op 28 | pc17 r9 := IMC(r9, #64, ADD) : 64, 64 => 128
+Cycle 863 | [CALC COMPLETE] Op 29 | pc18 r10 := IMC(r10, #4, ADD) : 1028, 4 => 1032
+Cycle 864 | [CALC START] Op 31 | Port 1 | Latency: 13
+Cycle 877 | [CALC COMPLETE] Op 31 | pc20 BRANCH(r5 != r6) -> pc11 : 2 != 16 => TAKEN
+Cycle 878 | [FETCH] Op 32
+Cycle 878 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 879 | [FETCH] Op 33
+Cycle 880 | [FETCH] Op 34
+Cycle 881 | [FETCH] Op 35
+Cycle 882 | [FETCH] Op 36
+Cycle 883 | [FETCH] Op 37
+Cycle 884 | [FETCH] Op 38
+Cycle 885 | [FETCH] Op 39
+Cycle 886 | [FETCH] Op 40
+Cycle 886 | [CALC START] Op 40 | Port 1 | Latency: 9
+Cycle 887 | [FETCH] Op 41
+Cycle 895 | [CALC COMPLETE] Op 40 | pc19 r5 := IMC(r5, #1, ADD) : 2, 1 => 3
+Cycle 898 | [LOAD COMPLETE] Op 32 | Loads completed: 1/2 | load mem[8] = 1
+Cycle 899 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 919 | [LOAD COMPLETE] Op 32 | Loads completed: 2/2 | load mem[1152] = 4
+Cycle 920 | [CALC START] Op 32 | Port 1 | Latency: 105
+Cycle 920 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 940 | [LOAD COMPLETE] Op 33 | Loads completed: 1/2 | load mem[128] = 2
+Cycle 941 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 961 | [LOAD COMPLETE] Op 33 | Loads completed: 2/2 | load mem[1032] = -2
+Cycle 1025 | [CALC START] Op 33 | Port 1 | Latency: 105
+Cycle 1025 | [CALC COMPLETE] Op 32 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 4 => 4
+Cycle 1130 | [CALC START] Op 36 | Port 1 | Latency: 9
+Cycle 1130 | [CALC COMPLETE] Op 33 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -2 => -4
+Cycle 1139 | [CALC START] Op 34 | Port 1 | Latency: 9
+Cycle 1139 | [CALC COMPLETE] Op 36 | pc15 r7 := IMC(r7, #4, ADD) : 8, 4 => 12
+Cycle 1148 | [CALC START] Op 37 | Port 1 | Latency: 9
+Cycle 1148 | [CALC COMPLETE] Op 34 | pc13 r4 := IMC(r2, r3, ADD) : 4, -4 => 0
+Cycle 1157 | [CALC START] Op 35 | Port 1 | Latency: 9
+Cycle 1157 | [CALC COMPLETE] Op 37 | pc16 r8 := IMC(r8, #64, ADD) : 1152, 64 => 1216
+Cycle 1166 | [CALC START] Op 38 | Port 1 | Latency: 9
+Cycle 1166 | [CALC COMPLETE] Op 35 | pc14 r1 := IMC(r1, r4, ADD) : -8, 0 => -8
+Cycle 1175 | [CALC START] Op 39 | Port 1 | Latency: 9
+Cycle 1175 | [CALC COMPLETE] Op 38 | pc17 r9 := IMC(r9, #64, ADD) : 128, 64 => 192
+Cycle 1184 | [CALC COMPLETE] Op 39 | pc18 r10 := IMC(r10, #4, ADD) : 1032, 4 => 1036
+Cycle 1185 | [CALC START] Op 41 | Port 1 | Latency: 13
+Cycle 1198 | [CALC COMPLETE] Op 41 | pc20 BRANCH(r5 != r6) -> pc11 : 3 != 16 => TAKEN
+Cycle 1199 | [FETCH] Op 42
+Cycle 1199 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1200 | [FETCH] Op 43
+Cycle 1201 | [FETCH] Op 44
+Cycle 1202 | [FETCH] Op 45
+Cycle 1203 | [FETCH] Op 46
+Cycle 1204 | [FETCH] Op 47
+Cycle 1205 | [FETCH] Op 48
+Cycle 1206 | [FETCH] Op 49
+Cycle 1207 | [FETCH] Op 50
+Cycle 1207 | [CALC START] Op 50 | Port 1 | Latency: 9
+Cycle 1208 | [FETCH] Op 51
+Cycle 1216 | [CALC COMPLETE] Op 50 | pc19 r5 := IMC(r5, #1, ADD) : 3, 1 => 4
+Cycle 1219 | [LOAD COMPLETE] Op 42 | Loads completed: 1/2 | load mem[12] = -3
+Cycle 1220 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1240 | [LOAD COMPLETE] Op 42 | Loads completed: 2/2 | load mem[1216] = 3
+Cycle 1241 | [CALC START] Op 42 | Port 1 | Latency: 105
+Cycle 1241 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1261 | [LOAD COMPLETE] Op 43 | Loads completed: 1/2 | load mem[192] = 4
+Cycle 1262 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1282 | [LOAD COMPLETE] Op 43 | Loads completed: 2/2 | load mem[1036] = 3
+Cycle 1346 | [CALC START] Op 43 | Port 1 | Latency: 105
+Cycle 1346 | [CALC COMPLETE] Op 42 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 3 => -9
+Cycle 1451 | [CALC START] Op 46 | Port 1 | Latency: 9
+Cycle 1451 | [CALC COMPLETE] Op 43 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 3 => 12
+Cycle 1460 | [CALC START] Op 44 | Port 1 | Latency: 9
+Cycle 1460 | [CALC COMPLETE] Op 46 | pc15 r7 := IMC(r7, #4, ADD) : 12, 4 => 16
+Cycle 1469 | [CALC START] Op 47 | Port 1 | Latency: 9
+Cycle 1469 | [CALC COMPLETE] Op 44 | pc13 r4 := IMC(r2, r3, ADD) : -9, 12 => 3
+Cycle 1478 | [CALC START] Op 45 | Port 1 | Latency: 9
+Cycle 1478 | [CALC COMPLETE] Op 47 | pc16 r8 := IMC(r8, #64, ADD) : 1216, 64 => 1280
+Cycle 1487 | [CALC START] Op 48 | Port 1 | Latency: 9
+Cycle 1487 | [CALC COMPLETE] Op 45 | pc14 r1 := IMC(r1, r4, ADD) : -8, 3 => -5
+Cycle 1496 | [CALC START] Op 49 | Port 1 | Latency: 9
+Cycle 1496 | [CALC COMPLETE] Op 48 | pc17 r9 := IMC(r9, #64, ADD) : 192, 64 => 256
+Cycle 1505 | [CALC COMPLETE] Op 49 | pc18 r10 := IMC(r10, #4, ADD) : 1036, 4 => 1040
+Cycle 1506 | [CALC START] Op 51 | Port 1 | Latency: 13
+Cycle 1519 | [CALC COMPLETE] Op 51 | pc20 BRANCH(r5 != r6) -> pc11 : 4 != 16 => TAKEN
+Cycle 1520 | [FETCH] Op 52
+Cycle 1520 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1521 | [FETCH] Op 53
+Cycle 1522 | [FETCH] Op 54
+Cycle 1523 | [FETCH] Op 55
+Cycle 1524 | [FETCH] Op 56
+Cycle 1525 | [FETCH] Op 57
+Cycle 1526 | [FETCH] Op 58
+Cycle 1527 | [FETCH] Op 59
+Cycle 1528 | [FETCH] Op 60
+Cycle 1528 | [CALC START] Op 60 | Port 1 | Latency: 9
+Cycle 1529 | [FETCH] Op 61
+Cycle 1537 | [CALC COMPLETE] Op 60 | pc19 r5 := IMC(r5, #1, ADD) : 4, 1 => 5
+Cycle 1540 | [LOAD COMPLETE] Op 52 | Loads completed: 1/2 | load mem[16] = 4
+Cycle 1541 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1561 | [LOAD COMPLETE] Op 52 | Loads completed: 2/2 | load mem[1280] = 2
+Cycle 1562 | [CALC START] Op 52 | Port 1 | Latency: 105
+Cycle 1562 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1582 | [LOAD COMPLETE] Op 53 | Loads completed: 1/2 | load mem[256] = -5
+Cycle 1583 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1603 | [LOAD COMPLETE] Op 53 | Loads completed: 2/2 | load mem[1040] = -1
+Cycle 1667 | [CALC START] Op 53 | Port 1 | Latency: 105
+Cycle 1667 | [CALC COMPLETE] Op 52 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 2 => 8
+Cycle 1772 | [CALC START] Op 56 | Port 1 | Latency: 9
+Cycle 1772 | [CALC COMPLETE] Op 53 | pc12 r3 := IMC([r9], [r10], MUL) : -5, -1 => 5
+Cycle 1781 | [CALC START] Op 54 | Port 1 | Latency: 9
+Cycle 1781 | [CALC COMPLETE] Op 56 | pc15 r7 := IMC(r7, #4, ADD) : 16, 4 => 20
+Cycle 1790 | [CALC START] Op 57 | Port 1 | Latency: 9
+Cycle 1790 | [CALC COMPLETE] Op 54 | pc13 r4 := IMC(r2, r3, ADD) : 8, 5 => 13
+Cycle 1799 | [CALC START] Op 55 | Port 1 | Latency: 9
+Cycle 1799 | [CALC COMPLETE] Op 57 | pc16 r8 := IMC(r8, #64, ADD) : 1280, 64 => 1344
+Cycle 1808 | [CALC START] Op 58 | Port 1 | Latency: 9
+Cycle 1808 | [CALC COMPLETE] Op 55 | pc14 r1 := IMC(r1, r4, ADD) : -5, 13 => 8
+Cycle 1817 | [CALC START] Op 59 | Port 1 | Latency: 9
+Cycle 1817 | [CALC COMPLETE] Op 58 | pc17 r9 := IMC(r9, #64, ADD) : 256, 64 => 320
+Cycle 1826 | [CALC COMPLETE] Op 59 | pc18 r10 := IMC(r10, #4, ADD) : 1040, 4 => 1044
+Cycle 1827 | [CALC START] Op 61 | Port 1 | Latency: 13
+Cycle 1840 | [CALC COMPLETE] Op 61 | pc20 BRANCH(r5 != r6) -> pc11 : 5 != 16 => TAKEN
+Cycle 1841 | [FETCH] Op 62
+Cycle 1841 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1842 | [FETCH] Op 63
+Cycle 1843 | [FETCH] Op 64
+Cycle 1844 | [FETCH] Op 65
+Cycle 1845 | [FETCH] Op 66
+Cycle 1846 | [FETCH] Op 67
+Cycle 1847 | [FETCH] Op 68
+Cycle 1848 | [FETCH] Op 69
+Cycle 1849 | [FETCH] Op 70
+Cycle 1849 | [CALC START] Op 70 | Port 1 | Latency: 9
+Cycle 1850 | [FETCH] Op 71
+Cycle 1858 | [CALC COMPLETE] Op 70 | pc19 r5 := IMC(r5, #1, ADD) : 5, 1 => 6
+Cycle 1861 | [LOAD COMPLETE] Op 62 | Loads completed: 1/2 | load mem[20] = 0
+Cycle 1862 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1882 | [LOAD COMPLETE] Op 62 | Loads completed: 2/2 | load mem[1344] = 1
+Cycle 1883 | [CALC START] Op 62 | Port 1 | Latency: 105
+Cycle 1883 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1903 | [LOAD COMPLETE] Op 63 | Loads completed: 1/2 | load mem[320] = -3
+Cycle 1904 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1924 | [LOAD COMPLETE] Op 63 | Loads completed: 2/2 | load mem[1044] = 4
+Cycle 1988 | [CALC START] Op 63 | Port 1 | Latency: 105
+Cycle 1988 | [CALC COMPLETE] Op 62 | pc11 r2 := IMC([r7], [r8], MUL) : 0, 1 => 0
+Cycle 2093 | [CALC START] Op 66 | Port 1 | Latency: 9
+Cycle 2093 | [CALC COMPLETE] Op 63 | pc12 r3 := IMC([r9], [r10], MUL) : -3, 4 => -12
+Cycle 2102 | [CALC START] Op 64 | Port 1 | Latency: 9
+Cycle 2102 | [CALC COMPLETE] Op 66 | pc15 r7 := IMC(r7, #4, ADD) : 20, 4 => 24
+Cycle 2111 | [CALC START] Op 67 | Port 1 | Latency: 9
+Cycle 2111 | [CALC COMPLETE] Op 64 | pc13 r4 := IMC(r2, r3, ADD) : 0, -12 => -12
+Cycle 2120 | [CALC START] Op 65 | Port 1 | Latency: 9
+Cycle 2120 | [CALC COMPLETE] Op 67 | pc16 r8 := IMC(r8, #64, ADD) : 1344, 64 => 1408
+Cycle 2129 | [CALC START] Op 68 | Port 1 | Latency: 9
+Cycle 2129 | [CALC COMPLETE] Op 65 | pc14 r1 := IMC(r1, r4, ADD) : 8, -12 => -4
+Cycle 2138 | [CALC START] Op 69 | Port 1 | Latency: 9
+Cycle 2138 | [CALC COMPLETE] Op 68 | pc17 r9 := IMC(r9, #64, ADD) : 320, 64 => 384
+Cycle 2147 | [CALC COMPLETE] Op 69 | pc18 r10 := IMC(r10, #4, ADD) : 1044, 4 => 1048
+Cycle 2148 | [CALC START] Op 71 | Port 1 | Latency: 13
+Cycle 2161 | [CALC COMPLETE] Op 71 | pc20 BRANCH(r5 != r6) -> pc11 : 6 != 16 => TAKEN
+Cycle 2162 | [FETCH] Op 72
+Cycle 2162 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2163 | [FETCH] Op 73
+Cycle 2164 | [FETCH] Op 74
+Cycle 2165 | [FETCH] Op 75
+Cycle 2166 | [FETCH] Op 76
+Cycle 2167 | [FETCH] Op 77
+Cycle 2168 | [FETCH] Op 78
+Cycle 2169 | [FETCH] Op 79
+Cycle 2170 | [FETCH] Op 80
+Cycle 2170 | [CALC START] Op 80 | Port 1 | Latency: 9
+Cycle 2171 | [FETCH] Op 81
+Cycle 2179 | [CALC COMPLETE] Op 80 | pc19 r5 := IMC(r5, #1, ADD) : 6, 1 => 7
+Cycle 2182 | [LOAD COMPLETE] Op 72 | Loads completed: 1/2 | load mem[24] = -4
+Cycle 2183 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2203 | [LOAD COMPLETE] Op 72 | Loads completed: 2/2 | load mem[1408] = 0
+Cycle 2204 | [CALC START] Op 72 | Port 1 | Latency: 105
+Cycle 2204 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2224 | [LOAD COMPLETE] Op 73 | Loads completed: 1/2 | load mem[384] = -1
+Cycle 2225 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2245 | [LOAD COMPLETE] Op 73 | Loads completed: 2/2 | load mem[1048] = 0
+Cycle 2309 | [CALC START] Op 73 | Port 1 | Latency: 105
+Cycle 2309 | [CALC COMPLETE] Op 72 | pc11 r2 := IMC([r7], [r8], MUL) : -4, 0 => 0
+Cycle 2414 | [CALC START] Op 76 | Port 1 | Latency: 9
+Cycle 2414 | [CALC COMPLETE] Op 73 | pc12 r3 := IMC([r9], [r10], MUL) : -1, 0 => 0
+Cycle 2423 | [CALC START] Op 74 | Port 1 | Latency: 9
+Cycle 2423 | [CALC COMPLETE] Op 76 | pc15 r7 := IMC(r7, #4, ADD) : 24, 4 => 28
+Cycle 2432 | [CALC START] Op 77 | Port 1 | Latency: 9
+Cycle 2432 | [CALC COMPLETE] Op 74 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 2441 | [CALC START] Op 75 | Port 1 | Latency: 9
+Cycle 2441 | [CALC COMPLETE] Op 77 | pc16 r8 := IMC(r8, #64, ADD) : 1408, 64 => 1472
+Cycle 2450 | [CALC START] Op 78 | Port 1 | Latency: 9
+Cycle 2450 | [CALC COMPLETE] Op 75 | pc14 r1 := IMC(r1, r4, ADD) : -4, 0 => -4
+Cycle 2459 | [CALC START] Op 79 | Port 1 | Latency: 9
+Cycle 2459 | [CALC COMPLETE] Op 78 | pc17 r9 := IMC(r9, #64, ADD) : 384, 64 => 448
+Cycle 2468 | [CALC COMPLETE] Op 79 | pc18 r10 := IMC(r10, #4, ADD) : 1048, 4 => 1052
+Cycle 2469 | [CALC START] Op 81 | Port 1 | Latency: 13
+Cycle 2482 | [CALC COMPLETE] Op 81 | pc20 BRANCH(r5 != r6) -> pc11 : 7 != 16 => TAKEN
+Cycle 2483 | [FETCH] Op 82
+Cycle 2483 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2484 | [FETCH] Op 83
+Cycle 2485 | [FETCH] Op 84
+Cycle 2486 | [FETCH] Op 85
+Cycle 2487 | [FETCH] Op 86
+Cycle 2488 | [FETCH] Op 87
+Cycle 2489 | [FETCH] Op 88
+Cycle 2490 | [FETCH] Op 89
+Cycle 2491 | [FETCH] Op 90
+Cycle 2491 | [CALC START] Op 90 | Port 1 | Latency: 9
+Cycle 2492 | [FETCH] Op 91
+Cycle 2500 | [CALC COMPLETE] Op 90 | pc19 r5 := IMC(r5, #1, ADD) : 7, 1 => 8
+Cycle 2503 | [LOAD COMPLETE] Op 82 | Loads completed: 1/2 | load mem[28] = 3
+Cycle 2504 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2524 | [LOAD COMPLETE] Op 82 | Loads completed: 2/2 | load mem[1472] = -1
+Cycle 2525 | [CALC START] Op 82 | Port 1 | Latency: 105
+Cycle 2525 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2545 | [LOAD COMPLETE] Op 83 | Loads completed: 1/2 | load mem[448] = 1
+Cycle 2546 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2566 | [LOAD COMPLETE] Op 83 | Loads completed: 2/2 | load mem[1052] = -4
+Cycle 2630 | [CALC START] Op 83 | Port 1 | Latency: 105
+Cycle 2630 | [CALC COMPLETE] Op 82 | pc11 r2 := IMC([r7], [r8], MUL) : 3, -1 => -3
+Cycle 2735 | [CALC START] Op 86 | Port 1 | Latency: 9
+Cycle 2735 | [CALC COMPLETE] Op 83 | pc12 r3 := IMC([r9], [r10], MUL) : 1, -4 => -4
+Cycle 2744 | [CALC START] Op 84 | Port 1 | Latency: 9
+Cycle 2744 | [CALC COMPLETE] Op 86 | pc15 r7 := IMC(r7, #4, ADD) : 28, 4 => 32
+Cycle 2753 | [CALC START] Op 87 | Port 1 | Latency: 9
+Cycle 2753 | [CALC COMPLETE] Op 84 | pc13 r4 := IMC(r2, r3, ADD) : -3, -4 => -7
+Cycle 2762 | [CALC START] Op 85 | Port 1 | Latency: 9
+Cycle 2762 | [CALC COMPLETE] Op 87 | pc16 r8 := IMC(r8, #64, ADD) : 1472, 64 => 1536
+Cycle 2771 | [CALC START] Op 88 | Port 1 | Latency: 9
+Cycle 2771 | [CALC COMPLETE] Op 85 | pc14 r1 := IMC(r1, r4, ADD) : -4, -7 => -11
+Cycle 2780 | [CALC START] Op 89 | Port 1 | Latency: 9
+Cycle 2780 | [CALC COMPLETE] Op 88 | pc17 r9 := IMC(r9, #64, ADD) : 448, 64 => 512
+Cycle 2789 | [CALC COMPLETE] Op 89 | pc18 r10 := IMC(r10, #4, ADD) : 1052, 4 => 1056
+Cycle 2790 | [CALC START] Op 91 | Port 1 | Latency: 13
+Cycle 2803 | [CALC COMPLETE] Op 91 | pc20 BRANCH(r5 != r6) -> pc11 : 8 != 16 => TAKEN
+Cycle 2804 | [FETCH] Op 92
+Cycle 2804 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2805 | [FETCH] Op 93
+Cycle 2806 | [FETCH] Op 94
+Cycle 2807 | [FETCH] Op 95
+Cycle 2808 | [FETCH] Op 96
+Cycle 2809 | [FETCH] Op 97
+Cycle 2810 | [FETCH] Op 98
+Cycle 2811 | [FETCH] Op 99
+Cycle 2812 | [FETCH] Op 100
+Cycle 2812 | [CALC START] Op 100 | Port 1 | Latency: 9
+Cycle 2813 | [FETCH] Op 101
+Cycle 2821 | [CALC COMPLETE] Op 100 | pc19 r5 := IMC(r5, #1, ADD) : 8, 1 => 9
+Cycle 2824 | [LOAD COMPLETE] Op 92 | Loads completed: 1/2 | load mem[32] = -1
+Cycle 2825 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2845 | [LOAD COMPLETE] Op 92 | Loads completed: 2/2 | load mem[1536] = -2
+Cycle 2846 | [CALC START] Op 92 | Port 1 | Latency: 105
+Cycle 2846 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2866 | [LOAD COMPLETE] Op 93 | Loads completed: 1/2 | load mem[512] = 3
+Cycle 2867 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2887 | [LOAD COMPLETE] Op 93 | Loads completed: 2/2 | load mem[1056] = 1
+Cycle 2951 | [CALC START] Op 93 | Port 1 | Latency: 105
+Cycle 2951 | [CALC COMPLETE] Op 92 | pc11 r2 := IMC([r7], [r8], MUL) : -1, -2 => 2
+Cycle 3056 | [CALC START] Op 96 | Port 1 | Latency: 9
+Cycle 3056 | [CALC COMPLETE] Op 93 | pc12 r3 := IMC([r9], [r10], MUL) : 3, 1 => 3
+Cycle 3065 | [CALC START] Op 94 | Port 1 | Latency: 9
+Cycle 3065 | [CALC COMPLETE] Op 96 | pc15 r7 := IMC(r7, #4, ADD) : 32, 4 => 36
+Cycle 3074 | [CALC START] Op 97 | Port 1 | Latency: 9
+Cycle 3074 | [CALC COMPLETE] Op 94 | pc13 r4 := IMC(r2, r3, ADD) : 2, 3 => 5
+Cycle 3083 | [CALC START] Op 95 | Port 1 | Latency: 9
+Cycle 3083 | [CALC COMPLETE] Op 97 | pc16 r8 := IMC(r8, #64, ADD) : 1536, 64 => 1600
+Cycle 3092 | [CALC START] Op 98 | Port 1 | Latency: 9
+Cycle 3092 | [CALC COMPLETE] Op 95 | pc14 r1 := IMC(r1, r4, ADD) : -11, 5 => -6
+Cycle 3101 | [CALC START] Op 99 | Port 1 | Latency: 9
+Cycle 3101 | [CALC COMPLETE] Op 98 | pc17 r9 := IMC(r9, #64, ADD) : 512, 64 => 576
+Cycle 3110 | [CALC COMPLETE] Op 99 | pc18 r10 := IMC(r10, #4, ADD) : 1056, 4 => 1060
+Cycle 3111 | [CALC START] Op 101 | Port 1 | Latency: 13
+Cycle 3124 | [CALC COMPLETE] Op 101 | pc20 BRANCH(r5 != r6) -> pc11 : 9 != 16 => TAKEN
+Cycle 3125 | [FETCH] Op 102
+Cycle 3125 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3126 | [FETCH] Op 103
+Cycle 3127 | [FETCH] Op 104
+Cycle 3128 | [FETCH] Op 105
+Cycle 3129 | [FETCH] Op 106
+Cycle 3130 | [FETCH] Op 107
+Cycle 3131 | [FETCH] Op 108
+Cycle 3132 | [FETCH] Op 109
+Cycle 3133 | [FETCH] Op 110
+Cycle 3133 | [CALC START] Op 110 | Port 1 | Latency: 9
+Cycle 3134 | [FETCH] Op 111
+Cycle 3142 | [CALC COMPLETE] Op 110 | pc19 r5 := IMC(r5, #1, ADD) : 9, 1 => 10
+Cycle 3145 | [LOAD COMPLETE] Op 102 | Loads completed: 1/2 | load mem[36] = -5
+Cycle 3146 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3166 | [LOAD COMPLETE] Op 102 | Loads completed: 2/2 | load mem[1600] = -3
+Cycle 3167 | [CALC START] Op 102 | Port 1 | Latency: 105
+Cycle 3167 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3187 | [LOAD COMPLETE] Op 103 | Loads completed: 1/2 | load mem[576] = 5
+Cycle 3188 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3208 | [LOAD COMPLETE] Op 103 | Loads completed: 2/2 | load mem[1060] = -3
+Cycle 3272 | [CALC START] Op 103 | Port 1 | Latency: 105
+Cycle 3272 | [CALC COMPLETE] Op 102 | pc11 r2 := IMC([r7], [r8], MUL) : -5, -3 => 15
+Cycle 3377 | [CALC START] Op 106 | Port 1 | Latency: 9
+Cycle 3377 | [CALC COMPLETE] Op 103 | pc12 r3 := IMC([r9], [r10], MUL) : 5, -3 => -15
+Cycle 3386 | [CALC START] Op 104 | Port 1 | Latency: 9
+Cycle 3386 | [CALC COMPLETE] Op 106 | pc15 r7 := IMC(r7, #4, ADD) : 36, 4 => 40
+Cycle 3395 | [CALC START] Op 107 | Port 1 | Latency: 9
+Cycle 3395 | [CALC COMPLETE] Op 104 | pc13 r4 := IMC(r2, r3, ADD) : 15, -15 => 0
+Cycle 3404 | [CALC START] Op 105 | Port 1 | Latency: 9
+Cycle 3404 | [CALC COMPLETE] Op 107 | pc16 r8 := IMC(r8, #64, ADD) : 1600, 64 => 1664
+Cycle 3413 | [CALC START] Op 108 | Port 1 | Latency: 9
+Cycle 3413 | [CALC COMPLETE] Op 105 | pc14 r1 := IMC(r1, r4, ADD) : -6, 0 => -6
+Cycle 3422 | [CALC START] Op 109 | Port 1 | Latency: 9
+Cycle 3422 | [CALC COMPLETE] Op 108 | pc17 r9 := IMC(r9, #64, ADD) : 576, 64 => 640
+Cycle 3431 | [CALC COMPLETE] Op 109 | pc18 r10 := IMC(r10, #4, ADD) : 1060, 4 => 1064
+Cycle 3432 | [CALC START] Op 111 | Port 1 | Latency: 13
+Cycle 3445 | [CALC COMPLETE] Op 111 | pc20 BRANCH(r5 != r6) -> pc11 : 10 != 16 => TAKEN
+Cycle 3446 | [FETCH] Op 112
+Cycle 3446 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3447 | [FETCH] Op 113
+Cycle 3448 | [FETCH] Op 114
+Cycle 3449 | [FETCH] Op 115
+Cycle 3450 | [FETCH] Op 116
+Cycle 3451 | [FETCH] Op 117
+Cycle 3452 | [FETCH] Op 118
+Cycle 3453 | [FETCH] Op 119
+Cycle 3454 | [FETCH] Op 120
+Cycle 3454 | [CALC START] Op 120 | Port 1 | Latency: 9
+Cycle 3455 | [FETCH] Op 121
+Cycle 3463 | [CALC COMPLETE] Op 120 | pc19 r5 := IMC(r5, #1, ADD) : 10, 1 => 11
+Cycle 3466 | [LOAD COMPLETE] Op 112 | Loads completed: 1/2 | load mem[40] = 2
+Cycle 3467 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3487 | [LOAD COMPLETE] Op 112 | Loads completed: 2/2 | load mem[1664] = -4
+Cycle 3488 | [CALC START] Op 112 | Port 1 | Latency: 105
+Cycle 3488 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3508 | [LOAD COMPLETE] Op 113 | Loads completed: 1/2 | load mem[640] = -4
+Cycle 3509 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3529 | [LOAD COMPLETE] Op 113 | Loads completed: 2/2 | load mem[1064] = 2
+Cycle 3593 | [CALC START] Op 113 | Port 1 | Latency: 105
+Cycle 3593 | [CALC COMPLETE] Op 112 | pc11 r2 := IMC([r7], [r8], MUL) : 2, -4 => -8
+Cycle 3698 | [CALC START] Op 116 | Port 1 | Latency: 9
+Cycle 3698 | [CALC COMPLETE] Op 113 | pc12 r3 := IMC([r9], [r10], MUL) : -4, 2 => -8
+Cycle 3707 | [CALC START] Op 114 | Port 1 | Latency: 9
+Cycle 3707 | [CALC COMPLETE] Op 116 | pc15 r7 := IMC(r7, #4, ADD) : 40, 4 => 44
+Cycle 3716 | [CALC START] Op 117 | Port 1 | Latency: 9
+Cycle 3716 | [CALC COMPLETE] Op 114 | pc13 r4 := IMC(r2, r3, ADD) : -8, -8 => -16
+Cycle 3725 | [CALC START] Op 115 | Port 1 | Latency: 9
+Cycle 3725 | [CALC COMPLETE] Op 117 | pc16 r8 := IMC(r8, #64, ADD) : 1664, 64 => 1728
+Cycle 3734 | [CALC START] Op 118 | Port 1 | Latency: 9
+Cycle 3734 | [CALC COMPLETE] Op 115 | pc14 r1 := IMC(r1, r4, ADD) : -6, -16 => -22
+Cycle 3743 | [CALC START] Op 119 | Port 1 | Latency: 9
+Cycle 3743 | [CALC COMPLETE] Op 118 | pc17 r9 := IMC(r9, #64, ADD) : 640, 64 => 704
+Cycle 3752 | [CALC COMPLETE] Op 119 | pc18 r10 := IMC(r10, #4, ADD) : 1064, 4 => 1068
+Cycle 3753 | [CALC START] Op 121 | Port 1 | Latency: 13
+Cycle 3766 | [CALC COMPLETE] Op 121 | pc20 BRANCH(r5 != r6) -> pc11 : 11 != 16 => TAKEN
+Cycle 3767 | [FETCH] Op 122
+Cycle 3767 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3768 | [FETCH] Op 123
+Cycle 3769 | [FETCH] Op 124
+Cycle 3770 | [FETCH] Op 125
+Cycle 3771 | [FETCH] Op 126
+Cycle 3772 | [FETCH] Op 127
+Cycle 3773 | [FETCH] Op 128
+Cycle 3774 | [FETCH] Op 129
+Cycle 3775 | [FETCH] Op 130
+Cycle 3775 | [CALC START] Op 130 | Port 1 | Latency: 9
+Cycle 3776 | [FETCH] Op 131
+Cycle 3784 | [CALC COMPLETE] Op 130 | pc19 r5 := IMC(r5, #1, ADD) : 11, 1 => 12
+Cycle 3787 | [LOAD COMPLETE] Op 122 | Loads completed: 1/2 | load mem[44] = -2
+Cycle 3788 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3808 | [LOAD COMPLETE] Op 122 | Loads completed: 2/2 | load mem[1728] = 4
+Cycle 3809 | [CALC START] Op 122 | Port 1 | Latency: 105
+Cycle 3809 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3829 | [LOAD COMPLETE] Op 123 | Loads completed: 1/2 | load mem[704] = -2
+Cycle 3830 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3850 | [LOAD COMPLETE] Op 123 | Loads completed: 2/2 | load mem[1068] = -2
+Cycle 3914 | [CALC START] Op 123 | Port 1 | Latency: 105
+Cycle 3914 | [CALC COMPLETE] Op 122 | pc11 r2 := IMC([r7], [r8], MUL) : -2, 4 => -8
+Cycle 4019 | [CALC START] Op 126 | Port 1 | Latency: 9
+Cycle 4019 | [CALC COMPLETE] Op 123 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -2 => 4
+Cycle 4028 | [CALC START] Op 124 | Port 1 | Latency: 9
+Cycle 4028 | [CALC COMPLETE] Op 126 | pc15 r7 := IMC(r7, #4, ADD) : 44, 4 => 48
+Cycle 4037 | [CALC START] Op 127 | Port 1 | Latency: 9
+Cycle 4037 | [CALC COMPLETE] Op 124 | pc13 r4 := IMC(r2, r3, ADD) : -8, 4 => -4
+Cycle 4046 | [CALC START] Op 125 | Port 1 | Latency: 9
+Cycle 4046 | [CALC COMPLETE] Op 127 | pc16 r8 := IMC(r8, #64, ADD) : 1728, 64 => 1792
+Cycle 4055 | [CALC START] Op 128 | Port 1 | Latency: 9
+Cycle 4055 | [CALC COMPLETE] Op 125 | pc14 r1 := IMC(r1, r4, ADD) : -22, -4 => -26
+Cycle 4064 | [CALC START] Op 129 | Port 1 | Latency: 9
+Cycle 4064 | [CALC COMPLETE] Op 128 | pc17 r9 := IMC(r9, #64, ADD) : 704, 64 => 768
+Cycle 4073 | [CALC COMPLETE] Op 129 | pc18 r10 := IMC(r10, #4, ADD) : 1068, 4 => 1072
+Cycle 4074 | [CALC START] Op 131 | Port 1 | Latency: 13
+Cycle 4087 | [CALC COMPLETE] Op 131 | pc20 BRANCH(r5 != r6) -> pc11 : 12 != 16 => TAKEN
+Cycle 4088 | [FETCH] Op 132
+Cycle 4088 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4089 | [FETCH] Op 133
+Cycle 4090 | [FETCH] Op 134
+Cycle 4091 | [FETCH] Op 135
+Cycle 4092 | [FETCH] Op 136
+Cycle 4093 | [FETCH] Op 137
+Cycle 4094 | [FETCH] Op 138
+Cycle 4095 | [FETCH] Op 139
+Cycle 4096 | [FETCH] Op 140
+Cycle 4096 | [CALC START] Op 140 | Port 1 | Latency: 9
+Cycle 4097 | [FETCH] Op 141
+Cycle 4105 | [CALC COMPLETE] Op 140 | pc19 r5 := IMC(r5, #1, ADD) : 12, 1 => 13
+Cycle 4108 | [LOAD COMPLETE] Op 132 | Loads completed: 1/2 | load mem[48] = 5
+Cycle 4109 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4129 | [LOAD COMPLETE] Op 132 | Loads completed: 2/2 | load mem[1792] = 3
+Cycle 4130 | [CALC START] Op 132 | Port 1 | Latency: 105
+Cycle 4130 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4150 | [LOAD COMPLETE] Op 133 | Loads completed: 1/2 | load mem[768] = 0
+Cycle 4151 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4171 | [LOAD COMPLETE] Op 133 | Loads completed: 2/2 | load mem[1072] = 3
+Cycle 4235 | [CALC START] Op 133 | Port 1 | Latency: 105
+Cycle 4235 | [CALC COMPLETE] Op 132 | pc11 r2 := IMC([r7], [r8], MUL) : 5, 3 => 15
+Cycle 4340 | [CALC START] Op 136 | Port 1 | Latency: 9
+Cycle 4340 | [CALC COMPLETE] Op 133 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 3 => 0
+Cycle 4349 | [CALC START] Op 134 | Port 1 | Latency: 9
+Cycle 4349 | [CALC COMPLETE] Op 136 | pc15 r7 := IMC(r7, #4, ADD) : 48, 4 => 52
+Cycle 4358 | [CALC START] Op 137 | Port 1 | Latency: 9
+Cycle 4358 | [CALC COMPLETE] Op 134 | pc13 r4 := IMC(r2, r3, ADD) : 15, 0 => 15
+Cycle 4367 | [CALC START] Op 135 | Port 1 | Latency: 9
+Cycle 4367 | [CALC COMPLETE] Op 137 | pc16 r8 := IMC(r8, #64, ADD) : 1792, 64 => 1856
+Cycle 4376 | [CALC START] Op 138 | Port 1 | Latency: 9
+Cycle 4376 | [CALC COMPLETE] Op 135 | pc14 r1 := IMC(r1, r4, ADD) : -26, 15 => -11
+Cycle 4385 | [CALC START] Op 139 | Port 1 | Latency: 9
+Cycle 4385 | [CALC COMPLETE] Op 138 | pc17 r9 := IMC(r9, #64, ADD) : 768, 64 => 832
+Cycle 4394 | [CALC COMPLETE] Op 139 | pc18 r10 := IMC(r10, #4, ADD) : 1072, 4 => 1076
+Cycle 4395 | [CALC START] Op 141 | Port 1 | Latency: 13
+Cycle 4408 | [CALC COMPLETE] Op 141 | pc20 BRANCH(r5 != r6) -> pc11 : 13 != 16 => TAKEN
+Cycle 4409 | [FETCH] Op 142
+Cycle 4409 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4410 | [FETCH] Op 143
+Cycle 4411 | [FETCH] Op 144
+Cycle 4412 | [FETCH] Op 145
+Cycle 4413 | [FETCH] Op 146
+Cycle 4414 | [FETCH] Op 147
+Cycle 4415 | [FETCH] Op 148
+Cycle 4416 | [FETCH] Op 149
+Cycle 4417 | [FETCH] Op 150
+Cycle 4417 | [CALC START] Op 150 | Port 1 | Latency: 9
+Cycle 4418 | [FETCH] Op 151
+Cycle 4426 | [CALC COMPLETE] Op 150 | pc19 r5 := IMC(r5, #1, ADD) : 13, 1 => 14
+Cycle 4429 | [LOAD COMPLETE] Op 142 | Loads completed: 1/2 | load mem[52] = 1
+Cycle 4430 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4450 | [LOAD COMPLETE] Op 142 | Loads completed: 2/2 | load mem[1856] = 2
+Cycle 4451 | [CALC START] Op 142 | Port 1 | Latency: 105
+Cycle 4451 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4471 | [LOAD COMPLETE] Op 143 | Loads completed: 1/2 | load mem[832] = 2
+Cycle 4472 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4492 | [LOAD COMPLETE] Op 143 | Loads completed: 2/2 | load mem[1076] = -1
+Cycle 4556 | [CALC START] Op 143 | Port 1 | Latency: 105
+Cycle 4556 | [CALC COMPLETE] Op 142 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 2 => 2
+Cycle 4661 | [CALC START] Op 146 | Port 1 | Latency: 9
+Cycle 4661 | [CALC COMPLETE] Op 143 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -1 => -2
+Cycle 4670 | [CALC START] Op 144 | Port 1 | Latency: 9
+Cycle 4670 | [CALC COMPLETE] Op 146 | pc15 r7 := IMC(r7, #4, ADD) : 52, 4 => 56
+Cycle 4679 | [CALC START] Op 147 | Port 1 | Latency: 9
+Cycle 4679 | [CALC COMPLETE] Op 144 | pc13 r4 := IMC(r2, r3, ADD) : 2, -2 => 0
+Cycle 4688 | [CALC START] Op 145 | Port 1 | Latency: 9
+Cycle 4688 | [CALC COMPLETE] Op 147 | pc16 r8 := IMC(r8, #64, ADD) : 1856, 64 => 1920
+Cycle 4697 | [CALC START] Op 148 | Port 1 | Latency: 9
+Cycle 4697 | [CALC COMPLETE] Op 145 | pc14 r1 := IMC(r1, r4, ADD) : -11, 0 => -11
+Cycle 4706 | [CALC START] Op 149 | Port 1 | Latency: 9
+Cycle 4706 | [CALC COMPLETE] Op 148 | pc17 r9 := IMC(r9, #64, ADD) : 832, 64 => 896
+Cycle 4715 | [CALC COMPLETE] Op 149 | pc18 r10 := IMC(r10, #4, ADD) : 1076, 4 => 1080
+Cycle 4716 | [CALC START] Op 151 | Port 1 | Latency: 13
+Cycle 4729 | [CALC COMPLETE] Op 151 | pc20 BRANCH(r5 != r6) -> pc11 : 14 != 16 => TAKEN
+Cycle 4730 | [FETCH] Op 152
+Cycle 4730 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4731 | [FETCH] Op 153
+Cycle 4732 | [FETCH] Op 154
+Cycle 4733 | [FETCH] Op 155
+Cycle 4734 | [FETCH] Op 156
+Cycle 4735 | [FETCH] Op 157
+Cycle 4736 | [FETCH] Op 158
+Cycle 4737 | [FETCH] Op 159
+Cycle 4738 | [FETCH] Op 160
+Cycle 4738 | [CALC START] Op 160 | Port 1 | Latency: 9
+Cycle 4739 | [FETCH] Op 161
+Cycle 4747 | [CALC COMPLETE] Op 160 | pc19 r5 := IMC(r5, #1, ADD) : 14, 1 => 15
+Cycle 4750 | [LOAD COMPLETE] Op 152 | Loads completed: 1/2 | load mem[56] = -3
+Cycle 4751 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4771 | [LOAD COMPLETE] Op 152 | Loads completed: 2/2 | load mem[1920] = 1
+Cycle 4772 | [CALC START] Op 152 | Port 1 | Latency: 105
+Cycle 4772 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4792 | [LOAD COMPLETE] Op 153 | Loads completed: 1/2 | load mem[896] = 4
+Cycle 4793 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4813 | [LOAD COMPLETE] Op 153 | Loads completed: 2/2 | load mem[1080] = 4
+Cycle 4877 | [CALC START] Op 153 | Port 1 | Latency: 105
+Cycle 4877 | [CALC COMPLETE] Op 152 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 1 => -3
+Cycle 4982 | [CALC START] Op 156 | Port 1 | Latency: 9
+Cycle 4982 | [CALC COMPLETE] Op 153 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 4 => 16
+Cycle 4991 | [CALC START] Op 154 | Port 1 | Latency: 9
+Cycle 4991 | [CALC COMPLETE] Op 156 | pc15 r7 := IMC(r7, #4, ADD) : 56, 4 => 60
+Cycle 5000 | [CALC START] Op 157 | Port 1 | Latency: 9
+Cycle 5000 | [CALC COMPLETE] Op 154 | pc13 r4 := IMC(r2, r3, ADD) : -3, 16 => 13
+Cycle 5009 | [CALC START] Op 155 | Port 1 | Latency: 9
+Cycle 5009 | [CALC COMPLETE] Op 157 | pc16 r8 := IMC(r8, #64, ADD) : 1920, 64 => 1984
+Cycle 5018 | [CALC START] Op 158 | Port 1 | Latency: 9
+Cycle 5018 | [CALC COMPLETE] Op 155 | pc14 r1 := IMC(r1, r4, ADD) : -11, 13 => 2
+Cycle 5027 | [CALC START] Op 159 | Port 1 | Latency: 9
+Cycle 5027 | [CALC COMPLETE] Op 158 | pc17 r9 := IMC(r9, #64, ADD) : 896, 64 => 960
+Cycle 5036 | [CALC COMPLETE] Op 159 | pc18 r10 := IMC(r10, #4, ADD) : 1080, 4 => 1084
+Cycle 5037 | [CALC START] Op 161 | Port 1 | Latency: 13
+Cycle 5050 | [CALC COMPLETE] Op 161 | pc20 BRANCH(r5 != r6) -> pc11 : 15 != 16 => TAKEN
+Cycle 5051 | [FETCH] Op 162
+Cycle 5051 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5052 | [FETCH] Op 163
+Cycle 5053 | [FETCH] Op 164
+Cycle 5054 | [FETCH] Op 165
+Cycle 5055 | [FETCH] Op 166
+Cycle 5056 | [FETCH] Op 167
+Cycle 5057 | [FETCH] Op 168
+Cycle 5058 | [FETCH] Op 169
+Cycle 5059 | [FETCH] Op 170
+Cycle 5059 | [CALC START] Op 170 | Port 1 | Latency: 9
+Cycle 5060 | [FETCH] Op 171
+Cycle 5068 | [CALC COMPLETE] Op 170 | pc19 r5 := IMC(r5, #1, ADD) : 15, 1 => 16
+Cycle 5071 | [LOAD COMPLETE] Op 162 | Loads completed: 1/2 | load mem[60] = 4
+Cycle 5072 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5092 | [LOAD COMPLETE] Op 162 | Loads completed: 2/2 | load mem[1984] = 0
+Cycle 5093 | [CALC START] Op 162 | Port 1 | Latency: 105
+Cycle 5093 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5113 | [LOAD COMPLETE] Op 163 | Loads completed: 1/2 | load mem[960] = -5
+Cycle 5114 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5134 | [LOAD COMPLETE] Op 163 | Loads completed: 2/2 | load mem[1084] = 0
+Cycle 5198 | [CALC START] Op 163 | Port 1 | Latency: 105
+Cycle 5198 | [CALC COMPLETE] Op 162 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 0 => 0
+Cycle 5303 | [CALC START] Op 166 | Port 1 | Latency: 9
+Cycle 5303 | [CALC COMPLETE] Op 163 | pc12 r3 := IMC([r9], [r10], MUL) : -5, 0 => 0
+Cycle 5312 | [CALC START] Op 164 | Port 1 | Latency: 9
+Cycle 5312 | [CALC COMPLETE] Op 166 | pc15 r7 := IMC(r7, #4, ADD) : 60, 4 => 64
+Cycle 5321 | [CALC START] Op 167 | Port 1 | Latency: 9
+Cycle 5321 | [CALC COMPLETE] Op 164 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 5330 | [CALC START] Op 165 | Port 1 | Latency: 9
+Cycle 5330 | [CALC COMPLETE] Op 167 | pc16 r8 := IMC(r8, #64, ADD) : 1984, 64 => 2048
+Cycle 5339 | [CALC START] Op 168 | Port 1 | Latency: 9
+Cycle 5339 | [CALC COMPLETE] Op 165 | pc14 r1 := IMC(r1, r4, ADD) : 2, 0 => 2
+Cycle 5348 | [CALC START] Op 169 | Port 1 | Latency: 9
+Cycle 5348 | [CALC COMPLETE] Op 168 | pc17 r9 := IMC(r9, #64, ADD) : 960, 64 => 1024
+Cycle 5357 | [CALC COMPLETE] Op 169 | pc18 r10 := IMC(r10, #4, ADD) : 1084, 4 => 1088
+Cycle 5358 | [CALC START] Op 171 | Port 1 | Latency: 13
+Cycle 5371 | [CALC COMPLETE] Op 171 | pc20 BRANCH(r5 != r6) -> pc11 : 16 != 16 => not taken
+Cycle 5372 | [FETCH] Op 172
+Cycle 5372 | [CALC START] Op 172 | Port 1 | Latency: 9
+Cycle 5381 | [CALC COMPLETE] Op 172 | pc21 [r11] := IMC(r1, #0, ADD) : 2, 0 => 2
+Cycle 5382 | [STORE START] Op 172 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5402 | [STORE COMPLETE] Op 172 | store mem[2048] = 2
+
+====================================
+SIMULATION COMPLETED
+Total Cycles: 5402
+====================================
+
+---------------- FINAL RESULT (Design 2: Pipelined) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  C (n x n)  [16 x 16]
+          2     -12     -30     -36     -12     -46     -32      97      31      48     -10      16     -34     -43     -22     -52
+          7      12     -50     -19     -46     -25       8      -6      46      30      90     -27     -40     -12     -35     -35
+         96      -4     -36       7       3     -45     -18      -2     -55      69      24      36      35     -24     -17     -12
+         26      63       6       6     -30      -4     -38     -47      37     -51      41      28      83     -19     -37      17
+         17      -7     109     -33      -2      -1       3     -31      -8     -11     -79      81      -6      47       4       8
+        -74      39      31      44      43      19     -38       2     -36     -53      16     -47      21      31      62      16
+          4      -7      -4       2     104      -8       9     -39      -3       2     -53      -6     -44      58       1      40
+        -36      -9     -31      31       2      63      19      45     -79      11      -6     -83      34      -6      11       0
+        -15     -49       3      22     -39      -3      90      -8       5     -18       3       0     -25      -9     -17      21
+         12     -28     -45     -14     -52      14       2      33      40      58     -26       1     -12     -83      38     -18
+        -27     -48     -10     -41     -31      -9      -2     -15     110      -4      30      13     -62       3     -19     -45
+         40      13     -18     -37      -4     -51     -50      66     -13      13      41      54      -9     -31     -23     -44
+         36      91     -20     -38       7     -21     -37      -1       2     -41      69       2      39      18     -54      18
+         71      21      39      33       2       4     -18     -51     -54      43     -51      11      60      51       9     -13
+        -53      34      27      77      14      -9       7     -51     -16     -32      11     -51      54       2      34      61
+         -8     -45      58       2      42      30      21     -26     -16     -10     -91      56     -44      -4      39      52
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 5402
+
+################ Design 3: Pipelined + Renaming ################
+Cycle 1 | [FETCH] Op 1
+Cycle 1 | [CALC START] Op 1 | Port 1 | Latency: 9
+Cycle 2 | [FETCH] Op 2
+Cycle 3 | [FETCH] Op 3
+Cycle 4 | [FETCH] Op 4
+Cycle 5 | [FETCH] Op 5
+Cycle 6 | [FETCH] Op 6
+Cycle 7 | [FETCH] Op 7
+Cycle 8 | [FETCH] Op 8
+Cycle 9 | [FETCH] Op 9
+Cycle 10 | [FETCH] Op 10
+Cycle 10 | [CALC START] Op 2 | Port 1 | Latency: 9
+Cycle 10 | [CALC COMPLETE] Op 1 | pc0 r6 := IMC(r0, #16, ADD) : 0, 16 => 16
+Cycle 10 | [COMMIT] Op 1 retired.
+Cycle 11 | [FETCH] Op 11
+Cycle 12 | [FETCH] Op 12
+Cycle 13 | [FETCH] Op 13
+Cycle 14 | [FETCH] Op 14
+Cycle 15 | [FETCH] Op 15
+Cycle 16 | [FETCH] Op 16
+Cycle 17 | [FETCH] Op 17
+Cycle 19 | [CALC START] Op 3 | Port 1 | Latency: 9
+Cycle 19 | [CALC COMPLETE] Op 2 | pc1 r5 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 19 | [COMMIT] Op 2 retired.
+Cycle 20 | [FETCH] Op 18
+Cycle 28 | [CALC START] Op 4 | Port 1 | Latency: 105
+Cycle 28 | [CALC COMPLETE] Op 3 | pc2 r1 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 28 | [COMMIT] Op 3 retired.
+Cycle 29 | [FETCH] Op 19
+Cycle 133 | [CALC START] Op 5 | Port 1 | Latency: 82
+Cycle 133 | [CALC COMPLETE] Op 4 | pc3 r14 := IMC(r30, #64, MUL) : 0, 64 => 0
+Cycle 133 | [COMMIT] Op 4 retired.
+Cycle 134 | [FETCH] Op 20
+Cycle 215 | [CALC START] Op 6 | Port 1 | Latency: 9
+Cycle 215 | [CALC COMPLETE] Op 5 | pc4 r15 := IMC(r31, #2, SLL) : 0, 2 => 0
+Cycle 215 | [COMMIT] Op 5 retired.
+Cycle 216 | [FETCH] Op 21
+Cycle 224 | [CALC START] Op 7 | Port 1 | Latency: 9
+Cycle 224 | [CALC COMPLETE] Op 6 | pc5 r7 := IMC(r14, #0, ADD) : 0, 0 => 0
+Cycle 224 | [COMMIT] Op 6 retired.
+Cycle 225 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 233 | [CALC START] Op 8 | Port 1 | Latency: 9
+Cycle 233 | [CALC COMPLETE] Op 7 | pc6 r8 := IMC(r15, #1024, ADD) : 0, 1024 => 1024
+Cycle 233 | [COMMIT] Op 7 retired.
+Cycle 242 | [CALC START] Op 9 | Port 1 | Latency: 9
+Cycle 242 | [CALC COMPLETE] Op 8 | pc7 r9 := IMC(r15, #0, ADD) : 0, 0 => 0
+Cycle 242 | [COMMIT] Op 8 retired.
+Cycle 245 | [LOAD COMPLETE] Op 12 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 246 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 251 | [CALC START] Op 10 | Port 1 | Latency: 9
+Cycle 251 | [CALC COMPLETE] Op 9 | pc8 r10 := IMC(r14, #1024, ADD) : 0, 1024 => 1024
+Cycle 251 | [COMMIT] Op 9 retired.
+Cycle 260 | [CALC START] Op 16 | Port 1 | Latency: 9
+Cycle 260 | [CALC COMPLETE] Op 10 | pc9 r11 := IMC(r14, r15, ADD) : 0, 0 => 0
+Cycle 260 | [COMMIT] Op 10 retired.
+Cycle 266 | [LOAD COMPLETE] Op 12 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 267 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 269 | [CALC START] Op 11 | Port 1 | Latency: 9
+Cycle 269 | [CALC COMPLETE] Op 16 | pc15 r7 := IMC(r7, #4, ADD) : 0, 4 => 4
+Cycle 278 | [CALC START] Op 12 | Port 1 | Latency: 105
+Cycle 278 | [CALC COMPLETE] Op 11 | pc10 r11 := IMC(r11, #2048, ADD) : 0, 2048 => 2048
+Cycle 287 | [LOAD COMPLETE] Op 13 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 288 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 308 | [LOAD COMPLETE] Op 13 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 383 | [CALC START] Op 13 | Port 1 | Latency: 105
+Cycle 383 | [CALC COMPLETE] Op 12 | pc11 r2 := IMC([r7], [r8], MUL) : -2, -3 => 6
+Cycle 488 | [CALC START] Op 17 | Port 1 | Latency: 9
+Cycle 488 | [CALC COMPLETE] Op 13 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -3 => 6
+Cycle 497 | [CALC START] Op 14 | Port 1 | Latency: 9
+Cycle 497 | [CALC COMPLETE] Op 17 | pc16 r8 := IMC(r8, #64, ADD) : 1024, 64 => 1088
+Cycle 506 | [CALC START] Op 18 | Port 1 | Latency: 9
+Cycle 506 | [CALC COMPLETE] Op 14 | pc13 r4 := IMC(r2, r3, ADD) : 6, 6 => 12
+Cycle 515 | [CALC START] Op 15 | Port 1 | Latency: 9
+Cycle 515 | [CALC COMPLETE] Op 18 | pc17 r9 := IMC(r9, #64, ADD) : 0, 64 => 64
+Cycle 524 | [CALC START] Op 19 | Port 1 | Latency: 9
+Cycle 524 | [CALC COMPLETE] Op 15 | pc14 r1 := IMC(r1, r4, ADD) : 0, 12 => 12
+Cycle 533 | [CALC START] Op 20 | Port 1 | Latency: 9
+Cycle 533 | [CALC COMPLETE] Op 19 | pc18 r10 := IMC(r10, #4, ADD) : 1024, 4 => 1028
+Cycle 542 | [CALC COMPLETE] Op 20 | pc19 r5 := IMC(r5, #1, ADD) : 0, 1 => 1
+Cycle 543 | [CALC START] Op 21 | Port 1 | Latency: 13
+Cycle 556 | [CALC COMPLETE] Op 21 | pc20 BRANCH(r5 != r6) -> pc11 : 1 != 16 => TAKEN
+Cycle 557 | [FETCH] Op 22
+Cycle 557 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 558 | [FETCH] Op 23
+Cycle 559 | [FETCH] Op 24
+Cycle 560 | [FETCH] Op 25
+Cycle 561 | [FETCH] Op 26
+Cycle 561 | [CALC START] Op 26 | Port 1 | Latency: 9
+Cycle 562 | [FETCH] Op 27
+Cycle 563 | [FETCH] Op 28
+Cycle 564 | [FETCH] Op 29
+Cycle 565 | [FETCH] Op 30
+Cycle 566 | [FETCH] Op 31
+Cycle 570 | [CALC START] Op 27 | Port 1 | Latency: 9
+Cycle 570 | [CALC COMPLETE] Op 26 | pc15 r7 := IMC(r7, #4, ADD) : 4, 4 => 8
+Cycle 577 | [LOAD COMPLETE] Op 22 | Loads completed: 1/2 | load mem[4] = 5
+Cycle 578 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 579 | [CALC START] Op 28 | Port 1 | Latency: 9
+Cycle 579 | [CALC COMPLETE] Op 27 | pc16 r8 := IMC(r8, #64, ADD) : 1088, 64 => 1152
+Cycle 588 | [CALC START] Op 29 | Port 1 | Latency: 9
+Cycle 588 | [CALC COMPLETE] Op 28 | pc17 r9 := IMC(r9, #64, ADD) : 64, 64 => 128
+Cycle 597 | [CALC START] Op 30 | Port 1 | Latency: 9
+Cycle 597 | [CALC COMPLETE] Op 29 | pc18 r10 := IMC(r10, #4, ADD) : 1028, 4 => 1032
+Cycle 598 | [LOAD COMPLETE] Op 22 | Loads completed: 2/2 | load mem[1088] = -4
+Cycle 599 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 606 | [CALC START] Op 22 | Port 1 | Latency: 105
+Cycle 606 | [CALC COMPLETE] Op 30 | pc19 r5 := IMC(r5, #1, ADD) : 1, 1 => 2
+Cycle 619 | [LOAD COMPLETE] Op 23 | Loads completed: 1/2 | load mem[64] = 0
+Cycle 620 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 640 | [LOAD COMPLETE] Op 23 | Loads completed: 2/2 | load mem[1028] = 2
+Cycle 711 | [CALC START] Op 23 | Port 1 | Latency: 105
+Cycle 711 | [CALC COMPLETE] Op 22 | pc11 r2 := IMC([r7], [r8], MUL) : 5, -4 => -20
+Cycle 816 | [CALC START] Op 31 | Port 1 | Latency: 13
+Cycle 816 | [CALC COMPLETE] Op 23 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 2 => 0
+Cycle 829 | [CALC START] Op 24 | Port 1 | Latency: 9
+Cycle 829 | [CALC COMPLETE] Op 31 | pc20 BRANCH(r5 != r6) -> pc11 : 2 != 16 => TAKEN
+Cycle 838 | [CALC COMPLETE] Op 24 | pc13 r4 := IMC(r2, r3, ADD) : -20, 0 => -20
+Cycle 839 | [CALC START] Op 25 | Port 1 | Latency: 9
+Cycle 848 | [CALC COMPLETE] Op 25 | pc14 r1 := IMC(r1, r4, ADD) : 12, -20 => -8
+Cycle 849 | [FETCH] Op 32
+Cycle 849 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 850 | [FETCH] Op 33
+Cycle 851 | [FETCH] Op 34
+Cycle 852 | [FETCH] Op 35
+Cycle 853 | [FETCH] Op 36
+Cycle 853 | [CALC START] Op 36 | Port 1 | Latency: 9
+Cycle 854 | [FETCH] Op 37
+Cycle 855 | [FETCH] Op 38
+Cycle 856 | [FETCH] Op 39
+Cycle 857 | [FETCH] Op 40
+Cycle 858 | [FETCH] Op 41
+Cycle 862 | [CALC START] Op 37 | Port 1 | Latency: 9
+Cycle 862 | [CALC COMPLETE] Op 36 | pc15 r7 := IMC(r7, #4, ADD) : 8, 4 => 12
+Cycle 869 | [LOAD COMPLETE] Op 32 | Loads completed: 1/2 | load mem[8] = 1
+Cycle 870 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 871 | [CALC START] Op 38 | Port 1 | Latency: 9
+Cycle 871 | [CALC COMPLETE] Op 37 | pc16 r8 := IMC(r8, #64, ADD) : 1152, 64 => 1216
+Cycle 880 | [CALC START] Op 39 | Port 1 | Latency: 9
+Cycle 880 | [CALC COMPLETE] Op 38 | pc17 r9 := IMC(r9, #64, ADD) : 128, 64 => 192
+Cycle 889 | [CALC START] Op 40 | Port 1 | Latency: 9
+Cycle 889 | [CALC COMPLETE] Op 39 | pc18 r10 := IMC(r10, #4, ADD) : 1032, 4 => 1036
+Cycle 890 | [LOAD COMPLETE] Op 32 | Loads completed: 2/2 | load mem[1152] = 4
+Cycle 891 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 898 | [CALC START] Op 32 | Port 1 | Latency: 105
+Cycle 898 | [CALC COMPLETE] Op 40 | pc19 r5 := IMC(r5, #1, ADD) : 2, 1 => 3
+Cycle 911 | [LOAD COMPLETE] Op 33 | Loads completed: 1/2 | load mem[128] = 2
+Cycle 912 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 932 | [LOAD COMPLETE] Op 33 | Loads completed: 2/2 | load mem[1032] = -2
+Cycle 1003 | [CALC START] Op 33 | Port 1 | Latency: 105
+Cycle 1003 | [CALC COMPLETE] Op 32 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 4 => 4
+Cycle 1108 | [CALC START] Op 41 | Port 1 | Latency: 13
+Cycle 1108 | [CALC COMPLETE] Op 33 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -2 => -4
+Cycle 1121 | [CALC START] Op 34 | Port 1 | Latency: 9
+Cycle 1121 | [CALC COMPLETE] Op 41 | pc20 BRANCH(r5 != r6) -> pc11 : 3 != 16 => TAKEN
+Cycle 1130 | [CALC COMPLETE] Op 34 | pc13 r4 := IMC(r2, r3, ADD) : 4, -4 => 0
+Cycle 1131 | [CALC START] Op 35 | Port 1 | Latency: 9
+Cycle 1140 | [CALC COMPLETE] Op 35 | pc14 r1 := IMC(r1, r4, ADD) : -8, 0 => -8
+Cycle 1141 | [FETCH] Op 42
+Cycle 1141 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1142 | [FETCH] Op 43
+Cycle 1143 | [FETCH] Op 44
+Cycle 1144 | [FETCH] Op 45
+Cycle 1145 | [FETCH] Op 46
+Cycle 1145 | [CALC START] Op 46 | Port 1 | Latency: 9
+Cycle 1146 | [FETCH] Op 47
+Cycle 1147 | [FETCH] Op 48
+Cycle 1148 | [FETCH] Op 49
+Cycle 1149 | [FETCH] Op 50
+Cycle 1150 | [FETCH] Op 51
+Cycle 1154 | [CALC START] Op 47 | Port 1 | Latency: 9
+Cycle 1154 | [CALC COMPLETE] Op 46 | pc15 r7 := IMC(r7, #4, ADD) : 12, 4 => 16
+Cycle 1161 | [LOAD COMPLETE] Op 42 | Loads completed: 1/2 | load mem[12] = -3
+Cycle 1162 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1163 | [CALC START] Op 48 | Port 1 | Latency: 9
+Cycle 1163 | [CALC COMPLETE] Op 47 | pc16 r8 := IMC(r8, #64, ADD) : 1216, 64 => 1280
+Cycle 1172 | [CALC START] Op 49 | Port 1 | Latency: 9
+Cycle 1172 | [CALC COMPLETE] Op 48 | pc17 r9 := IMC(r9, #64, ADD) : 192, 64 => 256
+Cycle 1181 | [CALC START] Op 50 | Port 1 | Latency: 9
+Cycle 1181 | [CALC COMPLETE] Op 49 | pc18 r10 := IMC(r10, #4, ADD) : 1036, 4 => 1040
+Cycle 1182 | [LOAD COMPLETE] Op 42 | Loads completed: 2/2 | load mem[1216] = 3
+Cycle 1183 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1190 | [CALC START] Op 42 | Port 1 | Latency: 105
+Cycle 1190 | [CALC COMPLETE] Op 50 | pc19 r5 := IMC(r5, #1, ADD) : 3, 1 => 4
+Cycle 1203 | [LOAD COMPLETE] Op 43 | Loads completed: 1/2 | load mem[192] = 4
+Cycle 1204 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1224 | [LOAD COMPLETE] Op 43 | Loads completed: 2/2 | load mem[1036] = 3
+Cycle 1295 | [CALC START] Op 43 | Port 1 | Latency: 105
+Cycle 1295 | [CALC COMPLETE] Op 42 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 3 => -9
+Cycle 1400 | [CALC START] Op 51 | Port 1 | Latency: 13
+Cycle 1400 | [CALC COMPLETE] Op 43 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 3 => 12
+Cycle 1413 | [CALC START] Op 44 | Port 1 | Latency: 9
+Cycle 1413 | [CALC COMPLETE] Op 51 | pc20 BRANCH(r5 != r6) -> pc11 : 4 != 16 => TAKEN
+Cycle 1422 | [CALC COMPLETE] Op 44 | pc13 r4 := IMC(r2, r3, ADD) : -9, 12 => 3
+Cycle 1423 | [CALC START] Op 45 | Port 1 | Latency: 9
+Cycle 1432 | [CALC COMPLETE] Op 45 | pc14 r1 := IMC(r1, r4, ADD) : -8, 3 => -5
+Cycle 1433 | [FETCH] Op 52
+Cycle 1433 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1434 | [FETCH] Op 53
+Cycle 1435 | [FETCH] Op 54
+Cycle 1436 | [FETCH] Op 55
+Cycle 1437 | [FETCH] Op 56
+Cycle 1437 | [CALC START] Op 56 | Port 1 | Latency: 9
+Cycle 1438 | [FETCH] Op 57
+Cycle 1439 | [FETCH] Op 58
+Cycle 1440 | [FETCH] Op 59
+Cycle 1441 | [FETCH] Op 60
+Cycle 1442 | [FETCH] Op 61
+Cycle 1446 | [CALC START] Op 57 | Port 1 | Latency: 9
+Cycle 1446 | [CALC COMPLETE] Op 56 | pc15 r7 := IMC(r7, #4, ADD) : 16, 4 => 20
+Cycle 1453 | [LOAD COMPLETE] Op 52 | Loads completed: 1/2 | load mem[16] = 4
+Cycle 1454 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1455 | [CALC START] Op 58 | Port 1 | Latency: 9
+Cycle 1455 | [CALC COMPLETE] Op 57 | pc16 r8 := IMC(r8, #64, ADD) : 1280, 64 => 1344
+Cycle 1464 | [CALC START] Op 59 | Port 1 | Latency: 9
+Cycle 1464 | [CALC COMPLETE] Op 58 | pc17 r9 := IMC(r9, #64, ADD) : 256, 64 => 320
+Cycle 1473 | [CALC START] Op 60 | Port 1 | Latency: 9
+Cycle 1473 | [CALC COMPLETE] Op 59 | pc18 r10 := IMC(r10, #4, ADD) : 1040, 4 => 1044
+Cycle 1474 | [LOAD COMPLETE] Op 52 | Loads completed: 2/2 | load mem[1280] = 2
+Cycle 1475 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1482 | [CALC START] Op 52 | Port 1 | Latency: 105
+Cycle 1482 | [CALC COMPLETE] Op 60 | pc19 r5 := IMC(r5, #1, ADD) : 4, 1 => 5
+Cycle 1495 | [LOAD COMPLETE] Op 53 | Loads completed: 1/2 | load mem[256] = -5
+Cycle 1496 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1516 | [LOAD COMPLETE] Op 53 | Loads completed: 2/2 | load mem[1040] = -1
+Cycle 1587 | [CALC START] Op 53 | Port 1 | Latency: 105
+Cycle 1587 | [CALC COMPLETE] Op 52 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 2 => 8
+Cycle 1692 | [CALC START] Op 61 | Port 1 | Latency: 13
+Cycle 1692 | [CALC COMPLETE] Op 53 | pc12 r3 := IMC([r9], [r10], MUL) : -5, -1 => 5
+Cycle 1705 | [CALC START] Op 54 | Port 1 | Latency: 9
+Cycle 1705 | [CALC COMPLETE] Op 61 | pc20 BRANCH(r5 != r6) -> pc11 : 5 != 16 => TAKEN
+Cycle 1714 | [CALC COMPLETE] Op 54 | pc13 r4 := IMC(r2, r3, ADD) : 8, 5 => 13
+Cycle 1715 | [CALC START] Op 55 | Port 1 | Latency: 9
+Cycle 1724 | [CALC COMPLETE] Op 55 | pc14 r1 := IMC(r1, r4, ADD) : -5, 13 => 8
+Cycle 1725 | [FETCH] Op 62
+Cycle 1725 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1726 | [FETCH] Op 63
+Cycle 1727 | [FETCH] Op 64
+Cycle 1728 | [FETCH] Op 65
+Cycle 1729 | [FETCH] Op 66
+Cycle 1729 | [CALC START] Op 66 | Port 1 | Latency: 9
+Cycle 1730 | [FETCH] Op 67
+Cycle 1731 | [FETCH] Op 68
+Cycle 1732 | [FETCH] Op 69
+Cycle 1733 | [FETCH] Op 70
+Cycle 1734 | [FETCH] Op 71
+Cycle 1738 | [CALC START] Op 67 | Port 1 | Latency: 9
+Cycle 1738 | [CALC COMPLETE] Op 66 | pc15 r7 := IMC(r7, #4, ADD) : 20, 4 => 24
+Cycle 1745 | [LOAD COMPLETE] Op 62 | Loads completed: 1/2 | load mem[20] = 0
+Cycle 1746 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1747 | [CALC START] Op 68 | Port 1 | Latency: 9
+Cycle 1747 | [CALC COMPLETE] Op 67 | pc16 r8 := IMC(r8, #64, ADD) : 1344, 64 => 1408
+Cycle 1756 | [CALC START] Op 69 | Port 1 | Latency: 9
+Cycle 1756 | [CALC COMPLETE] Op 68 | pc17 r9 := IMC(r9, #64, ADD) : 320, 64 => 384
+Cycle 1765 | [CALC START] Op 70 | Port 1 | Latency: 9
+Cycle 1765 | [CALC COMPLETE] Op 69 | pc18 r10 := IMC(r10, #4, ADD) : 1044, 4 => 1048
+Cycle 1766 | [LOAD COMPLETE] Op 62 | Loads completed: 2/2 | load mem[1344] = 1
+Cycle 1767 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1774 | [CALC START] Op 62 | Port 1 | Latency: 105
+Cycle 1774 | [CALC COMPLETE] Op 70 | pc19 r5 := IMC(r5, #1, ADD) : 5, 1 => 6
+Cycle 1787 | [LOAD COMPLETE] Op 63 | Loads completed: 1/2 | load mem[320] = -3
+Cycle 1788 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1808 | [LOAD COMPLETE] Op 63 | Loads completed: 2/2 | load mem[1044] = 4
+Cycle 1879 | [CALC START] Op 63 | Port 1 | Latency: 105
+Cycle 1879 | [CALC COMPLETE] Op 62 | pc11 r2 := IMC([r7], [r8], MUL) : 0, 1 => 0
+Cycle 1984 | [CALC START] Op 71 | Port 1 | Latency: 13
+Cycle 1984 | [CALC COMPLETE] Op 63 | pc12 r3 := IMC([r9], [r10], MUL) : -3, 4 => -12
+Cycle 1997 | [CALC START] Op 64 | Port 1 | Latency: 9
+Cycle 1997 | [CALC COMPLETE] Op 71 | pc20 BRANCH(r5 != r6) -> pc11 : 6 != 16 => TAKEN
+Cycle 2006 | [CALC COMPLETE] Op 64 | pc13 r4 := IMC(r2, r3, ADD) : 0, -12 => -12
+Cycle 2007 | [CALC START] Op 65 | Port 1 | Latency: 9
+Cycle 2016 | [CALC COMPLETE] Op 65 | pc14 r1 := IMC(r1, r4, ADD) : 8, -12 => -4
+Cycle 2017 | [FETCH] Op 72
+Cycle 2017 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2018 | [FETCH] Op 73
+Cycle 2019 | [FETCH] Op 74
+Cycle 2020 | [FETCH] Op 75
+Cycle 2021 | [FETCH] Op 76
+Cycle 2021 | [CALC START] Op 76 | Port 1 | Latency: 9
+Cycle 2022 | [FETCH] Op 77
+Cycle 2023 | [FETCH] Op 78
+Cycle 2024 | [FETCH] Op 79
+Cycle 2025 | [FETCH] Op 80
+Cycle 2026 | [FETCH] Op 81
+Cycle 2030 | [CALC START] Op 77 | Port 1 | Latency: 9
+Cycle 2030 | [CALC COMPLETE] Op 76 | pc15 r7 := IMC(r7, #4, ADD) : 24, 4 => 28
+Cycle 2037 | [LOAD COMPLETE] Op 72 | Loads completed: 1/2 | load mem[24] = -4
+Cycle 2038 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2039 | [CALC START] Op 78 | Port 1 | Latency: 9
+Cycle 2039 | [CALC COMPLETE] Op 77 | pc16 r8 := IMC(r8, #64, ADD) : 1408, 64 => 1472
+Cycle 2048 | [CALC START] Op 79 | Port 1 | Latency: 9
+Cycle 2048 | [CALC COMPLETE] Op 78 | pc17 r9 := IMC(r9, #64, ADD) : 384, 64 => 448
+Cycle 2057 | [CALC START] Op 80 | Port 1 | Latency: 9
+Cycle 2057 | [CALC COMPLETE] Op 79 | pc18 r10 := IMC(r10, #4, ADD) : 1048, 4 => 1052
+Cycle 2058 | [LOAD COMPLETE] Op 72 | Loads completed: 2/2 | load mem[1408] = 0
+Cycle 2059 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2066 | [CALC START] Op 72 | Port 1 | Latency: 105
+Cycle 2066 | [CALC COMPLETE] Op 80 | pc19 r5 := IMC(r5, #1, ADD) : 6, 1 => 7
+Cycle 2079 | [LOAD COMPLETE] Op 73 | Loads completed: 1/2 | load mem[384] = -1
+Cycle 2080 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2100 | [LOAD COMPLETE] Op 73 | Loads completed: 2/2 | load mem[1048] = 0
+Cycle 2171 | [CALC START] Op 73 | Port 1 | Latency: 105
+Cycle 2171 | [CALC COMPLETE] Op 72 | pc11 r2 := IMC([r7], [r8], MUL) : -4, 0 => 0
+Cycle 2276 | [CALC START] Op 81 | Port 1 | Latency: 13
+Cycle 2276 | [CALC COMPLETE] Op 73 | pc12 r3 := IMC([r9], [r10], MUL) : -1, 0 => 0
+Cycle 2289 | [CALC START] Op 74 | Port 1 | Latency: 9
+Cycle 2289 | [CALC COMPLETE] Op 81 | pc20 BRANCH(r5 != r6) -> pc11 : 7 != 16 => TAKEN
+Cycle 2298 | [CALC COMPLETE] Op 74 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 2299 | [CALC START] Op 75 | Port 1 | Latency: 9
+Cycle 2308 | [CALC COMPLETE] Op 75 | pc14 r1 := IMC(r1, r4, ADD) : -4, 0 => -4
+Cycle 2309 | [FETCH] Op 82
+Cycle 2309 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2310 | [FETCH] Op 83
+Cycle 2311 | [FETCH] Op 84
+Cycle 2312 | [FETCH] Op 85
+Cycle 2313 | [FETCH] Op 86
+Cycle 2313 | [CALC START] Op 86 | Port 1 | Latency: 9
+Cycle 2314 | [FETCH] Op 87
+Cycle 2315 | [FETCH] Op 88
+Cycle 2316 | [FETCH] Op 89
+Cycle 2317 | [FETCH] Op 90
+Cycle 2318 | [FETCH] Op 91
+Cycle 2322 | [CALC START] Op 87 | Port 1 | Latency: 9
+Cycle 2322 | [CALC COMPLETE] Op 86 | pc15 r7 := IMC(r7, #4, ADD) : 28, 4 => 32
+Cycle 2329 | [LOAD COMPLETE] Op 82 | Loads completed: 1/2 | load mem[28] = 3
+Cycle 2330 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2331 | [CALC START] Op 88 | Port 1 | Latency: 9
+Cycle 2331 | [CALC COMPLETE] Op 87 | pc16 r8 := IMC(r8, #64, ADD) : 1472, 64 => 1536
+Cycle 2340 | [CALC START] Op 89 | Port 1 | Latency: 9
+Cycle 2340 | [CALC COMPLETE] Op 88 | pc17 r9 := IMC(r9, #64, ADD) : 448, 64 => 512
+Cycle 2349 | [CALC START] Op 90 | Port 1 | Latency: 9
+Cycle 2349 | [CALC COMPLETE] Op 89 | pc18 r10 := IMC(r10, #4, ADD) : 1052, 4 => 1056
+Cycle 2350 | [LOAD COMPLETE] Op 82 | Loads completed: 2/2 | load mem[1472] = -1
+Cycle 2351 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2358 | [CALC START] Op 82 | Port 1 | Latency: 105
+Cycle 2358 | [CALC COMPLETE] Op 90 | pc19 r5 := IMC(r5, #1, ADD) : 7, 1 => 8
+Cycle 2371 | [LOAD COMPLETE] Op 83 | Loads completed: 1/2 | load mem[448] = 1
+Cycle 2372 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2392 | [LOAD COMPLETE] Op 83 | Loads completed: 2/2 | load mem[1052] = -4
+Cycle 2463 | [CALC START] Op 83 | Port 1 | Latency: 105
+Cycle 2463 | [CALC COMPLETE] Op 82 | pc11 r2 := IMC([r7], [r8], MUL) : 3, -1 => -3
+Cycle 2568 | [CALC START] Op 91 | Port 1 | Latency: 13
+Cycle 2568 | [CALC COMPLETE] Op 83 | pc12 r3 := IMC([r9], [r10], MUL) : 1, -4 => -4
+Cycle 2581 | [CALC START] Op 84 | Port 1 | Latency: 9
+Cycle 2581 | [CALC COMPLETE] Op 91 | pc20 BRANCH(r5 != r6) -> pc11 : 8 != 16 => TAKEN
+Cycle 2590 | [CALC COMPLETE] Op 84 | pc13 r4 := IMC(r2, r3, ADD) : -3, -4 => -7
+Cycle 2591 | [CALC START] Op 85 | Port 1 | Latency: 9
+Cycle 2600 | [CALC COMPLETE] Op 85 | pc14 r1 := IMC(r1, r4, ADD) : -4, -7 => -11
+Cycle 2601 | [FETCH] Op 92
+Cycle 2601 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2602 | [FETCH] Op 93
+Cycle 2603 | [FETCH] Op 94
+Cycle 2604 | [FETCH] Op 95
+Cycle 2605 | [FETCH] Op 96
+Cycle 2605 | [CALC START] Op 96 | Port 1 | Latency: 9
+Cycle 2606 | [FETCH] Op 97
+Cycle 2607 | [FETCH] Op 98
+Cycle 2608 | [FETCH] Op 99
+Cycle 2609 | [FETCH] Op 100
+Cycle 2610 | [FETCH] Op 101
+Cycle 2614 | [CALC START] Op 97 | Port 1 | Latency: 9
+Cycle 2614 | [CALC COMPLETE] Op 96 | pc15 r7 := IMC(r7, #4, ADD) : 32, 4 => 36
+Cycle 2621 | [LOAD COMPLETE] Op 92 | Loads completed: 1/2 | load mem[32] = -1
+Cycle 2622 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2623 | [CALC START] Op 98 | Port 1 | Latency: 9
+Cycle 2623 | [CALC COMPLETE] Op 97 | pc16 r8 := IMC(r8, #64, ADD) : 1536, 64 => 1600
+Cycle 2632 | [CALC START] Op 99 | Port 1 | Latency: 9
+Cycle 2632 | [CALC COMPLETE] Op 98 | pc17 r9 := IMC(r9, #64, ADD) : 512, 64 => 576
+Cycle 2641 | [CALC START] Op 100 | Port 1 | Latency: 9
+Cycle 2641 | [CALC COMPLETE] Op 99 | pc18 r10 := IMC(r10, #4, ADD) : 1056, 4 => 1060
+Cycle 2642 | [LOAD COMPLETE] Op 92 | Loads completed: 2/2 | load mem[1536] = -2
+Cycle 2643 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2650 | [CALC START] Op 92 | Port 1 | Latency: 105
+Cycle 2650 | [CALC COMPLETE] Op 100 | pc19 r5 := IMC(r5, #1, ADD) : 8, 1 => 9
+Cycle 2663 | [LOAD COMPLETE] Op 93 | Loads completed: 1/2 | load mem[512] = 3
+Cycle 2664 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2684 | [LOAD COMPLETE] Op 93 | Loads completed: 2/2 | load mem[1056] = 1
+Cycle 2755 | [CALC START] Op 93 | Port 1 | Latency: 105
+Cycle 2755 | [CALC COMPLETE] Op 92 | pc11 r2 := IMC([r7], [r8], MUL) : -1, -2 => 2
+Cycle 2860 | [CALC START] Op 101 | Port 1 | Latency: 13
+Cycle 2860 | [CALC COMPLETE] Op 93 | pc12 r3 := IMC([r9], [r10], MUL) : 3, 1 => 3
+Cycle 2873 | [CALC START] Op 94 | Port 1 | Latency: 9
+Cycle 2873 | [CALC COMPLETE] Op 101 | pc20 BRANCH(r5 != r6) -> pc11 : 9 != 16 => TAKEN
+Cycle 2882 | [CALC COMPLETE] Op 94 | pc13 r4 := IMC(r2, r3, ADD) : 2, 3 => 5
+Cycle 2883 | [CALC START] Op 95 | Port 1 | Latency: 9
+Cycle 2892 | [CALC COMPLETE] Op 95 | pc14 r1 := IMC(r1, r4, ADD) : -11, 5 => -6
+Cycle 2893 | [FETCH] Op 102
+Cycle 2893 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2894 | [FETCH] Op 103
+Cycle 2895 | [FETCH] Op 104
+Cycle 2896 | [FETCH] Op 105
+Cycle 2897 | [FETCH] Op 106
+Cycle 2897 | [CALC START] Op 106 | Port 1 | Latency: 9
+Cycle 2898 | [FETCH] Op 107
+Cycle 2899 | [FETCH] Op 108
+Cycle 2900 | [FETCH] Op 109
+Cycle 2901 | [FETCH] Op 110
+Cycle 2902 | [FETCH] Op 111
+Cycle 2906 | [CALC START] Op 107 | Port 1 | Latency: 9
+Cycle 2906 | [CALC COMPLETE] Op 106 | pc15 r7 := IMC(r7, #4, ADD) : 36, 4 => 40
+Cycle 2913 | [LOAD COMPLETE] Op 102 | Loads completed: 1/2 | load mem[36] = -5
+Cycle 2914 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2915 | [CALC START] Op 108 | Port 1 | Latency: 9
+Cycle 2915 | [CALC COMPLETE] Op 107 | pc16 r8 := IMC(r8, #64, ADD) : 1600, 64 => 1664
+Cycle 2924 | [CALC START] Op 109 | Port 1 | Latency: 9
+Cycle 2924 | [CALC COMPLETE] Op 108 | pc17 r9 := IMC(r9, #64, ADD) : 576, 64 => 640
+Cycle 2933 | [CALC START] Op 110 | Port 1 | Latency: 9
+Cycle 2933 | [CALC COMPLETE] Op 109 | pc18 r10 := IMC(r10, #4, ADD) : 1060, 4 => 1064
+Cycle 2934 | [LOAD COMPLETE] Op 102 | Loads completed: 2/2 | load mem[1600] = -3
+Cycle 2935 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2942 | [CALC START] Op 102 | Port 1 | Latency: 105
+Cycle 2942 | [CALC COMPLETE] Op 110 | pc19 r5 := IMC(r5, #1, ADD) : 9, 1 => 10
+Cycle 2955 | [LOAD COMPLETE] Op 103 | Loads completed: 1/2 | load mem[576] = 5
+Cycle 2956 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2976 | [LOAD COMPLETE] Op 103 | Loads completed: 2/2 | load mem[1060] = -3
+Cycle 3047 | [CALC START] Op 103 | Port 1 | Latency: 105
+Cycle 3047 | [CALC COMPLETE] Op 102 | pc11 r2 := IMC([r7], [r8], MUL) : -5, -3 => 15
+Cycle 3152 | [CALC START] Op 111 | Port 1 | Latency: 13
+Cycle 3152 | [CALC COMPLETE] Op 103 | pc12 r3 := IMC([r9], [r10], MUL) : 5, -3 => -15
+Cycle 3165 | [CALC START] Op 104 | Port 1 | Latency: 9
+Cycle 3165 | [CALC COMPLETE] Op 111 | pc20 BRANCH(r5 != r6) -> pc11 : 10 != 16 => TAKEN
+Cycle 3174 | [CALC COMPLETE] Op 104 | pc13 r4 := IMC(r2, r3, ADD) : 15, -15 => 0
+Cycle 3175 | [CALC START] Op 105 | Port 1 | Latency: 9
+Cycle 3184 | [CALC COMPLETE] Op 105 | pc14 r1 := IMC(r1, r4, ADD) : -6, 0 => -6
+Cycle 3185 | [FETCH] Op 112
+Cycle 3185 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3186 | [FETCH] Op 113
+Cycle 3187 | [FETCH] Op 114
+Cycle 3188 | [FETCH] Op 115
+Cycle 3189 | [FETCH] Op 116
+Cycle 3189 | [CALC START] Op 116 | Port 1 | Latency: 9
+Cycle 3190 | [FETCH] Op 117
+Cycle 3191 | [FETCH] Op 118
+Cycle 3192 | [FETCH] Op 119
+Cycle 3193 | [FETCH] Op 120
+Cycle 3194 | [FETCH] Op 121
+Cycle 3198 | [CALC START] Op 117 | Port 1 | Latency: 9
+Cycle 3198 | [CALC COMPLETE] Op 116 | pc15 r7 := IMC(r7, #4, ADD) : 40, 4 => 44
+Cycle 3205 | [LOAD COMPLETE] Op 112 | Loads completed: 1/2 | load mem[40] = 2
+Cycle 3206 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3207 | [CALC START] Op 118 | Port 1 | Latency: 9
+Cycle 3207 | [CALC COMPLETE] Op 117 | pc16 r8 := IMC(r8, #64, ADD) : 1664, 64 => 1728
+Cycle 3216 | [CALC START] Op 119 | Port 1 | Latency: 9
+Cycle 3216 | [CALC COMPLETE] Op 118 | pc17 r9 := IMC(r9, #64, ADD) : 640, 64 => 704
+Cycle 3225 | [CALC START] Op 120 | Port 1 | Latency: 9
+Cycle 3225 | [CALC COMPLETE] Op 119 | pc18 r10 := IMC(r10, #4, ADD) : 1064, 4 => 1068
+Cycle 3226 | [LOAD COMPLETE] Op 112 | Loads completed: 2/2 | load mem[1664] = -4
+Cycle 3227 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3234 | [CALC START] Op 112 | Port 1 | Latency: 105
+Cycle 3234 | [CALC COMPLETE] Op 120 | pc19 r5 := IMC(r5, #1, ADD) : 10, 1 => 11
+Cycle 3247 | [LOAD COMPLETE] Op 113 | Loads completed: 1/2 | load mem[640] = -4
+Cycle 3248 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3268 | [LOAD COMPLETE] Op 113 | Loads completed: 2/2 | load mem[1064] = 2
+Cycle 3339 | [CALC START] Op 113 | Port 1 | Latency: 105
+Cycle 3339 | [CALC COMPLETE] Op 112 | pc11 r2 := IMC([r7], [r8], MUL) : 2, -4 => -8
+Cycle 3444 | [CALC START] Op 121 | Port 1 | Latency: 13
+Cycle 3444 | [CALC COMPLETE] Op 113 | pc12 r3 := IMC([r9], [r10], MUL) : -4, 2 => -8
+Cycle 3457 | [CALC START] Op 114 | Port 1 | Latency: 9
+Cycle 3457 | [CALC COMPLETE] Op 121 | pc20 BRANCH(r5 != r6) -> pc11 : 11 != 16 => TAKEN
+Cycle 3466 | [CALC COMPLETE] Op 114 | pc13 r4 := IMC(r2, r3, ADD) : -8, -8 => -16
+Cycle 3467 | [CALC START] Op 115 | Port 1 | Latency: 9
+Cycle 3476 | [CALC COMPLETE] Op 115 | pc14 r1 := IMC(r1, r4, ADD) : -6, -16 => -22
+Cycle 3477 | [FETCH] Op 122
+Cycle 3477 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3478 | [FETCH] Op 123
+Cycle 3479 | [FETCH] Op 124
+Cycle 3480 | [FETCH] Op 125
+Cycle 3481 | [FETCH] Op 126
+Cycle 3481 | [CALC START] Op 126 | Port 1 | Latency: 9
+Cycle 3482 | [FETCH] Op 127
+Cycle 3483 | [FETCH] Op 128
+Cycle 3484 | [FETCH] Op 129
+Cycle 3485 | [FETCH] Op 130
+Cycle 3486 | [FETCH] Op 131
+Cycle 3490 | [CALC START] Op 127 | Port 1 | Latency: 9
+Cycle 3490 | [CALC COMPLETE] Op 126 | pc15 r7 := IMC(r7, #4, ADD) : 44, 4 => 48
+Cycle 3497 | [LOAD COMPLETE] Op 122 | Loads completed: 1/2 | load mem[44] = -2
+Cycle 3498 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3499 | [CALC START] Op 128 | Port 1 | Latency: 9
+Cycle 3499 | [CALC COMPLETE] Op 127 | pc16 r8 := IMC(r8, #64, ADD) : 1728, 64 => 1792
+Cycle 3508 | [CALC START] Op 129 | Port 1 | Latency: 9
+Cycle 3508 | [CALC COMPLETE] Op 128 | pc17 r9 := IMC(r9, #64, ADD) : 704, 64 => 768
+Cycle 3517 | [CALC START] Op 130 | Port 1 | Latency: 9
+Cycle 3517 | [CALC COMPLETE] Op 129 | pc18 r10 := IMC(r10, #4, ADD) : 1068, 4 => 1072
+Cycle 3518 | [LOAD COMPLETE] Op 122 | Loads completed: 2/2 | load mem[1728] = 4
+Cycle 3519 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3526 | [CALC START] Op 122 | Port 1 | Latency: 105
+Cycle 3526 | [CALC COMPLETE] Op 130 | pc19 r5 := IMC(r5, #1, ADD) : 11, 1 => 12
+Cycle 3539 | [LOAD COMPLETE] Op 123 | Loads completed: 1/2 | load mem[704] = -2
+Cycle 3540 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3560 | [LOAD COMPLETE] Op 123 | Loads completed: 2/2 | load mem[1068] = -2
+Cycle 3631 | [CALC START] Op 123 | Port 1 | Latency: 105
+Cycle 3631 | [CALC COMPLETE] Op 122 | pc11 r2 := IMC([r7], [r8], MUL) : -2, 4 => -8
+Cycle 3736 | [CALC START] Op 131 | Port 1 | Latency: 13
+Cycle 3736 | [CALC COMPLETE] Op 123 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -2 => 4
+Cycle 3749 | [CALC START] Op 124 | Port 1 | Latency: 9
+Cycle 3749 | [CALC COMPLETE] Op 131 | pc20 BRANCH(r5 != r6) -> pc11 : 12 != 16 => TAKEN
+Cycle 3758 | [CALC COMPLETE] Op 124 | pc13 r4 := IMC(r2, r3, ADD) : -8, 4 => -4
+Cycle 3759 | [CALC START] Op 125 | Port 1 | Latency: 9
+Cycle 3768 | [CALC COMPLETE] Op 125 | pc14 r1 := IMC(r1, r4, ADD) : -22, -4 => -26
+Cycle 3769 | [FETCH] Op 132
+Cycle 3769 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3770 | [FETCH] Op 133
+Cycle 3771 | [FETCH] Op 134
+Cycle 3772 | [FETCH] Op 135
+Cycle 3773 | [FETCH] Op 136
+Cycle 3773 | [CALC START] Op 136 | Port 1 | Latency: 9
+Cycle 3774 | [FETCH] Op 137
+Cycle 3775 | [FETCH] Op 138
+Cycle 3776 | [FETCH] Op 139
+Cycle 3777 | [FETCH] Op 140
+Cycle 3778 | [FETCH] Op 141
+Cycle 3782 | [CALC START] Op 137 | Port 1 | Latency: 9
+Cycle 3782 | [CALC COMPLETE] Op 136 | pc15 r7 := IMC(r7, #4, ADD) : 48, 4 => 52
+Cycle 3789 | [LOAD COMPLETE] Op 132 | Loads completed: 1/2 | load mem[48] = 5
+Cycle 3790 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3791 | [CALC START] Op 138 | Port 1 | Latency: 9
+Cycle 3791 | [CALC COMPLETE] Op 137 | pc16 r8 := IMC(r8, #64, ADD) : 1792, 64 => 1856
+Cycle 3800 | [CALC START] Op 139 | Port 1 | Latency: 9
+Cycle 3800 | [CALC COMPLETE] Op 138 | pc17 r9 := IMC(r9, #64, ADD) : 768, 64 => 832
+Cycle 3809 | [CALC START] Op 140 | Port 1 | Latency: 9
+Cycle 3809 | [CALC COMPLETE] Op 139 | pc18 r10 := IMC(r10, #4, ADD) : 1072, 4 => 1076
+Cycle 3810 | [LOAD COMPLETE] Op 132 | Loads completed: 2/2 | load mem[1792] = 3
+Cycle 3811 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3818 | [CALC START] Op 132 | Port 1 | Latency: 105
+Cycle 3818 | [CALC COMPLETE] Op 140 | pc19 r5 := IMC(r5, #1, ADD) : 12, 1 => 13
+Cycle 3831 | [LOAD COMPLETE] Op 133 | Loads completed: 1/2 | load mem[768] = 0
+Cycle 3832 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3852 | [LOAD COMPLETE] Op 133 | Loads completed: 2/2 | load mem[1072] = 3
+Cycle 3923 | [CALC START] Op 133 | Port 1 | Latency: 105
+Cycle 3923 | [CALC COMPLETE] Op 132 | pc11 r2 := IMC([r7], [r8], MUL) : 5, 3 => 15
+Cycle 4028 | [CALC START] Op 141 | Port 1 | Latency: 13
+Cycle 4028 | [CALC COMPLETE] Op 133 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 3 => 0
+Cycle 4041 | [CALC START] Op 134 | Port 1 | Latency: 9
+Cycle 4041 | [CALC COMPLETE] Op 141 | pc20 BRANCH(r5 != r6) -> pc11 : 13 != 16 => TAKEN
+Cycle 4050 | [CALC COMPLETE] Op 134 | pc13 r4 := IMC(r2, r3, ADD) : 15, 0 => 15
+Cycle 4051 | [CALC START] Op 135 | Port 1 | Latency: 9
+Cycle 4060 | [CALC COMPLETE] Op 135 | pc14 r1 := IMC(r1, r4, ADD) : -26, 15 => -11
+Cycle 4061 | [FETCH] Op 142
+Cycle 4061 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4062 | [FETCH] Op 143
+Cycle 4063 | [FETCH] Op 144
+Cycle 4064 | [FETCH] Op 145
+Cycle 4065 | [FETCH] Op 146
+Cycle 4065 | [CALC START] Op 146 | Port 1 | Latency: 9
+Cycle 4066 | [FETCH] Op 147
+Cycle 4067 | [FETCH] Op 148
+Cycle 4068 | [FETCH] Op 149
+Cycle 4069 | [FETCH] Op 150
+Cycle 4070 | [FETCH] Op 151
+Cycle 4074 | [CALC START] Op 147 | Port 1 | Latency: 9
+Cycle 4074 | [CALC COMPLETE] Op 146 | pc15 r7 := IMC(r7, #4, ADD) : 52, 4 => 56
+Cycle 4081 | [LOAD COMPLETE] Op 142 | Loads completed: 1/2 | load mem[52] = 1
+Cycle 4082 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4083 | [CALC START] Op 148 | Port 1 | Latency: 9
+Cycle 4083 | [CALC COMPLETE] Op 147 | pc16 r8 := IMC(r8, #64, ADD) : 1856, 64 => 1920
+Cycle 4092 | [CALC START] Op 149 | Port 1 | Latency: 9
+Cycle 4092 | [CALC COMPLETE] Op 148 | pc17 r9 := IMC(r9, #64, ADD) : 832, 64 => 896
+Cycle 4101 | [CALC START] Op 150 | Port 1 | Latency: 9
+Cycle 4101 | [CALC COMPLETE] Op 149 | pc18 r10 := IMC(r10, #4, ADD) : 1076, 4 => 1080
+Cycle 4102 | [LOAD COMPLETE] Op 142 | Loads completed: 2/2 | load mem[1856] = 2
+Cycle 4103 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4110 | [CALC START] Op 142 | Port 1 | Latency: 105
+Cycle 4110 | [CALC COMPLETE] Op 150 | pc19 r5 := IMC(r5, #1, ADD) : 13, 1 => 14
+Cycle 4123 | [LOAD COMPLETE] Op 143 | Loads completed: 1/2 | load mem[832] = 2
+Cycle 4124 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4144 | [LOAD COMPLETE] Op 143 | Loads completed: 2/2 | load mem[1076] = -1
+Cycle 4215 | [CALC START] Op 143 | Port 1 | Latency: 105
+Cycle 4215 | [CALC COMPLETE] Op 142 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 2 => 2
+Cycle 4320 | [CALC START] Op 151 | Port 1 | Latency: 13
+Cycle 4320 | [CALC COMPLETE] Op 143 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -1 => -2
+Cycle 4333 | [CALC START] Op 144 | Port 1 | Latency: 9
+Cycle 4333 | [CALC COMPLETE] Op 151 | pc20 BRANCH(r5 != r6) -> pc11 : 14 != 16 => TAKEN
+Cycle 4342 | [CALC COMPLETE] Op 144 | pc13 r4 := IMC(r2, r3, ADD) : 2, -2 => 0
+Cycle 4343 | [CALC START] Op 145 | Port 1 | Latency: 9
+Cycle 4352 | [CALC COMPLETE] Op 145 | pc14 r1 := IMC(r1, r4, ADD) : -11, 0 => -11
+Cycle 4353 | [FETCH] Op 152
+Cycle 4353 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4354 | [FETCH] Op 153
+Cycle 4355 | [FETCH] Op 154
+Cycle 4356 | [FETCH] Op 155
+Cycle 4357 | [FETCH] Op 156
+Cycle 4357 | [CALC START] Op 156 | Port 1 | Latency: 9
+Cycle 4358 | [FETCH] Op 157
+Cycle 4359 | [FETCH] Op 158
+Cycle 4360 | [FETCH] Op 159
+Cycle 4361 | [FETCH] Op 160
+Cycle 4362 | [FETCH] Op 161
+Cycle 4366 | [CALC START] Op 157 | Port 1 | Latency: 9
+Cycle 4366 | [CALC COMPLETE] Op 156 | pc15 r7 := IMC(r7, #4, ADD) : 56, 4 => 60
+Cycle 4373 | [LOAD COMPLETE] Op 152 | Loads completed: 1/2 | load mem[56] = -3
+Cycle 4374 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4375 | [CALC START] Op 158 | Port 1 | Latency: 9
+Cycle 4375 | [CALC COMPLETE] Op 157 | pc16 r8 := IMC(r8, #64, ADD) : 1920, 64 => 1984
+Cycle 4384 | [CALC START] Op 159 | Port 1 | Latency: 9
+Cycle 4384 | [CALC COMPLETE] Op 158 | pc17 r9 := IMC(r9, #64, ADD) : 896, 64 => 960
+Cycle 4393 | [CALC START] Op 160 | Port 1 | Latency: 9
+Cycle 4393 | [CALC COMPLETE] Op 159 | pc18 r10 := IMC(r10, #4, ADD) : 1080, 4 => 1084
+Cycle 4394 | [LOAD COMPLETE] Op 152 | Loads completed: 2/2 | load mem[1920] = 1
+Cycle 4395 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4402 | [CALC START] Op 152 | Port 1 | Latency: 105
+Cycle 4402 | [CALC COMPLETE] Op 160 | pc19 r5 := IMC(r5, #1, ADD) : 14, 1 => 15
+Cycle 4415 | [LOAD COMPLETE] Op 153 | Loads completed: 1/2 | load mem[896] = 4
+Cycle 4416 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4436 | [LOAD COMPLETE] Op 153 | Loads completed: 2/2 | load mem[1080] = 4
+Cycle 4507 | [CALC START] Op 153 | Port 1 | Latency: 105
+Cycle 4507 | [CALC COMPLETE] Op 152 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 1 => -3
+Cycle 4612 | [CALC START] Op 161 | Port 1 | Latency: 13
+Cycle 4612 | [CALC COMPLETE] Op 153 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 4 => 16
+Cycle 4625 | [CALC START] Op 154 | Port 1 | Latency: 9
+Cycle 4625 | [CALC COMPLETE] Op 161 | pc20 BRANCH(r5 != r6) -> pc11 : 15 != 16 => TAKEN
+Cycle 4634 | [CALC COMPLETE] Op 154 | pc13 r4 := IMC(r2, r3, ADD) : -3, 16 => 13
+Cycle 4635 | [CALC START] Op 155 | Port 1 | Latency: 9
+Cycle 4644 | [CALC COMPLETE] Op 155 | pc14 r1 := IMC(r1, r4, ADD) : -11, 13 => 2
+Cycle 4645 | [FETCH] Op 162
+Cycle 4645 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4646 | [FETCH] Op 163
+Cycle 4647 | [FETCH] Op 164
+Cycle 4648 | [FETCH] Op 165
+Cycle 4649 | [FETCH] Op 166
+Cycle 4649 | [CALC START] Op 166 | Port 1 | Latency: 9
+Cycle 4650 | [FETCH] Op 167
+Cycle 4651 | [FETCH] Op 168
+Cycle 4652 | [FETCH] Op 169
+Cycle 4653 | [FETCH] Op 170
+Cycle 4654 | [FETCH] Op 171
+Cycle 4658 | [CALC START] Op 167 | Port 1 | Latency: 9
+Cycle 4658 | [CALC COMPLETE] Op 166 | pc15 r7 := IMC(r7, #4, ADD) : 60, 4 => 64
+Cycle 4665 | [LOAD COMPLETE] Op 162 | Loads completed: 1/2 | load mem[60] = 4
+Cycle 4666 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4667 | [CALC START] Op 168 | Port 1 | Latency: 9
+Cycle 4667 | [CALC COMPLETE] Op 167 | pc16 r8 := IMC(r8, #64, ADD) : 1984, 64 => 2048
+Cycle 4676 | [CALC START] Op 169 | Port 1 | Latency: 9
+Cycle 4676 | [CALC COMPLETE] Op 168 | pc17 r9 := IMC(r9, #64, ADD) : 960, 64 => 1024
+Cycle 4685 | [CALC START] Op 170 | Port 1 | Latency: 9
+Cycle 4685 | [CALC COMPLETE] Op 169 | pc18 r10 := IMC(r10, #4, ADD) : 1084, 4 => 1088
+Cycle 4686 | [LOAD COMPLETE] Op 162 | Loads completed: 2/2 | load mem[1984] = 0
+Cycle 4687 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4694 | [CALC START] Op 162 | Port 1 | Latency: 105
+Cycle 4694 | [CALC COMPLETE] Op 170 | pc19 r5 := IMC(r5, #1, ADD) : 15, 1 => 16
+Cycle 4707 | [LOAD COMPLETE] Op 163 | Loads completed: 1/2 | load mem[960] = -5
+Cycle 4708 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4728 | [LOAD COMPLETE] Op 163 | Loads completed: 2/2 | load mem[1084] = 0
+Cycle 4799 | [CALC START] Op 163 | Port 1 | Latency: 105
+Cycle 4799 | [CALC COMPLETE] Op 162 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 0 => 0
+Cycle 4904 | [CALC START] Op 171 | Port 1 | Latency: 13
+Cycle 4904 | [CALC COMPLETE] Op 163 | pc12 r3 := IMC([r9], [r10], MUL) : -5, 0 => 0
+Cycle 4917 | [CALC START] Op 164 | Port 1 | Latency: 9
+Cycle 4917 | [CALC COMPLETE] Op 171 | pc20 BRANCH(r5 != r6) -> pc11 : 16 != 16 => not taken
+Cycle 4926 | [CALC COMPLETE] Op 164 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 4927 | [CALC START] Op 165 | Port 1 | Latency: 9
+Cycle 4936 | [CALC COMPLETE] Op 165 | pc14 r1 := IMC(r1, r4, ADD) : 2, 0 => 2
+Cycle 4937 | [FETCH] Op 172
+Cycle 4937 | [CALC START] Op 172 | Port 1 | Latency: 9
+Cycle 4946 | [CALC COMPLETE] Op 172 | pc21 [r11] := IMC(r1, #0, ADD) : 2, 0 => 2
+Cycle 4947 | [STORE START] Op 172 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4967 | [STORE COMPLETE] Op 172 | store mem[2048] = 2
+
+====================================
+SIMULATION COMPLETED
+Total Cycles: 4967
+====================================
+
+---------------- FINAL RESULT (Design 3: Pipelined + Renaming) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  C (n x n)  [16 x 16]
+          2     -12     -30     -36     -12     -46     -32      97      31      48     -10      16     -34     -43     -22     -52
+          7      12     -50     -19     -46     -25       8      -6      46      30      90     -27     -40     -12     -35     -35
+         96      -4     -36       7       3     -45     -18      -2     -55      69      24      36      35     -24     -17     -12
+         26      63       6       6     -30      -4     -38     -47      37     -51      41      28      83     -19     -37      17
+         17      -7     109     -33      -2      -1       3     -31      -8     -11     -79      81      -6      47       4       8
+        -74      39      31      44      43      19     -38       2     -36     -53      16     -47      21      31      62      16
+          4      -7      -4       2     104      -8       9     -39      -3       2     -53      -6     -44      58       1      40
+        -36      -9     -31      31       2      63      19      45     -79      11      -6     -83      34      -6      11       0
+        -15     -49       3      22     -39      -3      90      -8       5     -18       3       0     -25      -9     -17      21
+         12     -28     -45     -14     -52      14       2      33      40      58     -26       1     -12     -83      38     -18
+        -27     -48     -10     -41     -31      -9      -2     -15     110      -4      30      13     -62       3     -19     -45
+         40      13     -18     -37      -4     -51     -50      66     -13      13      41      54      -9     -31     -23     -44
+         36      91     -20     -38       7     -21     -37      -1       2     -41      69       2      39      18     -54      18
+         71      21      39      33       2       4     -18     -51     -54      43     -51      11      60      51       9     -13
+        -53      34      27      77      14      -9       7     -51     -16     -32      11     -51      54       2      34      61
+         -8     -45      58       2      42      30      21     -26     -16     -10     -91      56     -44      -4      39      52
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 4967
+
+################ Design 4: Fine-Grained Issue ################
+Cycle 1 | [FETCH] Op 1
+Cycle 1 | [CALC START] Op 1 | Port 1 | Latency: 9
+Cycle 2 | [FETCH] Op 2
+Cycle 2 | [CALC START] Op 2 | Port 0 | Latency: 9
+Cycle 3 | [FETCH] Op 3
+Cycle 4 | [FETCH] Op 4
+Cycle 5 | [FETCH] Op 5
+Cycle 6 | [FETCH] Op 6
+Cycle 7 | [FETCH] Op 7
+Cycle 8 | [FETCH] Op 8
+Cycle 9 | [FETCH] Op 9
+Cycle 10 | [FETCH] Op 10
+Cycle 10 | [CALC START] Op 3 | Port 1 | Latency: 9
+Cycle 10 | [CALC COMPLETE] Op 1 | pc0 r6 := IMC(r0, #16, ADD) : 0, 16 => 16
+Cycle 10 | [COMMIT] Op 1 retired.
+Cycle 11 | [FETCH] Op 11
+Cycle 11 | [CALC START] Op 4 | Port 0 | Latency: 105
+Cycle 11 | [CALC COMPLETE] Op 2 | pc1 r5 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 11 | [COMMIT] Op 2 retired.
+Cycle 12 | [FETCH] Op 12
+Cycle 13 | [FETCH] Op 13
+Cycle 14 | [FETCH] Op 14
+Cycle 15 | [FETCH] Op 15
+Cycle 16 | [FETCH] Op 16
+Cycle 17 | [FETCH] Op 17
+Cycle 18 | [FETCH] Op 18
+Cycle 19 | [CALC START] Op 5 | Port 1 | Latency: 82
+Cycle 19 | [CALC COMPLETE] Op 3 | pc2 r1 := IMC(r0, #0, ADD) : 0, 0 => 0
+Cycle 19 | [COMMIT] Op 3 retired.
+Cycle 20 | [FETCH] Op 19
+Cycle 101 | [CALC COMPLETE] Op 5 | pc4 r15 := IMC(r31, #2, SLL) : 0, 2 => 0
+Cycle 102 | [CALC START] Op 7 | Port 1 | Latency: 9
+Cycle 111 | [CALC START] Op 8 | Port 1 | Latency: 9
+Cycle 111 | [CALC COMPLETE] Op 7 | pc6 r8 := IMC(r15, #1024, ADD) : 0, 1024 => 1024
+Cycle 116 | [CALC START] Op 17 | Port 0 | Latency: 9
+Cycle 116 | [CALC COMPLETE] Op 4 | pc3 r14 := IMC(r30, #64, MUL) : 0, 64 => 0
+Cycle 116 | [COMMIT] Op 4 retired.
+Cycle 116 | [COMMIT] Op 5 retired.
+Cycle 117 | [FETCH] Op 20
+Cycle 118 | [FETCH] Op 21
+Cycle 120 | [CALC START] Op 6 | Port 1 | Latency: 9
+Cycle 120 | [CALC COMPLETE] Op 8 | pc7 r9 := IMC(r15, #0, ADD) : 0, 0 => 0
+Cycle 125 | [CALC START] Op 9 | Port 0 | Latency: 9
+Cycle 125 | [CALC COMPLETE] Op 17 | pc16 r8 := IMC(r8, #64, ADD) : 1024, 64 => 1088
+Cycle 129 | [CALC START] Op 10 | Port 1 | Latency: 9
+Cycle 129 | [CALC COMPLETE] Op 6 | pc5 r7 := IMC(r14, #0, ADD) : 0, 0 => 0
+Cycle 129 | [COMMIT] Op 6 retired.
+Cycle 129 | [COMMIT] Op 7 retired.
+Cycle 129 | [COMMIT] Op 8 retired.
+Cycle 134 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 134 | [CALC COMPLETE] Op 9 | pc8 r10 := IMC(r14, #1024, ADD) : 0, 1024 => 1024
+Cycle 134 | [COMMIT] Op 9 retired.
+Cycle 136 | [CALC START] Op 16 | Port 0 | Latency: 9
+Cycle 138 | [CALC START] Op 18 | Port 1 | Latency: 9
+Cycle 138 | [CALC COMPLETE] Op 10 | pc9 r11 := IMC(r14, r15, ADD) : 0, 0 => 0
+Cycle 138 | [COMMIT] Op 10 retired.
+Cycle 145 | [CALC COMPLETE] Op 16 | pc15 r7 := IMC(r7, #4, ADD) : 0, 4 => 4
+Cycle 147 | [CALC START] Op 11 | Port 1 | Latency: 9
+Cycle 147 | [CALC COMPLETE] Op 18 | pc17 r9 := IMC(r9, #64, ADD) : 0, 64 => 64
+Cycle 152 | [MEMORY WRITEBACK START] Op 12
+Cycle 154 | [LOAD COMPLETE] Op 12 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 155 | [LOAD START] Op 12 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 156 | [CALC START] Op 19 | Port 1 | Latency: 9
+Cycle 156 | [CALC COMPLETE] Op 11 | pc10 r11 := IMC(r11, #2048, ADD) : 0, 2048 => 2048
+Cycle 157 | [CALC START] Op 20 | Port 0 | Latency: 9
+Cycle 165 | [CALC COMPLETE] Op 19 | pc18 r10 := IMC(r10, #4, ADD) : 1024, 4 => 1028
+Cycle 166 | [CALC COMPLETE] Op 20 | pc19 r5 := IMC(r5, #1, ADD) : 0, 1 => 1
+Cycle 167 | [CALC START] Op 21 | Port 1 | Latency: 13
+Cycle 173 | [MEMORY WRITEBACK START] Op 12
+Cycle 175 | [LOAD COMPLETE] Op 12 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 176 | [CALC START] Op 12 | Port 0 | Latency: 105
+Cycle 180 | [CALC COMPLETE] Op 21 | pc20 BRANCH(r5 != r6) -> pc11 : 1 != 16 => TAKEN
+Cycle 281 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 281 | [CALC COMPLETE] Op 12 | pc11 r2 := IMC([r7], [r8], MUL) : -2, -3 => 6
+Cycle 299 | [MEMORY WRITEBACK START] Op 13
+Cycle 301 | [LOAD COMPLETE] Op 13 | Loads completed: 1/2 | load mem[0] = -2
+Cycle 302 | [LOAD START] Op 13 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 320 | [MEMORY WRITEBACK START] Op 13
+Cycle 322 | [LOAD COMPLETE] Op 13 | Loads completed: 2/2 | load mem[1024] = -3
+Cycle 323 | [CALC START] Op 13 | Port 1 | Latency: 105
+Cycle 428 | [CALC COMPLETE] Op 13 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -3 => 6
+Cycle 429 | [CALC START] Op 14 | Port 1 | Latency: 9
+Cycle 438 | [CALC COMPLETE] Op 14 | pc13 r4 := IMC(r2, r3, ADD) : 6, 6 => 12
+Cycle 439 | [CALC START] Op 15 | Port 1 | Latency: 9
+Cycle 448 | [CALC COMPLETE] Op 15 | pc14 r1 := IMC(r1, r4, ADD) : 0, 12 => 12
+Cycle 449 | [FETCH] Op 22
+Cycle 449 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 450 | [FETCH] Op 23
+Cycle 451 | [FETCH] Op 24
+Cycle 452 | [FETCH] Op 25
+Cycle 453 | [FETCH] Op 26
+Cycle 453 | [CALC START] Op 26 | Port 1 | Latency: 9
+Cycle 454 | [FETCH] Op 27
+Cycle 454 | [CALC START] Op 27 | Port 0 | Latency: 9
+Cycle 455 | [FETCH] Op 28
+Cycle 456 | [FETCH] Op 29
+Cycle 457 | [FETCH] Op 30
+Cycle 458 | [FETCH] Op 31
+Cycle 462 | [CALC START] Op 28 | Port 1 | Latency: 9
+Cycle 462 | [CALC COMPLETE] Op 26 | pc15 r7 := IMC(r7, #4, ADD) : 4, 4 => 8
+Cycle 463 | [CALC COMPLETE] Op 27 | pc16 r8 := IMC(r8, #64, ADD) : 1088, 64 => 1152
+Cycle 467 | [MEMORY WRITEBACK START] Op 22
+Cycle 469 | [LOAD COMPLETE] Op 22 | Loads completed: 1/2 | load mem[4] = 5
+Cycle 470 | [LOAD START] Op 22 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 471 | [CALC START] Op 29 | Port 1 | Latency: 9
+Cycle 471 | [CALC COMPLETE] Op 28 | pc17 r9 := IMC(r9, #64, ADD) : 64, 64 => 128
+Cycle 472 | [CALC START] Op 30 | Port 0 | Latency: 9
+Cycle 480 | [CALC COMPLETE] Op 29 | pc18 r10 := IMC(r10, #4, ADD) : 1028, 4 => 1032
+Cycle 481 | [CALC COMPLETE] Op 30 | pc19 r5 := IMC(r5, #1, ADD) : 1, 1 => 2
+Cycle 482 | [CALC START] Op 31 | Port 1 | Latency: 13
+Cycle 488 | [MEMORY WRITEBACK START] Op 22
+Cycle 490 | [LOAD COMPLETE] Op 22 | Loads completed: 2/2 | load mem[1088] = -4
+Cycle 491 | [CALC START] Op 22 | Port 0 | Latency: 105
+Cycle 495 | [CALC COMPLETE] Op 31 | pc20 BRANCH(r5 != r6) -> pc11 : 2 != 16 => TAKEN
+Cycle 596 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 596 | [CALC COMPLETE] Op 22 | pc11 r2 := IMC([r7], [r8], MUL) : 5, -4 => -20
+Cycle 614 | [MEMORY WRITEBACK START] Op 23
+Cycle 616 | [LOAD COMPLETE] Op 23 | Loads completed: 1/2 | load mem[64] = 0
+Cycle 617 | [LOAD START] Op 23 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 635 | [MEMORY WRITEBACK START] Op 23
+Cycle 637 | [LOAD COMPLETE] Op 23 | Loads completed: 2/2 | load mem[1028] = 2
+Cycle 638 | [CALC START] Op 23 | Port 1 | Latency: 105
+Cycle 743 | [CALC COMPLETE] Op 23 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 2 => 0
+Cycle 744 | [CALC START] Op 24 | Port 1 | Latency: 9
+Cycle 753 | [CALC COMPLETE] Op 24 | pc13 r4 := IMC(r2, r3, ADD) : -20, 0 => -20
+Cycle 754 | [CALC START] Op 25 | Port 1 | Latency: 9
+Cycle 763 | [CALC COMPLETE] Op 25 | pc14 r1 := IMC(r1, r4, ADD) : 12, -20 => -8
+Cycle 764 | [FETCH] Op 32
+Cycle 764 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 765 | [FETCH] Op 33
+Cycle 766 | [FETCH] Op 34
+Cycle 767 | [FETCH] Op 35
+Cycle 768 | [FETCH] Op 36
+Cycle 768 | [CALC START] Op 36 | Port 1 | Latency: 9
+Cycle 769 | [FETCH] Op 37
+Cycle 769 | [CALC START] Op 37 | Port 0 | Latency: 9
+Cycle 770 | [FETCH] Op 38
+Cycle 771 | [FETCH] Op 39
+Cycle 772 | [FETCH] Op 40
+Cycle 773 | [FETCH] Op 41
+Cycle 777 | [CALC START] Op 38 | Port 1 | Latency: 9
+Cycle 777 | [CALC COMPLETE] Op 36 | pc15 r7 := IMC(r7, #4, ADD) : 8, 4 => 12
+Cycle 778 | [CALC COMPLETE] Op 37 | pc16 r8 := IMC(r8, #64, ADD) : 1152, 64 => 1216
+Cycle 782 | [MEMORY WRITEBACK START] Op 32
+Cycle 784 | [LOAD COMPLETE] Op 32 | Loads completed: 1/2 | load mem[8] = 1
+Cycle 785 | [LOAD START] Op 32 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 786 | [CALC START] Op 39 | Port 1 | Latency: 9
+Cycle 786 | [CALC COMPLETE] Op 38 | pc17 r9 := IMC(r9, #64, ADD) : 128, 64 => 192
+Cycle 787 | [CALC START] Op 40 | Port 0 | Latency: 9
+Cycle 795 | [CALC COMPLETE] Op 39 | pc18 r10 := IMC(r10, #4, ADD) : 1032, 4 => 1036
+Cycle 796 | [CALC COMPLETE] Op 40 | pc19 r5 := IMC(r5, #1, ADD) : 2, 1 => 3
+Cycle 797 | [CALC START] Op 41 | Port 1 | Latency: 13
+Cycle 803 | [MEMORY WRITEBACK START] Op 32
+Cycle 805 | [LOAD COMPLETE] Op 32 | Loads completed: 2/2 | load mem[1152] = 4
+Cycle 806 | [CALC START] Op 32 | Port 0 | Latency: 105
+Cycle 810 | [CALC COMPLETE] Op 41 | pc20 BRANCH(r5 != r6) -> pc11 : 3 != 16 => TAKEN
+Cycle 911 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 911 | [CALC COMPLETE] Op 32 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 4 => 4
+Cycle 929 | [MEMORY WRITEBACK START] Op 33
+Cycle 931 | [LOAD COMPLETE] Op 33 | Loads completed: 1/2 | load mem[128] = 2
+Cycle 932 | [LOAD START] Op 33 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 950 | [MEMORY WRITEBACK START] Op 33
+Cycle 952 | [LOAD COMPLETE] Op 33 | Loads completed: 2/2 | load mem[1032] = -2
+Cycle 953 | [CALC START] Op 33 | Port 1 | Latency: 105
+Cycle 1058 | [CALC COMPLETE] Op 33 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -2 => -4
+Cycle 1059 | [CALC START] Op 34 | Port 1 | Latency: 9
+Cycle 1068 | [CALC COMPLETE] Op 34 | pc13 r4 := IMC(r2, r3, ADD) : 4, -4 => 0
+Cycle 1069 | [CALC START] Op 35 | Port 1 | Latency: 9
+Cycle 1078 | [CALC COMPLETE] Op 35 | pc14 r1 := IMC(r1, r4, ADD) : -8, 0 => -8
+Cycle 1079 | [FETCH] Op 42
+Cycle 1079 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1080 | [FETCH] Op 43
+Cycle 1081 | [FETCH] Op 44
+Cycle 1082 | [FETCH] Op 45
+Cycle 1083 | [FETCH] Op 46
+Cycle 1083 | [CALC START] Op 46 | Port 1 | Latency: 9
+Cycle 1084 | [FETCH] Op 47
+Cycle 1084 | [CALC START] Op 47 | Port 0 | Latency: 9
+Cycle 1085 | [FETCH] Op 48
+Cycle 1086 | [FETCH] Op 49
+Cycle 1087 | [FETCH] Op 50
+Cycle 1088 | [FETCH] Op 51
+Cycle 1092 | [CALC START] Op 48 | Port 1 | Latency: 9
+Cycle 1092 | [CALC COMPLETE] Op 46 | pc15 r7 := IMC(r7, #4, ADD) : 12, 4 => 16
+Cycle 1093 | [CALC COMPLETE] Op 47 | pc16 r8 := IMC(r8, #64, ADD) : 1216, 64 => 1280
+Cycle 1097 | [MEMORY WRITEBACK START] Op 42
+Cycle 1099 | [LOAD COMPLETE] Op 42 | Loads completed: 1/2 | load mem[12] = -3
+Cycle 1100 | [LOAD START] Op 42 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1101 | [CALC START] Op 49 | Port 1 | Latency: 9
+Cycle 1101 | [CALC COMPLETE] Op 48 | pc17 r9 := IMC(r9, #64, ADD) : 192, 64 => 256
+Cycle 1102 | [CALC START] Op 50 | Port 0 | Latency: 9
+Cycle 1110 | [CALC COMPLETE] Op 49 | pc18 r10 := IMC(r10, #4, ADD) : 1036, 4 => 1040
+Cycle 1111 | [CALC COMPLETE] Op 50 | pc19 r5 := IMC(r5, #1, ADD) : 3, 1 => 4
+Cycle 1112 | [CALC START] Op 51 | Port 1 | Latency: 13
+Cycle 1118 | [MEMORY WRITEBACK START] Op 42
+Cycle 1120 | [LOAD COMPLETE] Op 42 | Loads completed: 2/2 | load mem[1216] = 3
+Cycle 1121 | [CALC START] Op 42 | Port 0 | Latency: 105
+Cycle 1125 | [CALC COMPLETE] Op 51 | pc20 BRANCH(r5 != r6) -> pc11 : 4 != 16 => TAKEN
+Cycle 1226 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1226 | [CALC COMPLETE] Op 42 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 3 => -9
+Cycle 1244 | [MEMORY WRITEBACK START] Op 43
+Cycle 1246 | [LOAD COMPLETE] Op 43 | Loads completed: 1/2 | load mem[192] = 4
+Cycle 1247 | [LOAD START] Op 43 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1265 | [MEMORY WRITEBACK START] Op 43
+Cycle 1267 | [LOAD COMPLETE] Op 43 | Loads completed: 2/2 | load mem[1036] = 3
+Cycle 1268 | [CALC START] Op 43 | Port 1 | Latency: 105
+Cycle 1373 | [CALC COMPLETE] Op 43 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 3 => 12
+Cycle 1374 | [CALC START] Op 44 | Port 1 | Latency: 9
+Cycle 1383 | [CALC COMPLETE] Op 44 | pc13 r4 := IMC(r2, r3, ADD) : -9, 12 => 3
+Cycle 1384 | [CALC START] Op 45 | Port 1 | Latency: 9
+Cycle 1393 | [CALC COMPLETE] Op 45 | pc14 r1 := IMC(r1, r4, ADD) : -8, 3 => -5
+Cycle 1394 | [FETCH] Op 52
+Cycle 1394 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1395 | [FETCH] Op 53
+Cycle 1396 | [FETCH] Op 54
+Cycle 1397 | [FETCH] Op 55
+Cycle 1398 | [FETCH] Op 56
+Cycle 1398 | [CALC START] Op 56 | Port 1 | Latency: 9
+Cycle 1399 | [FETCH] Op 57
+Cycle 1399 | [CALC START] Op 57 | Port 0 | Latency: 9
+Cycle 1400 | [FETCH] Op 58
+Cycle 1401 | [FETCH] Op 59
+Cycle 1402 | [FETCH] Op 60
+Cycle 1403 | [FETCH] Op 61
+Cycle 1407 | [CALC START] Op 58 | Port 1 | Latency: 9
+Cycle 1407 | [CALC COMPLETE] Op 56 | pc15 r7 := IMC(r7, #4, ADD) : 16, 4 => 20
+Cycle 1408 | [CALC COMPLETE] Op 57 | pc16 r8 := IMC(r8, #64, ADD) : 1280, 64 => 1344
+Cycle 1412 | [MEMORY WRITEBACK START] Op 52
+Cycle 1414 | [LOAD COMPLETE] Op 52 | Loads completed: 1/2 | load mem[16] = 4
+Cycle 1415 | [LOAD START] Op 52 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1416 | [CALC START] Op 59 | Port 1 | Latency: 9
+Cycle 1416 | [CALC COMPLETE] Op 58 | pc17 r9 := IMC(r9, #64, ADD) : 256, 64 => 320
+Cycle 1417 | [CALC START] Op 60 | Port 0 | Latency: 9
+Cycle 1425 | [CALC COMPLETE] Op 59 | pc18 r10 := IMC(r10, #4, ADD) : 1040, 4 => 1044
+Cycle 1426 | [CALC COMPLETE] Op 60 | pc19 r5 := IMC(r5, #1, ADD) : 4, 1 => 5
+Cycle 1427 | [CALC START] Op 61 | Port 1 | Latency: 13
+Cycle 1433 | [MEMORY WRITEBACK START] Op 52
+Cycle 1435 | [LOAD COMPLETE] Op 52 | Loads completed: 2/2 | load mem[1280] = 2
+Cycle 1436 | [CALC START] Op 52 | Port 0 | Latency: 105
+Cycle 1440 | [CALC COMPLETE] Op 61 | pc20 BRANCH(r5 != r6) -> pc11 : 5 != 16 => TAKEN
+Cycle 1541 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1541 | [CALC COMPLETE] Op 52 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 2 => 8
+Cycle 1559 | [MEMORY WRITEBACK START] Op 53
+Cycle 1561 | [LOAD COMPLETE] Op 53 | Loads completed: 1/2 | load mem[256] = -5
+Cycle 1562 | [LOAD START] Op 53 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1580 | [MEMORY WRITEBACK START] Op 53
+Cycle 1582 | [LOAD COMPLETE] Op 53 | Loads completed: 2/2 | load mem[1040] = -1
+Cycle 1583 | [CALC START] Op 53 | Port 1 | Latency: 105
+Cycle 1688 | [CALC COMPLETE] Op 53 | pc12 r3 := IMC([r9], [r10], MUL) : -5, -1 => 5
+Cycle 1689 | [CALC START] Op 54 | Port 1 | Latency: 9
+Cycle 1698 | [CALC COMPLETE] Op 54 | pc13 r4 := IMC(r2, r3, ADD) : 8, 5 => 13
+Cycle 1699 | [CALC START] Op 55 | Port 1 | Latency: 9
+Cycle 1708 | [CALC COMPLETE] Op 55 | pc14 r1 := IMC(r1, r4, ADD) : -5, 13 => 8
+Cycle 1709 | [FETCH] Op 62
+Cycle 1709 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1710 | [FETCH] Op 63
+Cycle 1711 | [FETCH] Op 64
+Cycle 1712 | [FETCH] Op 65
+Cycle 1713 | [FETCH] Op 66
+Cycle 1713 | [CALC START] Op 66 | Port 1 | Latency: 9
+Cycle 1714 | [FETCH] Op 67
+Cycle 1714 | [CALC START] Op 67 | Port 0 | Latency: 9
+Cycle 1715 | [FETCH] Op 68
+Cycle 1716 | [FETCH] Op 69
+Cycle 1717 | [FETCH] Op 70
+Cycle 1718 | [FETCH] Op 71
+Cycle 1722 | [CALC START] Op 68 | Port 1 | Latency: 9
+Cycle 1722 | [CALC COMPLETE] Op 66 | pc15 r7 := IMC(r7, #4, ADD) : 20, 4 => 24
+Cycle 1723 | [CALC COMPLETE] Op 67 | pc16 r8 := IMC(r8, #64, ADD) : 1344, 64 => 1408
+Cycle 1727 | [MEMORY WRITEBACK START] Op 62
+Cycle 1729 | [LOAD COMPLETE] Op 62 | Loads completed: 1/2 | load mem[20] = 0
+Cycle 1730 | [LOAD START] Op 62 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1731 | [CALC START] Op 69 | Port 1 | Latency: 9
+Cycle 1731 | [CALC COMPLETE] Op 68 | pc17 r9 := IMC(r9, #64, ADD) : 320, 64 => 384
+Cycle 1732 | [CALC START] Op 70 | Port 0 | Latency: 9
+Cycle 1740 | [CALC COMPLETE] Op 69 | pc18 r10 := IMC(r10, #4, ADD) : 1044, 4 => 1048
+Cycle 1741 | [CALC COMPLETE] Op 70 | pc19 r5 := IMC(r5, #1, ADD) : 5, 1 => 6
+Cycle 1742 | [CALC START] Op 71 | Port 1 | Latency: 13
+Cycle 1748 | [MEMORY WRITEBACK START] Op 62
+Cycle 1750 | [LOAD COMPLETE] Op 62 | Loads completed: 2/2 | load mem[1344] = 1
+Cycle 1751 | [CALC START] Op 62 | Port 0 | Latency: 105
+Cycle 1755 | [CALC COMPLETE] Op 71 | pc20 BRANCH(r5 != r6) -> pc11 : 6 != 16 => TAKEN
+Cycle 1856 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1856 | [CALC COMPLETE] Op 62 | pc11 r2 := IMC([r7], [r8], MUL) : 0, 1 => 0
+Cycle 1874 | [MEMORY WRITEBACK START] Op 63
+Cycle 1876 | [LOAD COMPLETE] Op 63 | Loads completed: 1/2 | load mem[320] = -3
+Cycle 1877 | [LOAD START] Op 63 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 1895 | [MEMORY WRITEBACK START] Op 63
+Cycle 1897 | [LOAD COMPLETE] Op 63 | Loads completed: 2/2 | load mem[1044] = 4
+Cycle 1898 | [CALC START] Op 63 | Port 1 | Latency: 105
+Cycle 2003 | [CALC COMPLETE] Op 63 | pc12 r3 := IMC([r9], [r10], MUL) : -3, 4 => -12
+Cycle 2004 | [CALC START] Op 64 | Port 1 | Latency: 9
+Cycle 2013 | [CALC COMPLETE] Op 64 | pc13 r4 := IMC(r2, r3, ADD) : 0, -12 => -12
+Cycle 2014 | [CALC START] Op 65 | Port 1 | Latency: 9
+Cycle 2023 | [CALC COMPLETE] Op 65 | pc14 r1 := IMC(r1, r4, ADD) : 8, -12 => -4
+Cycle 2024 | [FETCH] Op 72
+Cycle 2024 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2025 | [FETCH] Op 73
+Cycle 2026 | [FETCH] Op 74
+Cycle 2027 | [FETCH] Op 75
+Cycle 2028 | [FETCH] Op 76
+Cycle 2028 | [CALC START] Op 76 | Port 1 | Latency: 9
+Cycle 2029 | [FETCH] Op 77
+Cycle 2029 | [CALC START] Op 77 | Port 0 | Latency: 9
+Cycle 2030 | [FETCH] Op 78
+Cycle 2031 | [FETCH] Op 79
+Cycle 2032 | [FETCH] Op 80
+Cycle 2033 | [FETCH] Op 81
+Cycle 2037 | [CALC START] Op 78 | Port 1 | Latency: 9
+Cycle 2037 | [CALC COMPLETE] Op 76 | pc15 r7 := IMC(r7, #4, ADD) : 24, 4 => 28
+Cycle 2038 | [CALC COMPLETE] Op 77 | pc16 r8 := IMC(r8, #64, ADD) : 1408, 64 => 1472
+Cycle 2042 | [MEMORY WRITEBACK START] Op 72
+Cycle 2044 | [LOAD COMPLETE] Op 72 | Loads completed: 1/2 | load mem[24] = -4
+Cycle 2045 | [LOAD START] Op 72 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2046 | [CALC START] Op 79 | Port 1 | Latency: 9
+Cycle 2046 | [CALC COMPLETE] Op 78 | pc17 r9 := IMC(r9, #64, ADD) : 384, 64 => 448
+Cycle 2047 | [CALC START] Op 80 | Port 0 | Latency: 9
+Cycle 2055 | [CALC COMPLETE] Op 79 | pc18 r10 := IMC(r10, #4, ADD) : 1048, 4 => 1052
+Cycle 2056 | [CALC COMPLETE] Op 80 | pc19 r5 := IMC(r5, #1, ADD) : 6, 1 => 7
+Cycle 2057 | [CALC START] Op 81 | Port 1 | Latency: 13
+Cycle 2063 | [MEMORY WRITEBACK START] Op 72
+Cycle 2065 | [LOAD COMPLETE] Op 72 | Loads completed: 2/2 | load mem[1408] = 0
+Cycle 2066 | [CALC START] Op 72 | Port 0 | Latency: 105
+Cycle 2070 | [CALC COMPLETE] Op 81 | pc20 BRANCH(r5 != r6) -> pc11 : 7 != 16 => TAKEN
+Cycle 2171 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2171 | [CALC COMPLETE] Op 72 | pc11 r2 := IMC([r7], [r8], MUL) : -4, 0 => 0
+Cycle 2189 | [MEMORY WRITEBACK START] Op 73
+Cycle 2191 | [LOAD COMPLETE] Op 73 | Loads completed: 1/2 | load mem[384] = -1
+Cycle 2192 | [LOAD START] Op 73 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2210 | [MEMORY WRITEBACK START] Op 73
+Cycle 2212 | [LOAD COMPLETE] Op 73 | Loads completed: 2/2 | load mem[1048] = 0
+Cycle 2213 | [CALC START] Op 73 | Port 1 | Latency: 105
+Cycle 2318 | [CALC COMPLETE] Op 73 | pc12 r3 := IMC([r9], [r10], MUL) : -1, 0 => 0
+Cycle 2319 | [CALC START] Op 74 | Port 1 | Latency: 9
+Cycle 2328 | [CALC COMPLETE] Op 74 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 2329 | [CALC START] Op 75 | Port 1 | Latency: 9
+Cycle 2338 | [CALC COMPLETE] Op 75 | pc14 r1 := IMC(r1, r4, ADD) : -4, 0 => -4
+Cycle 2339 | [FETCH] Op 82
+Cycle 2339 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2340 | [FETCH] Op 83
+Cycle 2341 | [FETCH] Op 84
+Cycle 2342 | [FETCH] Op 85
+Cycle 2343 | [FETCH] Op 86
+Cycle 2343 | [CALC START] Op 86 | Port 1 | Latency: 9
+Cycle 2344 | [FETCH] Op 87
+Cycle 2344 | [CALC START] Op 87 | Port 0 | Latency: 9
+Cycle 2345 | [FETCH] Op 88
+Cycle 2346 | [FETCH] Op 89
+Cycle 2347 | [FETCH] Op 90
+Cycle 2348 | [FETCH] Op 91
+Cycle 2352 | [CALC START] Op 88 | Port 1 | Latency: 9
+Cycle 2352 | [CALC COMPLETE] Op 86 | pc15 r7 := IMC(r7, #4, ADD) : 28, 4 => 32
+Cycle 2353 | [CALC COMPLETE] Op 87 | pc16 r8 := IMC(r8, #64, ADD) : 1472, 64 => 1536
+Cycle 2357 | [MEMORY WRITEBACK START] Op 82
+Cycle 2359 | [LOAD COMPLETE] Op 82 | Loads completed: 1/2 | load mem[28] = 3
+Cycle 2360 | [LOAD START] Op 82 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2361 | [CALC START] Op 89 | Port 1 | Latency: 9
+Cycle 2361 | [CALC COMPLETE] Op 88 | pc17 r9 := IMC(r9, #64, ADD) : 448, 64 => 512
+Cycle 2362 | [CALC START] Op 90 | Port 0 | Latency: 9
+Cycle 2370 | [CALC COMPLETE] Op 89 | pc18 r10 := IMC(r10, #4, ADD) : 1052, 4 => 1056
+Cycle 2371 | [CALC COMPLETE] Op 90 | pc19 r5 := IMC(r5, #1, ADD) : 7, 1 => 8
+Cycle 2372 | [CALC START] Op 91 | Port 1 | Latency: 13
+Cycle 2378 | [MEMORY WRITEBACK START] Op 82
+Cycle 2380 | [LOAD COMPLETE] Op 82 | Loads completed: 2/2 | load mem[1472] = -1
+Cycle 2381 | [CALC START] Op 82 | Port 0 | Latency: 105
+Cycle 2385 | [CALC COMPLETE] Op 91 | pc20 BRANCH(r5 != r6) -> pc11 : 8 != 16 => TAKEN
+Cycle 2486 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2486 | [CALC COMPLETE] Op 82 | pc11 r2 := IMC([r7], [r8], MUL) : 3, -1 => -3
+Cycle 2504 | [MEMORY WRITEBACK START] Op 83
+Cycle 2506 | [LOAD COMPLETE] Op 83 | Loads completed: 1/2 | load mem[448] = 1
+Cycle 2507 | [LOAD START] Op 83 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2525 | [MEMORY WRITEBACK START] Op 83
+Cycle 2527 | [LOAD COMPLETE] Op 83 | Loads completed: 2/2 | load mem[1052] = -4
+Cycle 2528 | [CALC START] Op 83 | Port 1 | Latency: 105
+Cycle 2633 | [CALC COMPLETE] Op 83 | pc12 r3 := IMC([r9], [r10], MUL) : 1, -4 => -4
+Cycle 2634 | [CALC START] Op 84 | Port 1 | Latency: 9
+Cycle 2643 | [CALC COMPLETE] Op 84 | pc13 r4 := IMC(r2, r3, ADD) : -3, -4 => -7
+Cycle 2644 | [CALC START] Op 85 | Port 1 | Latency: 9
+Cycle 2653 | [CALC COMPLETE] Op 85 | pc14 r1 := IMC(r1, r4, ADD) : -4, -7 => -11
+Cycle 2654 | [FETCH] Op 92
+Cycle 2654 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2655 | [FETCH] Op 93
+Cycle 2656 | [FETCH] Op 94
+Cycle 2657 | [FETCH] Op 95
+Cycle 2658 | [FETCH] Op 96
+Cycle 2658 | [CALC START] Op 96 | Port 1 | Latency: 9
+Cycle 2659 | [FETCH] Op 97
+Cycle 2659 | [CALC START] Op 97 | Port 0 | Latency: 9
+Cycle 2660 | [FETCH] Op 98
+Cycle 2661 | [FETCH] Op 99
+Cycle 2662 | [FETCH] Op 100
+Cycle 2663 | [FETCH] Op 101
+Cycle 2667 | [CALC START] Op 98 | Port 1 | Latency: 9
+Cycle 2667 | [CALC COMPLETE] Op 96 | pc15 r7 := IMC(r7, #4, ADD) : 32, 4 => 36
+Cycle 2668 | [CALC COMPLETE] Op 97 | pc16 r8 := IMC(r8, #64, ADD) : 1536, 64 => 1600
+Cycle 2672 | [MEMORY WRITEBACK START] Op 92
+Cycle 2674 | [LOAD COMPLETE] Op 92 | Loads completed: 1/2 | load mem[32] = -1
+Cycle 2675 | [LOAD START] Op 92 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2676 | [CALC START] Op 99 | Port 1 | Latency: 9
+Cycle 2676 | [CALC COMPLETE] Op 98 | pc17 r9 := IMC(r9, #64, ADD) : 512, 64 => 576
+Cycle 2677 | [CALC START] Op 100 | Port 0 | Latency: 9
+Cycle 2685 | [CALC COMPLETE] Op 99 | pc18 r10 := IMC(r10, #4, ADD) : 1056, 4 => 1060
+Cycle 2686 | [CALC COMPLETE] Op 100 | pc19 r5 := IMC(r5, #1, ADD) : 8, 1 => 9
+Cycle 2687 | [CALC START] Op 101 | Port 1 | Latency: 13
+Cycle 2693 | [MEMORY WRITEBACK START] Op 92
+Cycle 2695 | [LOAD COMPLETE] Op 92 | Loads completed: 2/2 | load mem[1536] = -2
+Cycle 2696 | [CALC START] Op 92 | Port 0 | Latency: 105
+Cycle 2700 | [CALC COMPLETE] Op 101 | pc20 BRANCH(r5 != r6) -> pc11 : 9 != 16 => TAKEN
+Cycle 2801 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2801 | [CALC COMPLETE] Op 92 | pc11 r2 := IMC([r7], [r8], MUL) : -1, -2 => 2
+Cycle 2819 | [MEMORY WRITEBACK START] Op 93
+Cycle 2821 | [LOAD COMPLETE] Op 93 | Loads completed: 1/2 | load mem[512] = 3
+Cycle 2822 | [LOAD START] Op 93 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2840 | [MEMORY WRITEBACK START] Op 93
+Cycle 2842 | [LOAD COMPLETE] Op 93 | Loads completed: 2/2 | load mem[1056] = 1
+Cycle 2843 | [CALC START] Op 93 | Port 1 | Latency: 105
+Cycle 2948 | [CALC COMPLETE] Op 93 | pc12 r3 := IMC([r9], [r10], MUL) : 3, 1 => 3
+Cycle 2949 | [CALC START] Op 94 | Port 1 | Latency: 9
+Cycle 2958 | [CALC COMPLETE] Op 94 | pc13 r4 := IMC(r2, r3, ADD) : 2, 3 => 5
+Cycle 2959 | [CALC START] Op 95 | Port 1 | Latency: 9
+Cycle 2968 | [CALC COMPLETE] Op 95 | pc14 r1 := IMC(r1, r4, ADD) : -11, 5 => -6
+Cycle 2969 | [FETCH] Op 102
+Cycle 2969 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2970 | [FETCH] Op 103
+Cycle 2971 | [FETCH] Op 104
+Cycle 2972 | [FETCH] Op 105
+Cycle 2973 | [FETCH] Op 106
+Cycle 2973 | [CALC START] Op 106 | Port 1 | Latency: 9
+Cycle 2974 | [FETCH] Op 107
+Cycle 2974 | [CALC START] Op 107 | Port 0 | Latency: 9
+Cycle 2975 | [FETCH] Op 108
+Cycle 2976 | [FETCH] Op 109
+Cycle 2977 | [FETCH] Op 110
+Cycle 2978 | [FETCH] Op 111
+Cycle 2982 | [CALC START] Op 108 | Port 1 | Latency: 9
+Cycle 2982 | [CALC COMPLETE] Op 106 | pc15 r7 := IMC(r7, #4, ADD) : 36, 4 => 40
+Cycle 2983 | [CALC COMPLETE] Op 107 | pc16 r8 := IMC(r8, #64, ADD) : 1600, 64 => 1664
+Cycle 2987 | [MEMORY WRITEBACK START] Op 102
+Cycle 2989 | [LOAD COMPLETE] Op 102 | Loads completed: 1/2 | load mem[36] = -5
+Cycle 2990 | [LOAD START] Op 102 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 2991 | [CALC START] Op 109 | Port 1 | Latency: 9
+Cycle 2991 | [CALC COMPLETE] Op 108 | pc17 r9 := IMC(r9, #64, ADD) : 576, 64 => 640
+Cycle 2992 | [CALC START] Op 110 | Port 0 | Latency: 9
+Cycle 3000 | [CALC COMPLETE] Op 109 | pc18 r10 := IMC(r10, #4, ADD) : 1060, 4 => 1064
+Cycle 3001 | [CALC COMPLETE] Op 110 | pc19 r5 := IMC(r5, #1, ADD) : 9, 1 => 10
+Cycle 3002 | [CALC START] Op 111 | Port 1 | Latency: 13
+Cycle 3008 | [MEMORY WRITEBACK START] Op 102
+Cycle 3010 | [LOAD COMPLETE] Op 102 | Loads completed: 2/2 | load mem[1600] = -3
+Cycle 3011 | [CALC START] Op 102 | Port 0 | Latency: 105
+Cycle 3015 | [CALC COMPLETE] Op 111 | pc20 BRANCH(r5 != r6) -> pc11 : 10 != 16 => TAKEN
+Cycle 3116 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3116 | [CALC COMPLETE] Op 102 | pc11 r2 := IMC([r7], [r8], MUL) : -5, -3 => 15
+Cycle 3134 | [MEMORY WRITEBACK START] Op 103
+Cycle 3136 | [LOAD COMPLETE] Op 103 | Loads completed: 1/2 | load mem[576] = 5
+Cycle 3137 | [LOAD START] Op 103 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3155 | [MEMORY WRITEBACK START] Op 103
+Cycle 3157 | [LOAD COMPLETE] Op 103 | Loads completed: 2/2 | load mem[1060] = -3
+Cycle 3158 | [CALC START] Op 103 | Port 1 | Latency: 105
+Cycle 3263 | [CALC COMPLETE] Op 103 | pc12 r3 := IMC([r9], [r10], MUL) : 5, -3 => -15
+Cycle 3264 | [CALC START] Op 104 | Port 1 | Latency: 9
+Cycle 3273 | [CALC COMPLETE] Op 104 | pc13 r4 := IMC(r2, r3, ADD) : 15, -15 => 0
+Cycle 3274 | [CALC START] Op 105 | Port 1 | Latency: 9
+Cycle 3283 | [CALC COMPLETE] Op 105 | pc14 r1 := IMC(r1, r4, ADD) : -6, 0 => -6
+Cycle 3284 | [FETCH] Op 112
+Cycle 3284 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3285 | [FETCH] Op 113
+Cycle 3286 | [FETCH] Op 114
+Cycle 3287 | [FETCH] Op 115
+Cycle 3288 | [FETCH] Op 116
+Cycle 3288 | [CALC START] Op 116 | Port 1 | Latency: 9
+Cycle 3289 | [FETCH] Op 117
+Cycle 3289 | [CALC START] Op 117 | Port 0 | Latency: 9
+Cycle 3290 | [FETCH] Op 118
+Cycle 3291 | [FETCH] Op 119
+Cycle 3292 | [FETCH] Op 120
+Cycle 3293 | [FETCH] Op 121
+Cycle 3297 | [CALC START] Op 118 | Port 1 | Latency: 9
+Cycle 3297 | [CALC COMPLETE] Op 116 | pc15 r7 := IMC(r7, #4, ADD) : 40, 4 => 44
+Cycle 3298 | [CALC COMPLETE] Op 117 | pc16 r8 := IMC(r8, #64, ADD) : 1664, 64 => 1728
+Cycle 3302 | [MEMORY WRITEBACK START] Op 112
+Cycle 3304 | [LOAD COMPLETE] Op 112 | Loads completed: 1/2 | load mem[40] = 2
+Cycle 3305 | [LOAD START] Op 112 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3306 | [CALC START] Op 119 | Port 1 | Latency: 9
+Cycle 3306 | [CALC COMPLETE] Op 118 | pc17 r9 := IMC(r9, #64, ADD) : 640, 64 => 704
+Cycle 3307 | [CALC START] Op 120 | Port 0 | Latency: 9
+Cycle 3315 | [CALC COMPLETE] Op 119 | pc18 r10 := IMC(r10, #4, ADD) : 1064, 4 => 1068
+Cycle 3316 | [CALC COMPLETE] Op 120 | pc19 r5 := IMC(r5, #1, ADD) : 10, 1 => 11
+Cycle 3317 | [CALC START] Op 121 | Port 1 | Latency: 13
+Cycle 3323 | [MEMORY WRITEBACK START] Op 112
+Cycle 3325 | [LOAD COMPLETE] Op 112 | Loads completed: 2/2 | load mem[1664] = -4
+Cycle 3326 | [CALC START] Op 112 | Port 0 | Latency: 105
+Cycle 3330 | [CALC COMPLETE] Op 121 | pc20 BRANCH(r5 != r6) -> pc11 : 11 != 16 => TAKEN
+Cycle 3431 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3431 | [CALC COMPLETE] Op 112 | pc11 r2 := IMC([r7], [r8], MUL) : 2, -4 => -8
+Cycle 3449 | [MEMORY WRITEBACK START] Op 113
+Cycle 3451 | [LOAD COMPLETE] Op 113 | Loads completed: 1/2 | load mem[640] = -4
+Cycle 3452 | [LOAD START] Op 113 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3470 | [MEMORY WRITEBACK START] Op 113
+Cycle 3472 | [LOAD COMPLETE] Op 113 | Loads completed: 2/2 | load mem[1064] = 2
+Cycle 3473 | [CALC START] Op 113 | Port 1 | Latency: 105
+Cycle 3578 | [CALC COMPLETE] Op 113 | pc12 r3 := IMC([r9], [r10], MUL) : -4, 2 => -8
+Cycle 3579 | [CALC START] Op 114 | Port 1 | Latency: 9
+Cycle 3588 | [CALC COMPLETE] Op 114 | pc13 r4 := IMC(r2, r3, ADD) : -8, -8 => -16
+Cycle 3589 | [CALC START] Op 115 | Port 1 | Latency: 9
+Cycle 3598 | [CALC COMPLETE] Op 115 | pc14 r1 := IMC(r1, r4, ADD) : -6, -16 => -22
+Cycle 3599 | [FETCH] Op 122
+Cycle 3599 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3600 | [FETCH] Op 123
+Cycle 3601 | [FETCH] Op 124
+Cycle 3602 | [FETCH] Op 125
+Cycle 3603 | [FETCH] Op 126
+Cycle 3603 | [CALC START] Op 126 | Port 1 | Latency: 9
+Cycle 3604 | [FETCH] Op 127
+Cycle 3604 | [CALC START] Op 127 | Port 0 | Latency: 9
+Cycle 3605 | [FETCH] Op 128
+Cycle 3606 | [FETCH] Op 129
+Cycle 3607 | [FETCH] Op 130
+Cycle 3608 | [FETCH] Op 131
+Cycle 3612 | [CALC START] Op 128 | Port 1 | Latency: 9
+Cycle 3612 | [CALC COMPLETE] Op 126 | pc15 r7 := IMC(r7, #4, ADD) : 44, 4 => 48
+Cycle 3613 | [CALC COMPLETE] Op 127 | pc16 r8 := IMC(r8, #64, ADD) : 1728, 64 => 1792
+Cycle 3617 | [MEMORY WRITEBACK START] Op 122
+Cycle 3619 | [LOAD COMPLETE] Op 122 | Loads completed: 1/2 | load mem[44] = -2
+Cycle 3620 | [LOAD START] Op 122 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3621 | [CALC START] Op 129 | Port 1 | Latency: 9
+Cycle 3621 | [CALC COMPLETE] Op 128 | pc17 r9 := IMC(r9, #64, ADD) : 704, 64 => 768
+Cycle 3622 | [CALC START] Op 130 | Port 0 | Latency: 9
+Cycle 3630 | [CALC COMPLETE] Op 129 | pc18 r10 := IMC(r10, #4, ADD) : 1068, 4 => 1072
+Cycle 3631 | [CALC COMPLETE] Op 130 | pc19 r5 := IMC(r5, #1, ADD) : 11, 1 => 12
+Cycle 3632 | [CALC START] Op 131 | Port 1 | Latency: 13
+Cycle 3638 | [MEMORY WRITEBACK START] Op 122
+Cycle 3640 | [LOAD COMPLETE] Op 122 | Loads completed: 2/2 | load mem[1728] = 4
+Cycle 3641 | [CALC START] Op 122 | Port 0 | Latency: 105
+Cycle 3645 | [CALC COMPLETE] Op 131 | pc20 BRANCH(r5 != r6) -> pc11 : 12 != 16 => TAKEN
+Cycle 3746 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3746 | [CALC COMPLETE] Op 122 | pc11 r2 := IMC([r7], [r8], MUL) : -2, 4 => -8
+Cycle 3764 | [MEMORY WRITEBACK START] Op 123
+Cycle 3766 | [LOAD COMPLETE] Op 123 | Loads completed: 1/2 | load mem[704] = -2
+Cycle 3767 | [LOAD START] Op 123 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3785 | [MEMORY WRITEBACK START] Op 123
+Cycle 3787 | [LOAD COMPLETE] Op 123 | Loads completed: 2/2 | load mem[1068] = -2
+Cycle 3788 | [CALC START] Op 123 | Port 1 | Latency: 105
+Cycle 3893 | [CALC COMPLETE] Op 123 | pc12 r3 := IMC([r9], [r10], MUL) : -2, -2 => 4
+Cycle 3894 | [CALC START] Op 124 | Port 1 | Latency: 9
+Cycle 3903 | [CALC COMPLETE] Op 124 | pc13 r4 := IMC(r2, r3, ADD) : -8, 4 => -4
+Cycle 3904 | [CALC START] Op 125 | Port 1 | Latency: 9
+Cycle 3913 | [CALC COMPLETE] Op 125 | pc14 r1 := IMC(r1, r4, ADD) : -22, -4 => -26
+Cycle 3914 | [FETCH] Op 132
+Cycle 3914 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3915 | [FETCH] Op 133
+Cycle 3916 | [FETCH] Op 134
+Cycle 3917 | [FETCH] Op 135
+Cycle 3918 | [FETCH] Op 136
+Cycle 3918 | [CALC START] Op 136 | Port 1 | Latency: 9
+Cycle 3919 | [FETCH] Op 137
+Cycle 3919 | [CALC START] Op 137 | Port 0 | Latency: 9
+Cycle 3920 | [FETCH] Op 138
+Cycle 3921 | [FETCH] Op 139
+Cycle 3922 | [FETCH] Op 140
+Cycle 3923 | [FETCH] Op 141
+Cycle 3927 | [CALC START] Op 138 | Port 1 | Latency: 9
+Cycle 3927 | [CALC COMPLETE] Op 136 | pc15 r7 := IMC(r7, #4, ADD) : 48, 4 => 52
+Cycle 3928 | [CALC COMPLETE] Op 137 | pc16 r8 := IMC(r8, #64, ADD) : 1792, 64 => 1856
+Cycle 3932 | [MEMORY WRITEBACK START] Op 132
+Cycle 3934 | [LOAD COMPLETE] Op 132 | Loads completed: 1/2 | load mem[48] = 5
+Cycle 3935 | [LOAD START] Op 132 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 3936 | [CALC START] Op 139 | Port 1 | Latency: 9
+Cycle 3936 | [CALC COMPLETE] Op 138 | pc17 r9 := IMC(r9, #64, ADD) : 768, 64 => 832
+Cycle 3937 | [CALC START] Op 140 | Port 0 | Latency: 9
+Cycle 3945 | [CALC COMPLETE] Op 139 | pc18 r10 := IMC(r10, #4, ADD) : 1072, 4 => 1076
+Cycle 3946 | [CALC COMPLETE] Op 140 | pc19 r5 := IMC(r5, #1, ADD) : 12, 1 => 13
+Cycle 3947 | [CALC START] Op 141 | Port 1 | Latency: 13
+Cycle 3953 | [MEMORY WRITEBACK START] Op 132
+Cycle 3955 | [LOAD COMPLETE] Op 132 | Loads completed: 2/2 | load mem[1792] = 3
+Cycle 3956 | [CALC START] Op 132 | Port 0 | Latency: 105
+Cycle 3960 | [CALC COMPLETE] Op 141 | pc20 BRANCH(r5 != r6) -> pc11 : 13 != 16 => TAKEN
+Cycle 4061 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4061 | [CALC COMPLETE] Op 132 | pc11 r2 := IMC([r7], [r8], MUL) : 5, 3 => 15
+Cycle 4079 | [MEMORY WRITEBACK START] Op 133
+Cycle 4081 | [LOAD COMPLETE] Op 133 | Loads completed: 1/2 | load mem[768] = 0
+Cycle 4082 | [LOAD START] Op 133 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4100 | [MEMORY WRITEBACK START] Op 133
+Cycle 4102 | [LOAD COMPLETE] Op 133 | Loads completed: 2/2 | load mem[1072] = 3
+Cycle 4103 | [CALC START] Op 133 | Port 1 | Latency: 105
+Cycle 4208 | [CALC COMPLETE] Op 133 | pc12 r3 := IMC([r9], [r10], MUL) : 0, 3 => 0
+Cycle 4209 | [CALC START] Op 134 | Port 1 | Latency: 9
+Cycle 4218 | [CALC COMPLETE] Op 134 | pc13 r4 := IMC(r2, r3, ADD) : 15, 0 => 15
+Cycle 4219 | [CALC START] Op 135 | Port 1 | Latency: 9
+Cycle 4228 | [CALC COMPLETE] Op 135 | pc14 r1 := IMC(r1, r4, ADD) : -26, 15 => -11
+Cycle 4229 | [FETCH] Op 142
+Cycle 4229 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4230 | [FETCH] Op 143
+Cycle 4231 | [FETCH] Op 144
+Cycle 4232 | [FETCH] Op 145
+Cycle 4233 | [FETCH] Op 146
+Cycle 4233 | [CALC START] Op 146 | Port 1 | Latency: 9
+Cycle 4234 | [FETCH] Op 147
+Cycle 4234 | [CALC START] Op 147 | Port 0 | Latency: 9
+Cycle 4235 | [FETCH] Op 148
+Cycle 4236 | [FETCH] Op 149
+Cycle 4237 | [FETCH] Op 150
+Cycle 4238 | [FETCH] Op 151
+Cycle 4242 | [CALC START] Op 148 | Port 1 | Latency: 9
+Cycle 4242 | [CALC COMPLETE] Op 146 | pc15 r7 := IMC(r7, #4, ADD) : 52, 4 => 56
+Cycle 4243 | [CALC COMPLETE] Op 147 | pc16 r8 := IMC(r8, #64, ADD) : 1856, 64 => 1920
+Cycle 4247 | [MEMORY WRITEBACK START] Op 142
+Cycle 4249 | [LOAD COMPLETE] Op 142 | Loads completed: 1/2 | load mem[52] = 1
+Cycle 4250 | [LOAD START] Op 142 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4251 | [CALC START] Op 149 | Port 1 | Latency: 9
+Cycle 4251 | [CALC COMPLETE] Op 148 | pc17 r9 := IMC(r9, #64, ADD) : 832, 64 => 896
+Cycle 4252 | [CALC START] Op 150 | Port 0 | Latency: 9
+Cycle 4260 | [CALC COMPLETE] Op 149 | pc18 r10 := IMC(r10, #4, ADD) : 1076, 4 => 1080
+Cycle 4261 | [CALC COMPLETE] Op 150 | pc19 r5 := IMC(r5, #1, ADD) : 13, 1 => 14
+Cycle 4262 | [CALC START] Op 151 | Port 1 | Latency: 13
+Cycle 4268 | [MEMORY WRITEBACK START] Op 142
+Cycle 4270 | [LOAD COMPLETE] Op 142 | Loads completed: 2/2 | load mem[1856] = 2
+Cycle 4271 | [CALC START] Op 142 | Port 0 | Latency: 105
+Cycle 4275 | [CALC COMPLETE] Op 151 | pc20 BRANCH(r5 != r6) -> pc11 : 14 != 16 => TAKEN
+Cycle 4376 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4376 | [CALC COMPLETE] Op 142 | pc11 r2 := IMC([r7], [r8], MUL) : 1, 2 => 2
+Cycle 4394 | [MEMORY WRITEBACK START] Op 143
+Cycle 4396 | [LOAD COMPLETE] Op 143 | Loads completed: 1/2 | load mem[832] = 2
+Cycle 4397 | [LOAD START] Op 143 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4415 | [MEMORY WRITEBACK START] Op 143
+Cycle 4417 | [LOAD COMPLETE] Op 143 | Loads completed: 2/2 | load mem[1076] = -1
+Cycle 4418 | [CALC START] Op 143 | Port 1 | Latency: 105
+Cycle 4523 | [CALC COMPLETE] Op 143 | pc12 r3 := IMC([r9], [r10], MUL) : 2, -1 => -2
+Cycle 4524 | [CALC START] Op 144 | Port 1 | Latency: 9
+Cycle 4533 | [CALC COMPLETE] Op 144 | pc13 r4 := IMC(r2, r3, ADD) : 2, -2 => 0
+Cycle 4534 | [CALC START] Op 145 | Port 1 | Latency: 9
+Cycle 4543 | [CALC COMPLETE] Op 145 | pc14 r1 := IMC(r1, r4, ADD) : -11, 0 => -11
+Cycle 4544 | [FETCH] Op 152
+Cycle 4544 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4545 | [FETCH] Op 153
+Cycle 4546 | [FETCH] Op 154
+Cycle 4547 | [FETCH] Op 155
+Cycle 4548 | [FETCH] Op 156
+Cycle 4548 | [CALC START] Op 156 | Port 1 | Latency: 9
+Cycle 4549 | [FETCH] Op 157
+Cycle 4549 | [CALC START] Op 157 | Port 0 | Latency: 9
+Cycle 4550 | [FETCH] Op 158
+Cycle 4551 | [FETCH] Op 159
+Cycle 4552 | [FETCH] Op 160
+Cycle 4553 | [FETCH] Op 161
+Cycle 4557 | [CALC START] Op 158 | Port 1 | Latency: 9
+Cycle 4557 | [CALC COMPLETE] Op 156 | pc15 r7 := IMC(r7, #4, ADD) : 56, 4 => 60
+Cycle 4558 | [CALC COMPLETE] Op 157 | pc16 r8 := IMC(r8, #64, ADD) : 1920, 64 => 1984
+Cycle 4562 | [MEMORY WRITEBACK START] Op 152
+Cycle 4564 | [LOAD COMPLETE] Op 152 | Loads completed: 1/2 | load mem[56] = -3
+Cycle 4565 | [LOAD START] Op 152 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4566 | [CALC START] Op 159 | Port 1 | Latency: 9
+Cycle 4566 | [CALC COMPLETE] Op 158 | pc17 r9 := IMC(r9, #64, ADD) : 896, 64 => 960
+Cycle 4567 | [CALC START] Op 160 | Port 0 | Latency: 9
+Cycle 4575 | [CALC COMPLETE] Op 159 | pc18 r10 := IMC(r10, #4, ADD) : 1080, 4 => 1084
+Cycle 4576 | [CALC COMPLETE] Op 160 | pc19 r5 := IMC(r5, #1, ADD) : 14, 1 => 15
+Cycle 4577 | [CALC START] Op 161 | Port 1 | Latency: 13
+Cycle 4583 | [MEMORY WRITEBACK START] Op 152
+Cycle 4585 | [LOAD COMPLETE] Op 152 | Loads completed: 2/2 | load mem[1920] = 1
+Cycle 4586 | [CALC START] Op 152 | Port 0 | Latency: 105
+Cycle 4590 | [CALC COMPLETE] Op 161 | pc20 BRANCH(r5 != r6) -> pc11 : 15 != 16 => TAKEN
+Cycle 4691 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4691 | [CALC COMPLETE] Op 152 | pc11 r2 := IMC([r7], [r8], MUL) : -3, 1 => -3
+Cycle 4709 | [MEMORY WRITEBACK START] Op 153
+Cycle 4711 | [LOAD COMPLETE] Op 153 | Loads completed: 1/2 | load mem[896] = 4
+Cycle 4712 | [LOAD START] Op 153 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4730 | [MEMORY WRITEBACK START] Op 153
+Cycle 4732 | [LOAD COMPLETE] Op 153 | Loads completed: 2/2 | load mem[1080] = 4
+Cycle 4733 | [CALC START] Op 153 | Port 1 | Latency: 105
+Cycle 4838 | [CALC COMPLETE] Op 153 | pc12 r3 := IMC([r9], [r10], MUL) : 4, 4 => 16
+Cycle 4839 | [CALC START] Op 154 | Port 1 | Latency: 9
+Cycle 4848 | [CALC COMPLETE] Op 154 | pc13 r4 := IMC(r2, r3, ADD) : -3, 16 => 13
+Cycle 4849 | [CALC START] Op 155 | Port 1 | Latency: 9
+Cycle 4858 | [CALC COMPLETE] Op 155 | pc14 r1 := IMC(r1, r4, ADD) : -11, 13 => 2
+Cycle 4859 | [FETCH] Op 162
+Cycle 4859 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4860 | [FETCH] Op 163
+Cycle 4861 | [FETCH] Op 164
+Cycle 4862 | [FETCH] Op 165
+Cycle 4863 | [FETCH] Op 166
+Cycle 4863 | [CALC START] Op 166 | Port 1 | Latency: 9
+Cycle 4864 | [FETCH] Op 167
+Cycle 4864 | [CALC START] Op 167 | Port 0 | Latency: 9
+Cycle 4865 | [FETCH] Op 168
+Cycle 4866 | [FETCH] Op 169
+Cycle 4867 | [FETCH] Op 170
+Cycle 4868 | [FETCH] Op 171
+Cycle 4872 | [CALC START] Op 168 | Port 1 | Latency: 9
+Cycle 4872 | [CALC COMPLETE] Op 166 | pc15 r7 := IMC(r7, #4, ADD) : 60, 4 => 64
+Cycle 4873 | [CALC COMPLETE] Op 167 | pc16 r8 := IMC(r8, #64, ADD) : 1984, 64 => 2048
+Cycle 4877 | [MEMORY WRITEBACK START] Op 162
+Cycle 4879 | [LOAD COMPLETE] Op 162 | Loads completed: 1/2 | load mem[60] = 4
+Cycle 4880 | [LOAD START] Op 162 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 4881 | [CALC START] Op 169 | Port 1 | Latency: 9
+Cycle 4881 | [CALC COMPLETE] Op 168 | pc17 r9 := IMC(r9, #64, ADD) : 960, 64 => 1024
+Cycle 4882 | [CALC START] Op 170 | Port 0 | Latency: 9
+Cycle 4890 | [CALC COMPLETE] Op 169 | pc18 r10 := IMC(r10, #4, ADD) : 1084, 4 => 1088
+Cycle 4891 | [CALC COMPLETE] Op 170 | pc19 r5 := IMC(r5, #1, ADD) : 15, 1 => 16
+Cycle 4892 | [CALC START] Op 171 | Port 1 | Latency: 13
+Cycle 4898 | [MEMORY WRITEBACK START] Op 162
+Cycle 4900 | [LOAD COMPLETE] Op 162 | Loads completed: 2/2 | load mem[1984] = 0
+Cycle 4901 | [CALC START] Op 162 | Port 0 | Latency: 105
+Cycle 4905 | [CALC COMPLETE] Op 171 | pc20 BRANCH(r5 != r6) -> pc11 : 16 != 16 => not taken
+Cycle 5006 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5006 | [CALC COMPLETE] Op 162 | pc11 r2 := IMC([r7], [r8], MUL) : 4, 0 => 0
+Cycle 5024 | [MEMORY WRITEBACK START] Op 163
+Cycle 5026 | [LOAD COMPLETE] Op 163 | Loads completed: 1/2 | load mem[960] = -5
+Cycle 5027 | [LOAD START] Op 163 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5045 | [MEMORY WRITEBACK START] Op 163
+Cycle 5047 | [LOAD COMPLETE] Op 163 | Loads completed: 2/2 | load mem[1084] = 0
+Cycle 5048 | [CALC START] Op 163 | Port 1 | Latency: 105
+Cycle 5153 | [CALC COMPLETE] Op 163 | pc12 r3 := IMC([r9], [r10], MUL) : -5, 0 => 0
+Cycle 5154 | [CALC START] Op 164 | Port 1 | Latency: 9
+Cycle 5163 | [CALC COMPLETE] Op 164 | pc13 r4 := IMC(r2, r3, ADD) : 0, 0 => 0
+Cycle 5164 | [CALC START] Op 165 | Port 1 | Latency: 9
+Cycle 5173 | [CALC COMPLETE] Op 165 | pc14 r1 := IMC(r1, r4, ADD) : 2, 0 => 2
+Cycle 5174 | [FETCH] Op 172
+Cycle 5174 | [CALC START] Op 172 | Port 1 | Latency: 9
+Cycle 5183 | [CALC COMPLETE] Op 172 | pc21 [r11] := IMC(r1, #0, ADD) : 2, 0 => 2
+Cycle 5184 | [STORE START] Op 172 | Address: 2 | Visit: 16 | Writeback: 2
+Cycle 5202 | [MEMORY WRITEBACK START] Op 172
+Cycle 5204 | [STORE COMPLETE] Op 172 | store mem[2048] = 2
+
+====================================
+SIMULATION COMPLETED
+Total Cycles: 5204
+====================================
+
+---------------- FINAL RESULT (Design 4: Fine-Grained Issue) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  C (n x n)  [16 x 16]
+          2     -12     -30     -36     -12     -46     -32      97      31      48     -10      16     -34     -43     -22     -52
+          7      12     -50     -19     -46     -25       8      -6      46      30      90     -27     -40     -12     -35     -35
+         96      -4     -36       7       3     -45     -18      -2     -55      69      24      36      35     -24     -17     -12
+         26      63       6       6     -30      -4     -38     -47      37     -51      41      28      83     -19     -37      17
+         17      -7     109     -33      -2      -1       3     -31      -8     -11     -79      81      -6      47       4       8
+        -74      39      31      44      43      19     -38       2     -36     -53      16     -47      21      31      62      16
+          4      -7      -4       2     104      -8       9     -39      -3       2     -53      -6     -44      58       1      40
+        -36      -9     -31      31       2      63      19      45     -79      11      -6     -83      34      -6      11       0
+        -15     -49       3      22     -39      -3      90      -8       5     -18       3       0     -25      -9     -17      21
+         12     -28     -45     -14     -52      14       2      33      40      58     -26       1     -12     -83      38     -18
+        -27     -48     -10     -41     -31      -9      -2     -15     110      -4      30      13     -62       3     -19     -45
+         40      13     -18     -37      -4     -51     -50      66     -13      13      41      54      -9     -31     -23     -44
+         36      91     -20     -38       7     -21     -37      -1       2     -41      69       2      39      18     -54      18
+         71      21      39      33       2       4     -18     -51     -54      43     -51      11      60      51       9     -13
+        -53      34      27      77      14      -9       7     -51     -16     -32      11     -51      54       2      34      61
+         -8     -45      58       2      42      30      21     -26     -16     -10     -91      56     -44      -4      39      52
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 5204
