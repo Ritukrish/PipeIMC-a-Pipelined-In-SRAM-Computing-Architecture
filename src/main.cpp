@@ -218,7 +218,8 @@ int main(int argc, char* argv[]) {
 
     if (func) {
         log_file
-            << fsim->listing()
+            << fsim->listing() << "\n"
+            << fsim->inputs()
             << "\nEach line below is one clock-cycle event. At [CALC COMPLETE] the real ALU operation is computed,\n"
             << "after the Table III calculation cycles have elapsed; loads/stores read/write the real memory.\n\n";
     }

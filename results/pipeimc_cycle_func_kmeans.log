@@ -46,6 +46,22 @@ IMC program (38 static operations):
   pc36  BRANCH(r9 != r10) -> pc11
   pc37  [r22] := IMC(r12, #0, ADD)
 
+INPUT DATA (the values the kernel computes on; signed 32-bit words):
+  points, rows = feature f, cols = point p  [8 x 256]  (showing first 8 x 32)
+        -20     -13      -6       1       8      15     -19     -12      -5       2       9      16     -18     -11      -4       3      10      17     -17     -10      -3       4      11      18     -16      -9      -2       5      12      19     -15      -8
+         -9      -1       7      15     -18     -10      -2       6      14     -19     -11      -3       5      13     -20     -12      -4       4      12      20     -13      -5       3      11      19     -14      -6       2      10      18     -15      -7
+          2      11      20     -12      -3       6      15     -17      -8       1      10      19     -13      -4       5      14     -18      -9       0       9      18     -14      -5       4      13     -19     -10      -1       8      17     -15      -6
+         13     -18      -8       2      12     -19      -9       1      11     -20     -10       0      10      20     -11      -1       9      19     -12      -2       8      18     -13      -3       7      17     -14      -4       6      16     -15      -5
+        -17      -6       5      16     -14      -3       8      19     -11       0      11     -19      -8       3      14     -16      -5       6      17     -13      -2       9      20     -10       1      12     -18      -7       4      15     -15      -4
+         -6       6      18     -11       1      13     -16      -4       8      20      -9       3      15     -14      -2      10     -19      -7       5      17     -12       0      12     -17      -5       7      19     -10       2      14     -15      -3
+          5      18     -10       3      16     -12       1      14     -14      -1      12     -16      -3      10     -18      -5       8     -20      -7       6      19      -9       4      17     -11       2      15     -13       0      13     -15      -2
+         16     -11       3      17     -10       4      18      -9       5      19      -8       6      20      -7       7     -20      -6       8     -19      -5       9     -18      -4      10     -17      -3      11     -16      -2      12     -15      -1
+  centroids, rows = cluster c, cols = feature f  [4 x 8]
+        -12      -7      -2       3       8      13     -13      -8
+          1       6      11     -15     -10      -5       0       5
+         14     -12      -7      -2       3       8      13     -13
+         -4       1       6      11     -15     -10      -5       0
+
 Each line below is one clock-cycle event. At [CALC COMPLETE] the real ALU operation is computed,
 after the Table III calculation cycles have elapsed; loads/stores read/write the real memory.
 
@@ -977,6 +993,28 @@ SIMULATION COMPLETED
 Total Cycles: 7558
 ====================================
 
+---------------- FINAL RESULT (Design 1: In-Order Baseline) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  labels (nearest centroid index) of point p = row*n + col  [16 x 16]
+          3       1       0       1       2       1       1       2       3       1       2       1       0       3       0       3
+          3       3       0       1       3       0       2       1       3       0       1       3       1       2       3       3
+          1       3       1       2       0       3       1       2       2       3       1       0       1       2       1       1
+          2       3       1       2       1       0       3       0       3       3       3       0       1       3       0       2
+          1       3       0       1       3       1       2       3       3       1       3       1       2       0       3       1
+          2       2       3       1       0       1       2       1       1       2       3       1       2       1       0       3
+          0       3       3       3       0       1       3       0       2       1       3       0       1       3       1       2
+          3       3       1       3       1       2       0       3       1       2       2       3       1       0       1       2
+          1       1       2       3       1       2       1       0       3       0       3       3       3       0       1       3
+          0       2       1       3       0       1       3       1       2       3       3       1       3       1       2       0
+          3       1       2       2       3       1       0       1       2       1       1       2       3       1       2       1
+          0       3       0       3       3       3       0       1       3       0       2       1       3       0       1       3
+          1       2       3       3       1       3       1       2       0       3       1       2       2       3       1       0
+          1       2       1       1       2       3       1       2       1       0       3       0       3       3       3       0
+          1       3       0       2       1       3       0       1       3       1       2       3       3       1       3       1
+          2       0       3       1       2       2       3       1       0       1       2       1       1       2       3       1
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 7558
+
 ################ Design 2: Pipelined ################
 Cycle 1 | [FETCH] Op 1
 Cycle 1 | [CALC START] Op 1 | Port 1 | Latency: 9
@@ -1904,6 +1942,28 @@ SIMULATION COMPLETED
 Total Cycles: 6519
 ====================================
 
+---------------- FINAL RESULT (Design 2: Pipelined) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  labels (nearest centroid index) of point p = row*n + col  [16 x 16]
+          3       1       0       1       2       1       1       2       3       1       2       1       0       3       0       3
+          3       3       0       1       3       0       2       1       3       0       1       3       1       2       3       3
+          1       3       1       2       0       3       1       2       2       3       1       0       1       2       1       1
+          2       3       1       2       1       0       3       0       3       3       3       0       1       3       0       2
+          1       3       0       1       3       1       2       3       3       1       3       1       2       0       3       1
+          2       2       3       1       0       1       2       1       1       2       3       1       2       1       0       3
+          0       3       3       3       0       1       3       0       2       1       3       0       1       3       1       2
+          3       3       1       3       1       2       0       3       1       2       2       3       1       0       1       2
+          1       1       2       3       1       2       1       0       3       0       3       3       3       0       1       3
+          0       2       1       3       0       1       3       1       2       3       3       1       3       1       2       0
+          3       1       2       2       3       1       0       1       2       1       1       2       3       1       2       1
+          0       3       0       3       3       3       0       1       3       0       2       1       3       0       1       3
+          1       2       3       3       1       3       1       2       0       3       1       2       2       3       1       0
+          1       2       1       1       2       3       1       2       1       0       3       0       3       3       3       0
+          1       3       0       2       1       3       0       1       3       1       2       3       3       1       3       1
+          2       0       3       1       2       2       3       1       0       1       2       1       1       2       3       1
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 6519
+
 ################ Design 3: Pipelined + Renaming ################
 Cycle 1 | [FETCH] Op 1
 Cycle 1 | [CALC START] Op 1 | Port 1 | Latency: 9
@@ -2830,6 +2890,28 @@ Cycle 6083 | [STORE COMPLETE] Op 260 | store mem[8320] = 3
 SIMULATION COMPLETED
 Total Cycles: 6083
 ====================================
+
+---------------- FINAL RESULT (Design 3: Pipelined + Renaming) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  labels (nearest centroid index) of point p = row*n + col  [16 x 16]
+          3       1       0       1       2       1       1       2       3       1       2       1       0       3       0       3
+          3       3       0       1       3       0       2       1       3       0       1       3       1       2       3       3
+          1       3       1       2       0       3       1       2       2       3       1       0       1       2       1       1
+          2       3       1       2       1       0       3       0       3       3       3       0       1       3       0       2
+          1       3       0       1       3       1       2       3       3       1       3       1       2       0       3       1
+          2       2       3       1       0       1       2       1       1       2       3       1       2       1       0       3
+          0       3       3       3       0       1       3       0       2       1       3       0       1       3       1       2
+          3       3       1       3       1       2       0       3       1       2       2       3       1       0       1       2
+          1       1       2       3       1       2       1       0       3       0       3       3       3       0       1       3
+          0       2       1       3       0       1       3       1       2       3       3       1       3       1       2       0
+          3       1       2       2       3       1       0       1       2       1       1       2       3       1       2       1
+          0       3       0       3       3       3       0       1       3       0       2       1       3       0       1       3
+          1       2       3       3       1       3       1       2       0       3       1       2       2       3       1       0
+          1       2       1       1       2       3       1       2       1       0       3       0       3       3       3       0
+          1       3       0       2       1       3       0       1       3       1       2       3       3       1       3       1
+          2       0       3       1       2       2       3       1       0       1       2       1       1       2       3       1
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 6083
 
 ################ Design 4: Fine-Grained Issue ################
 Cycle 1 | [FETCH] Op 1
@@ -3822,3 +3904,25 @@ Cycle 4329 | [STORE COMPLETE] Op 260 | store mem[8320] = 3
 SIMULATION COMPLETED
 Total Cycles: 4329
 ====================================
+
+---------------- FINAL RESULT (Design 4: Fine-Grained Issue) ----------------
+Output computed by the simulated in-SRAM operations (all 256 elements):
+  labels (nearest centroid index) of point p = row*n + col  [16 x 16]
+          3       1       0       1       2       1       1       2       3       1       2       1       0       3       0       3
+          3       3       0       1       3       0       2       1       3       0       1       3       1       2       3       3
+          1       3       1       2       0       3       1       2       2       3       1       0       1       2       1       1
+          2       3       1       2       1       0       3       0       3       3       3       0       1       3       0       2
+          1       3       0       1       3       1       2       3       3       1       3       1       2       0       3       1
+          2       2       3       1       0       1       2       1       1       2       3       1       2       1       0       3
+          0       3       3       3       0       1       3       0       2       1       3       0       1       3       1       2
+          3       3       1       3       1       2       0       3       1       2       2       3       1       0       1       2
+          1       1       2       3       1       2       1       0       3       0       3       3       3       0       1       3
+          0       2       1       3       0       1       3       1       2       3       3       1       3       1       2       0
+          3       1       2       2       3       1       0       1       2       1       1       2       3       1       2       1
+          0       3       0       3       3       3       0       1       3       0       2       1       3       0       1       3
+          1       2       3       3       1       3       1       2       0       3       1       2       2       3       1       0
+          1       2       1       1       2       3       1       2       1       0       3       0       3       3       3       0
+          1       3       0       2       1       3       0       1       3       1       2       3       3       1       3       1
+          2       0       3       1       2       2       3       1       0       1       2       1       1       2       3       1
+Check against plain C++ host reference: PASS (256/256 correct)
+Cycles for one output element on this design: 4329

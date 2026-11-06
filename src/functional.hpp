@@ -24,6 +24,7 @@ public:
 
     size_t ops_per_element() const { return ops_; }
     bool all_pass() const;
+    std::string inputs() const;                  // input data, printed into the log
     std::string listing() const;                 // the IMC program
     std::string report() const;                  // functional check of every design that was run
 

@@ -2,7 +2,9 @@
 #include "trace_generator.hpp"
 #include "sim_engine.hpp"
 
+#include <algorithm>
 #include <cstdint>
+#include <iomanip>
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -78,6 +80,12 @@ struct Builder {
 };
 
 
+// A rectangular block of memory words (for printing inputs / outputs in the log).
+struct Region {
+    std::string label;
+    size_t base = 0, rows = 0, cols = 0, stride = 0;     // base and stride in 32-bit words
+};
+
 // One kernel: the IMC program, its initial memory, how each output element is started, and the host check.
 struct Program {
     std::string name;
@@ -85,7 +93,8 @@ struct Program {
     std::vector<uint32_t> mem_init;
     size_t elements = 0;
     std::function<void(uint32_t*, size_t)> setup;                                   // set index registers of element e
-    std::function<void(const std::vector<uint32_t>&, size_t&, size_t&)> check;      // checked, wrong
+    std::function<void(const std::vector<uint32_t>&, size_t&, size_t&, std::vector<uint32_t>&)> check;  // checked, wrong, expected[] (by memory word)
+    std::vector<Region> in_regions, out_regions;
     std::function<std::string(const std::vector<uint32_t>&)> sample;                // first computed outputs
 };
 
@@ -95,6 +104,8 @@ Program make_matmul(int n) {
     const uint32_t nn = n * n, A = 0, B = 4 * nn, C = 8 * nn;
     Program P; P.name = "matmul"; P.elements = nn; P.mem_init.assign(3 * nn, 0);
     for (uint32_t x = 0; x < nn; ++x) { P.mem_init[A / 4 + x] = pat(x, 7, 3, 11, 5); P.mem_init[B / 4 + x] = pat(x, 5, 1, 9, 4); }
+    P.in_regions = {{"A (n x n, row-major)", A / 4, (size_t)n, (size_t)n, (size_t)n}, {"B (n x n, row-major)", B / 4, (size_t)n, (size_t)n, (size_t)n}};
+    P.out_regions = {{"C (n x n)", C / 4, (size_t)n, (size_t)n, (size_t)n}};
     const int SUM = 1, W1 = 2, W2 = 3, W3 = 4, K = 5, LIM = 6, PA1 = 7, PB1 = 8, PA2 = 9, PB2 = 10, PC = 11, I4N = 14, J4 = 15, TI = 30, TJ = 31;
     const int32_t row = 4 * n;
     Builder b;
@@ -123,11 +134,11 @@ Program make_matmul(int n) {
     b.st(PC, SUM);
     P.code = b.p;
     P.setup = [=](uint32_t* r, size_t e) { r[TI] = e / n; r[TJ] = e % n; };
-    P.check = [=](const std::vector<uint32_t>& mem, size_t& checked, size_t& wrong) {
+    P.check = [=](const std::vector<uint32_t>& mem, size_t& checked, size_t& wrong, std::vector<uint32_t>& exp) {
         for (int i = 0; i < n; ++i) for (int j = 0; j < n; ++j) {
             uint32_t s = 0;
             for (int k = 0; k < n; ++k) s += mem[A / 4 + i * n + k] * mem[B / 4 + k * n + j] + mem[A / 4 + k * n + j] * mem[B / 4 + i * n + k];
-            ++checked; if (mem[C / 4 + i * n + j] != s) ++wrong;
+            exp[C / 4 + i * n + j] = s; ++checked; if (mem[C / 4 + i * n + j] != s) ++wrong;
         }
     };
     P.sample = [=](const std::vector<uint32_t>& mem) {
@@ -141,6 +152,10 @@ Program make_stencil(int n) {
     Program P; P.name = "stencil"; P.elements = static_cast<size_t>(X) * Y; P.mem_init.assign(2 * static_cast<size_t>(vol), 0);
     for (int z = 1; z <= Z; ++z) for (int y = 1; y <= Y; ++y) for (int x = 1; x <= X; ++x)
         P.mem_init[IN / 4 + (z * SY + y) * SX + x] = pat(x * 7 + y * 5 + z * 3, 1, 0, 13, 6);
+    for (int z = 1; z <= std::min(Z, 4); ++z) {
+        P.in_regions.push_back({"IN  plane z=" + std::to_string(z) + " (interior y,x)", IN / 4 + (size_t)(z * SY + 1) * SX + 1, (size_t)Y, (size_t)X, (size_t)SX});
+        P.out_regions.push_back({"OUT plane z=" + std::to_string(z) + " (interior y,x)", OUT / 4 + (size_t)(z * SY + 1) * SX + 1, (size_t)Y, (size_t)X, (size_t)SX});
+    }
     const int K = 1, LIM = 2, W1 = 3, W2 = 4, W3 = 5, W4 = 6, W5 = 7, W6 = 8, W7 = 9, XM = 10, XP = 11, YM = 12, YP = 13, ZM = 14, ZP = 15,
               PC = 16, PO = 17, T1 = 18, T2 = 19, RY = 30, RX = 31;
     const int32_t rowB = 4 * SX, planeB = 4 * SX * SY;
@@ -173,11 +188,11 @@ Program make_stencil(int n) {
     b.br(K, LIM, loop);
     P.code = b.p;
     P.setup = [=](uint32_t* r, size_t e) { r[RY] = e / X; r[RX] = e % X; };
-    P.check = [=](const std::vector<uint32_t>& mem, size_t& checked, size_t& wrong) {
+    P.check = [=](const std::vector<uint32_t>& mem, size_t& checked, size_t& wrong, std::vector<uint32_t>& exp) {
         auto at = [&](int z, int y, int x) { return mem[IN / 4 + (z * SY + y) * SX + x]; };
         for (int z = 1; z <= Z; ++z) for (int y = 1; y <= Y; ++y) for (int x = 1; x <= X; ++x) {
             uint32_t ref = 2 * (at(z, y, x - 1) + at(z, y, x + 1) + at(z, y - 1, x) + at(z, y + 1, x) + at(z - 1, y, x) + at(z + 1, y, x)) + 3 * at(z, y, x);
-            ++checked; if (mem[OUT / 4 + (z * SY + y) * SX + x] != ref) ++wrong;
+            exp[OUT / 4 + (z * SY + y) * SX + x] = ref; ++checked; if (mem[OUT / 4 + (z * SY + y) * SX + x] != ref) ++wrong;
         }
     };
     P.sample = [=](const std::vector<uint32_t>& mem) {
@@ -191,6 +206,9 @@ Program make_kmeans(int n) {
     Program P; P.name = "kmeans"; P.elements = P_; P.mem_init.assign(static_cast<size_t>(F) * P_ + Cn * F + P_, 0);
     for (int f = 0; f < F; ++f) for (int p = 0; p < P_; ++p) P.mem_init[PT / 4 + f * P_ + p] = pat(p * 7 + f * 11 + p * f, 1, 0, 41, 20);
     for (int c = 0; c < Cn; ++c) for (int f = 0; f < F; ++f) P.mem_init[CENT / 4 + c * F + f] = pat(c * 13 + f * 5, 1, 3, 31, 15);
+    P.in_regions = {{"points, rows = feature f, cols = point p", PT / 4, (size_t)F, (size_t)P_, (size_t)P_},
+                    {"centroids, rows = cluster c, cols = feature f", CENT / 4, (size_t)Cn, (size_t)F, (size_t)F}};
+    P.out_regions = {{"labels (nearest centroid index) of point p = row*n + col", OUT / 4, (size_t)n, (size_t)n, (size_t)n}};
     const int ACC = 1, D1 = 2, S1 = 3, D2 = 4, S2 = 5, SS = 6, FC = 7, LIMF = 8, CC = 9, LIMC = 10, BEST = 11, IDX = 12, MASK = 13, M2 = 14,
               TMP = 15, PF1 = 16, PF2 = 17, PC1 = 18, PC2 = 19, B1 = 20, B2 = 21, PO = 22, RP = 31;
     Builder b;
@@ -236,7 +254,7 @@ Program make_kmeans(int n) {
     b.st(PO, IDX);
     P.code = b.p;
     P.setup = [=](uint32_t* r, size_t e) { r[RP] = static_cast<uint32_t>(e); };
-    P.check = [=](const std::vector<uint32_t>& mem, size_t& checked, size_t& wrong) {
+    P.check = [=](const std::vector<uint32_t>& mem, size_t& checked, size_t& wrong, std::vector<uint32_t>& exp) {
         for (int p = 0; p < P_; ++p) {
             int32_t best = INT32_MAX; uint32_t idx = 0;
             for (int c = 0; c < Cn; ++c) {
@@ -244,7 +262,7 @@ Program make_kmeans(int n) {
                 for (int f = 0; f < F; ++f) { uint32_t d = mem[PT / 4 + f * P_ + p] - mem[CENT / 4 + c * F + f]; acc += d * d; }
                 if (static_cast<int32_t>(acc) < best) { best = static_cast<int32_t>(acc); idx = c; }
             }
-            ++checked; if (mem[OUT / 4 + p] != idx) ++wrong;
+            exp[OUT / 4 + p] = idx; ++checked; if (mem[OUT / 4 + p] != idx) ++wrong;
         }
     };
     P.sample = [=](const std::vector<uint32_t>& mem) {
@@ -362,6 +380,19 @@ static const char* design_name(SimMode m) {
     return "?";
 }
 
+static void print_region(std::ostream& os, const Region& r, const std::vector<uint32_t>& mem) {
+    const size_t maxr = 32, maxc = 32;
+    size_t rr = std::min(r.rows, maxr), cc = std::min(r.cols, maxc);
+    os << "  " << r.label << "  [" << r.rows << " x " << r.cols << "]";
+    if (rr < r.rows || cc < r.cols) os << "  (showing first " << rr << " x " << cc << ")";
+    os << "\n";
+    for (size_t i = 0; i < rr; ++i) {
+        os << "   ";
+        for (size_t j = 0; j < cc; ++j) os << std::setw(8) << static_cast<int32_t>(mem[r.base + i * r.stride + j]);
+        os << "\n";
+    }
+}
+
 struct FuncSim::Impl {
     Program prog;
     struct Result { std::string design; bool pass; size_t checked, wrong; uint64_t cycles; bool same_timing; std::string sample; };
@@ -390,8 +421,21 @@ uint64_t FuncSim::run(SimMode mode, std::ostream* log) {
         else if (c != cycles0) same = false;
     }
     Impl::Result r{design_name(mode), false, 0, 0, cycles0, same, P.sample(mem)};
-    P.check(mem, r.checked, r.wrong);
+    std::vector<uint32_t> expected(mem.size(), 0);
+    P.check(mem, r.checked, r.wrong, expected);
     r.pass = r.wrong == 0;
+    if (log) {
+        *log << "\n---------------- FINAL RESULT (" << design_name(mode) << ") ----------------\n";
+        *log << "Output computed by the simulated in-SRAM operations (all " << P.elements << " elements):\n";
+        for (const auto& reg : P.out_regions) print_region(*log, reg, mem);
+        *log << "Check against plain C++ host reference: " << (r.pass ? "PASS" : "FAIL") << " ("
+             << (r.checked - r.wrong) << "/" << r.checked << " correct)\n";
+        if (!r.pass) {
+            *log << "Host reference values:\n";
+            for (const auto& reg : P.out_regions) print_region(*log, reg, expected);
+        }
+        *log << "Cycles for one output element on this design: " << cycles0 << "\n";
+    }
     impl_->results.push_back(r);
     return cycles0;
 }
@@ -399,6 +443,13 @@ uint64_t FuncSim::run(SimMode mode, std::ostream* log) {
 bool FuncSim::all_pass() const {
     for (auto& r : impl_->results) if (!r.pass) return false;
     return !impl_->results.empty();
+}
+
+std::string FuncSim::inputs() const {
+    std::ostringstream os;
+    os << "INPUT DATA (the values the kernel computes on; signed 32-bit words):\n";
+    for (const auto& r : impl_->prog.in_regions) print_region(os, r, impl_->prog.mem_init);
+    return os.str();
 }
 
 std::string FuncSim::listing() const {
