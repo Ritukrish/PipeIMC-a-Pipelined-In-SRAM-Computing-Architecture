@@ -268,18 +268,72 @@ TraceGenerator::generate_matmul(int iterations, KernelData* data) {
 }
 
 // ============================================================
+// Shared helpers for the loop-structured kernels (stencil, kmeans)
+// ============================================================
+//
+// Like matmul, each kernel is a real loop:
+//   r20 = 0            loop counter
+//   r21 = trip count   loop limit
+//   loop body ...
+//   r20 = r20 + 1
+//   BRANCH while r20 != r21   (real_branch, outcome checked by the simulator)
+//
+// The loop body handles POINTS_PER_ITER independent elements and reuses the SAME
+// architectural registers for each of them (as a compiler would for an unrolled
+// loop). That gives the four designs something to differ on: without renaming the
+// reused registers create WAR/WAW hazards; with renaming they disappear; and the
+// independent elements let memory and calculation phases overlap.
+
+namespace {
+
+constexpr int LOOP_COUNTER_REG = 20;
+constexpr int LOOP_LIMIT_REG   = 21;
+
+// Elements handled per loop iteration (the loop branch fences fetch, so this
+// is how much independent work each design can overlap).
+constexpr uint32_t POINTS_PER_ITER = 4;
+
+// dest = r0 + #value
+InSramOp make_const(uint64_t& id, int dest, int value) {
+    InSramOp op = make_op(id++, OpType::ADD, 0, 0, dest, false, false, true, false);
+    op.has_imm = true;
+    op.imm_val = value;
+    return op;
+}
+
+// counter++ and loop branch (taken while more iterations remain)
+void push_loop_tail(std::vector<InSramOp>& trace, uint64_t& id, bool taken) {
+    InSramOp inc = make_op(id++, OpType::ADD, LOOP_COUNTER_REG, 0, LOOP_COUNTER_REG,
+                           false, false, true, false);
+    inc.has_imm = true;
+    inc.imm_val = 1;
+    trace.push_back(inc);
+
+    InSramOp br = make_op(id++, OpType::BRANCH, LOOP_COUNTER_REG, LOOP_LIMIT_REG, 0,
+                          false, false, true, false, true);
+    br.real_branch = true;
+    br.branch_taken = taken;
+    trace.push_back(br);
+}
+
+uint32_t loop_trips(uint32_t elements) {
+    return (elements + POINTS_PER_ITER - 1) / POINTS_PER_ITER;
+}
+
+} // namespace
+
+// ============================================================
 // 2. STENCIL
 // ============================================================
 //
-// Simplified 2D stencil operation trace.
+// out[p] = w * ( (N[p] + S[p]) + (E[p] + W[p]) ),  p = 0 .. iterations-1,  w in r9
 //
-// O1: Load North and South; add.
-// O2: Load East and West; add.
-// O3: Combine the two partial sums.
-// O4: Multiply by the stencil weight and store output.
-// B : Loop-control branch.
-//
-// Five operations per iteration.
+// Per point p (POINTS_PER_ITER points per loop iteration):
+//   O1: r5  = N[p] + S[p]          (2 loads, ADD)
+//   O2: r6  = E[p] + W[p]          (2 loads, ADD)
+//   O3: r7  = r5 + r6
+//   O4: r10 = r7 * r9, store out[p] (MUL + store phase)
+// then the loop tail (counter++, real branch).
 //
 // ============================================================
 
@@ -288,100 +342,75 @@ TraceGenerator::generate_stencil(int iterations, KernelData* data) {
 
     validate_iterations(iterations);
 
+    const uint32_t pts = static_cast<uint32_t>(iterations);
+    const uint32_t NB = 0, SB = pts, EB = 2 * pts, WB = 3 * pts, OB = 4 * pts;
+    const int32_t weight = 3;
+    const uint32_t trips = loop_trips(pts);
+
+    // ---- real input grid ----
+    std::vector<int32_t> mem(5 * static_cast<size_t>(pts), 0);
+    const int mul[4] = {3, 5, 7, 11}, add[4] = {1, 2, 3, 4};
+    for (int d = 0; d < 4; ++d)
+        for (uint32_t p = 0; p < pts; ++p)
+            mem[d * pts + p] = pat(static_cast<int>(p), mul[d], add[d], 13, 6);
+
     std::vector<InSramOp> trace;
-    trace.reserve(static_cast<size_t>(iterations) * 5);
+    trace.reserve(static_cast<size_t>(pts) * 4 + trips * 2 + 2);
 
     uint64_t id = 1;
 
-    for (int i = 0; i < iterations; ++i) {
+    trace.push_back(make_const(id, LOOP_LIMIT_REG, static_cast<int>(trips)));   // r21 = trips
+    trace.push_back(make_const(id, LOOP_COUNTER_REG, 0));                      // r20 = 0
 
-        // O1: North + South
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::ADD,
-                1, 2, 5,
-                true, true,
-                true, false
-            )
-        );
+    for (uint32_t t = 0; t < trips; ++t) {
+        for (uint32_t u = 0; u < POINTS_PER_ITER; ++u) {
 
-        // O2: East + West
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::ADD,
-                3, 4, 6,
-                true, true,
-                true, false
-            )
-        );
+            const uint32_t p = t * POINTS_PER_ITER + u;
+            if (p >= pts)
+                break;
 
-        // O3: Combine partial sums
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::ADD,
-                5, 6, 7,
-                false, false,
-                true, false
-            )
-        );
+            // O1: North + South
+            InSramOp o1 = make_op(id++, OpType::ADD, 1, 2, 5, true, true, true, false);
+            o1.load1_addr = NB + p;
+            o1.load2_addr = SB + p;
+            trace.push_back(o1);
 
-        // O4: Apply weight and store output
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::MUL,
-                7, 9, 10,
-                false, false,
-                true, true
-            )
-        );
+            // O2: East + West
+            InSramOp o2 = make_op(id++, OpType::ADD, 3, 4, 6, true, true, true, false);
+            o2.load1_addr = EB + p;
+            o2.load2_addr = WB + p;
+            trace.push_back(o2);
 
-        // B: Loop-control branch
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::BRANCH,
-                10, 0, 0,
-                false, false,
-                true, false,
-                true
-            )
-        );
+            // O3: combine partial sums
+            trace.push_back(make_op(id++, OpType::ADD, 5, 6, 7, false, false, true, false));
+
+            // O4: apply weight and store out[p]
+            InSramOp o4 = make_op(id++, OpType::MUL, 7, 9, 10, false, false, true, true);
+            o4.store_addr = OB + p;
+            trace.push_back(o4);
+        }
+
+        push_loop_tail(trace, id, t + 1 != trips);
     }
 
-    // ---- real data and memory addresses: one output point per iteration ----
-    {
-        const uint32_t it = static_cast<uint32_t>(iterations);
-        for (uint32_t i = 0; i < it; ++i) {
-            const size_t base = static_cast<size_t>(i) * 5;
-            trace[base + 0].load1_addr = i;              // North[i]
-            trace[base + 0].load2_addr = it + i;         // South[i]
-            trace[base + 1].load1_addr = 2 * it + i;     // East[i]
-            trace[base + 1].load2_addr = 3 * it + i;     // West[i]
-            trace[base + 3].store_addr = 4 * it + i;     // out[i]
+    if (data) {
+        data->name = "stencil: out[p] = w * ((N[p] + S[p]) + (E[p] + W[p])), " +
+                     std::to_string(pts) + " points, " + std::to_string(POINTS_PER_ITER) +
+                     " points per loop iteration";
+        data->memory = mem;
+        data->init_reg[9] = weight;     // stencil weight lives in r9
+        data->input_lines.clear();
+        data->input_lines.push_back("weight (register r9) = " + std::to_string(weight));
+        const char* nm[4] = {"North", "South", "East ", "West "};
+        for (int d = 0; d < 4; ++d) {
+            std::vector<uint32_t> ad;
+            for (uint32_t p = 0; p < pts; ++p) ad.push_back(d * pts + p);
+            data->input_lines.push_back(list_values(mem, nm[d], ad));
         }
-        if (data) {
-            data->name = "stencil (out[i] = weight * (N[i] + S[i] + E[i] + W[i]), one point per iteration)";
-            data->memory.assign(5 * static_cast<size_t>(it), 0);
-            const int mul[4] = {3, 5, 7, 11}, add[4] = {1, 2, 3, 4};
-            const char* nm[4] = {"North", "South", "East ", "West "};
-            data->init_reg[9] = 3;      // stencil weight lives in r9
-            for (int d = 0; d < 4; ++d) {
-                std::vector<uint32_t> ad;
-                for (uint32_t i = 0; i < it; ++i) {
-                    data->memory[d * it + i] = pat(static_cast<int>(i), mul[d], add[d], 13, 6);
-                    ad.push_back(d * it + i);
-                }
-                data->input_lines.push_back(list_values(data->memory, nm[d], ad));
-            }
-            data->input_lines.insert(data->input_lines.begin(), "weight (register r9) = 3");
-            for (uint32_t i = 0; i < it; ++i) {
-                int32_t v = 3 * ((data->memory[i] + data->memory[it + i]) + (data->memory[2 * it + i] + data->memory[3 * it + i]));
-                data->expected.push_back({4 * it + i, v, "out[" + std::to_string(i) + "]"});
-            }
+        data->expected.clear();
+        for (uint32_t p = 0; p < pts; ++p) {
+            const int32_t v = weight * ((mem[NB + p] + mem[SB + p]) + (mem[EB + p] + mem[WB + p]));
+            data->expected.push_back({OB + p, v, "out[" + std::to_string(p) + "]"});
         }
     }
 
@@ -392,14 +421,14 @@ TraceGenerator::generate_stencil(int iterations, KernelData* data) {
 // 3. K-MEANS
 // ============================================================
 //
-// Simplified distance-accumulation operation trace.
+// distance^2 = sum over f of (point[f] - centroid[f])^2,  f = 0 .. iterations-1
 //
-// O1: Load point and centroid; subtract.
-// O2: Square the difference.
-// O3: Accumulate squared distance and store output.
-// B : Loop-control branch.
-//
-// Four operations per iteration.
+// Per feature f (POINTS_PER_ITER features per loop iteration):
+//   O1: r3 = point[f] - centroid[f]   (2 loads, SUB)
+//   O2: r4 = r3 * r3                  (MUL)
+//   O3: r5 = r5 + r4, store distance^2 (ADD + store phase)
+// then the loop tail (counter++, real branch).
+// r5 (the accumulator) is cleared once before the loop.
 //
 // ============================================================
 
@@ -408,84 +437,64 @@ TraceGenerator::generate_kmeans(int iterations, KernelData* data) {
 
     validate_iterations(iterations);
 
+    const uint32_t feats = static_cast<uint32_t>(iterations);
+    const uint32_t PB = 0, CB = feats, OUT = 2 * feats;
+    const uint32_t trips = loop_trips(feats);
+
+    // ---- real input vectors ----
+    std::vector<int32_t> mem(2 * static_cast<size_t>(feats) + 1, 0);
+    int32_t acc = 0;
+    for (uint32_t f = 0; f < feats; ++f) {
+        mem[PB + f] = pat(static_cast<int>(f), 7, 3, 41, 20);
+        mem[CB + f] = pat(static_cast<int>(f), 11, 5, 31, 15);
+        const int32_t d = mem[PB + f] - mem[CB + f];
+        acc += d * d;
+    }
+
     std::vector<InSramOp> trace;
-    trace.reserve(static_cast<size_t>(iterations) * 4);
+    trace.reserve(static_cast<size_t>(feats) * 3 + trips * 2 + 3);
 
     uint64_t id = 1;
 
-    for (int i = 0; i < iterations; ++i) {
+    trace.push_back(make_const(id, LOOP_LIMIT_REG, static_cast<int>(trips)));   // r21 = trips
+    trace.push_back(make_const(id, LOOP_COUNTER_REG, 0));                      // r20 = 0
+    trace.push_back(make_const(id, 5, 0));                                     // r5  = 0 (accumulator)
 
-        // O1: Point - centroid
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::SUB,
-                1, 2, 3,
-                true, true,
-                true, false
-            )
-        );
+    for (uint32_t t = 0; t < trips; ++t) {
+        for (uint32_t u = 0; u < POINTS_PER_ITER; ++u) {
 
-        // O2: Square the difference
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::MUL,
-                3, 3, 4,
-                false, false,
-                true, false
-            )
-        );
+            const uint32_t f = t * POINTS_PER_ITER + u;
+            if (f >= feats)
+                break;
 
-        // O3: Accumulate squared distance and store
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::ADD,
-                4, 5, 5,
-                false, false,
-                true, true
-            )
-        );
+            // O1: point - centroid
+            InSramOp o1 = make_op(id++, OpType::SUB, 1, 2, 3, true, true, true, false);
+            o1.load1_addr = PB + f;
+            o1.load2_addr = CB + f;
+            trace.push_back(o1);
 
-        // B: Loop-control branch
-        trace.push_back(
-            make_op(
-                id++,
-                OpType::BRANCH,
-                5, 0, 0,
-                false, false,
-                true, false,
-                true
-            )
-        );
+            // O2: square the difference
+            trace.push_back(make_op(id++, OpType::MUL, 3, 3, 4, false, false, true, false));
+
+            // O3: accumulate and store the running distance^2
+            InSramOp o3 = make_op(id++, OpType::ADD, 4, 5, 5, false, false, true, true);
+            o3.store_addr = OUT;
+            trace.push_back(o3);
+        }
+
+        push_loop_tail(trace, id, t + 1 != trips);
     }
 
-    // ---- real data and memory addresses: squared distance accumulated over features ----
-    {
-        const uint32_t it = static_cast<uint32_t>(iterations);
-        for (uint32_t f = 0; f < it; ++f) {
-            const size_t base = static_cast<size_t>(f) * 4;
-            trace[base + 0].load1_addr = f;              // point[f]
-            trace[base + 0].load2_addr = it + f;         // centroid[f]
-            trace[base + 2].store_addr = 2 * it;         // running squared distance
-        }
-        if (data) {
-            data->name = "kmeans (squared distance between one point and one centroid, sum over features)";
-            data->memory.assign(2 * static_cast<size_t>(it) + 1, 0);
-            std::vector<uint32_t> pa, ca;
-            int32_t acc = 0;
-            for (uint32_t f = 0; f < it; ++f) {
-                data->memory[f] = pat(static_cast<int>(f), 7, 3, 41, 20);
-                data->memory[it + f] = pat(static_cast<int>(f), 11, 5, 31, 15);
-                pa.push_back(f); ca.push_back(it + f);
-                int32_t d = data->memory[f] - data->memory[it + f];
-                acc += d * d;
-            }
-            data->input_lines = {list_values(data->memory, "point[f]   ", pa), list_values(data->memory, "centroid[f]", ca),
-                                 "Computation: distance^2 = sum over f of (point[f] - centroid[f])^2"};
-            data->expected = {{2 * it, acc, "distance^2"}};
-        }
+    if (data) {
+        data->name = "kmeans: distance^2 = sum_f (point[f] - centroid[f])^2, " +
+                     std::to_string(feats) + " features, " + std::to_string(POINTS_PER_ITER) +
+                     " features per loop iteration";
+        data->memory = mem;
+        std::vector<uint32_t> pa, ca;
+        for (uint32_t f = 0; f < feats; ++f) { pa.push_back(PB + f); ca.push_back(CB + f); }
+        data->input_lines = {list_values(mem, "point[f]   ", pa), list_values(mem, "centroid[f]", ca),
+                             "Computation: distance^2 = sum over f of (point[f] - centroid[f])^2"};
+        data->expected = {{OUT, acc, "distance^2"}};
     }
 
     return trace;

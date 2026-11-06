@@ -1,3 +1,29 @@
+// ============================================================
+// PipeIMC timing + execution engine
+// ============================================================
+//
+// One engine runs all four designs; SimMode only changes the rules
+// (how many ops may issue, which ports exist, renaming, fine-grained).
+//
+// Life of one operation (InSramOp built by make_op in the trace, carrying
+// its REAL operand values: load1_val / load2_val / imm_val):
+//
+//   1. FETCH + RENAME   op enters the operation table (16 entries).
+//                       Renaming modes map its registers to physical ones.
+//   2. DISPATCH         each cycle every op tries its next phase:
+//        a. LOAD phase(s)  on port 0:  address generation (2) ->
+//                          memory visit (16) -> writeback into the array (2)
+//        b. CALC phase     on the calc port, Table III latency
+//                          (ADD 9, SUB 17, MUL 105, DIV 145, ...).
+//                          When it completes, the ALU computes the real value.
+//        c. STORE phase    on port 0: address generation -> memory visit
+//                          (the value is written to memory) -> writeback
+//   3. COMPLETE         finished calc / memory phases are marked done.
+//   4. COMMIT           in program order, an op retires only when all its
+//                       phases are done; renaming frees old registers here,
+//                       and a retired branch lets fetch continue.
+//
+// ============================================================
 
 #include "sim_engine.hpp"
 
@@ -59,12 +85,71 @@ struct MemoryTask {
     uint64_t op_id = 0;
     EventType type = EventType::LOAD_COMPLETE;
 
-    uint64_t visit_end_cycle = 0;
-    uint64_t completion_cycle = 0;
+    uint64_t addr_end_cycle = 0;      // address generation finished
+    uint64_t visit_end_cycle = 0;     // memory visiting finished
+    uint64_t completion_cycle = 0;    // writeback finished
+
+    bool addr_logged = false;
+    bool visit_logged = false;
 
     bool fine_grained = false;
     bool writeback_reserved = false;
 };
+
+const char* op_name(OpType t) {
+    switch (t) {
+        case OpType::ADD:     return "ADD";
+        case OpType::SUB:     return "SUB";
+        case OpType::MUL:     return "MUL";
+        case OpType::DIV:     return "DIV";
+        case OpType::LOGIC:   return "AND";
+        case OpType::BRANCH:  return "BRANCH";
+        case OpType::BARRIER: return "BARRIER";
+    }
+    return "?";
+}
+
+// Human-readable instruction, including the real values it carries.
+std::string describe_op(const InSramOp& op) {
+    std::string s = op_name(op.type);
+
+    if (op.type == OpType::BRANCH) {
+        s += " if r" + std::to_string(op.src1) + " != r" + std::to_string(op.src2);
+        return s;
+    }
+
+    s += " r" + std::to_string(op.dest) + " = r" + std::to_string(op.src1) + ", ";
+    s += op.has_imm ? "#" + std::to_string(op.imm_val) : "r" + std::to_string(op.src2);
+
+    if (op.has_load1) {
+        s += " | load1 mem[" + std::to_string(op.load1_addr) + "]";
+        if (op.has_load_vals) s += "=" + std::to_string(op.load1_val);
+    }
+    if (op.has_load2) {
+        s += " | load2 mem[" + std::to_string(op.load2_addr) + "]";
+        if (op.has_load_vals) s += "=" + std::to_string(op.load2_val);
+    }
+    if (op.has_store)
+        s += " | store mem[" + std::to_string(op.store_addr) + "]";
+
+    s += " | calc " + std::to_string(op.calc_cycles) + " cycles";
+    return s;
+}
+
+// The in-SRAM ALU: the arithmetic of one calculation phase.
+int32_t alu(OpType type, int32_t a, int32_t b, const char*& sym) {
+    const uint32_t ua = static_cast<uint32_t>(a);
+    const uint32_t ub = static_cast<uint32_t>(b);
+
+    switch (type) {
+        case OpType::ADD:   sym = "+"; return static_cast<int32_t>(ua + ub);
+        case OpType::SUB:   sym = "-"; return static_cast<int32_t>(ua - ub);
+        case OpType::MUL:   sym = "*"; return static_cast<int32_t>(ua * ub);
+        case OpType::DIV:   sym = "/"; return (b == 0) ? -1 : a / b;
+        case OpType::LOGIC: sym = "&"; return static_cast<int32_t>(ua & ub);
+        default:            sym = "?"; return 0;
+    }
+}
 
 // Check hazzard between operations in the op_table 
 // Check whether an operation can safely read/write architectural
@@ -174,7 +259,7 @@ private:
 
     // ---- helpers of the stages ----
     void complete_memory_phase();
-    std::string compute_values(TableEntry& entry);
+    std::string execute_alu(TableEntry& entry);
     void rename_operands(TableEntry& entry, const InSramOp& next_op, bool& can_fetch);
 
     // ---- helpers of dispatch (one per phase) ----
@@ -183,6 +268,7 @@ private:
     bool try_issue_store(size_t i);
     void start_memory_phase(TableEntry& entry, EventType type);
     bool pick_calc_port(uint64_t completion_cycle, int& selected_port) const;
+    bool memory_phase_waiting() const;
 };
 
 Engine::Engine(
@@ -366,7 +452,13 @@ void Engine::fetch_and_rename() {
                     << "Cycle " << cycle
                     << " | [FETCH] Op "
                     << next_op.op_id
-                    << "\n";
+                    << " | " << describe_op(next_op);
+                if (uses_renaming)
+                    *log_out
+                        << " | renamed: p" << entry.phys_dest
+                        << " = f(p" << entry.phys_src1
+                        << ", p" << entry.phys_src2 << ")";
+                *log_out << "\n";
             }
         }
     }
@@ -418,7 +510,7 @@ void Engine::rename_operands(
                 usage_counter[entry.phys_src2]++;
         }
     }
-    else {
+    else { // for baseline when use_renaming is false, the physical registers are the same as the architectural ones.
         entry.phys_src1 = next_op.src1;
         entry.phys_src2 = next_op.src2;
         entry.phys_dest = next_op.dest;
@@ -505,47 +597,39 @@ bool Engine::try_issue_store(size_t i) {
 // Shared by load and store: one memory phase
 // (address -> visit -> writeback) on the memory port.
 void Engine::start_memory_phase(TableEntry& entry, EventType type) {
-    const bool is_load = (type == EventType::LOAD_COMPLETE);
+    const bool is_load = (type == EventType::LOAD_COMPLETE); // check if the memory phase is for store ?
 
-    const int addr =
-        std::max(1, entry.op.addr_cycles);
+    const int addr = std::max(1, entry.op.addr_cycles);
+    const int visit = std::max(1, entry.op.visit_cycles);
+    const int writeback = std::max(1, entry.op.writeback_cycles);
 
-    const int visit =
-        std::max(1, entry.op.visit_cycles);
-
-    const int writeback =
-        std::max(1, entry.op.writeback_cycles);
-
-    const int total_latency =
-        addr + visit + writeback;
+    const int total_latency = addr + visit + writeback;
 
     if (is_load)
         entry.load_on_fly = true;
     else
         entry.store_on_fly = true;
 
+    // Configuring the Global memory_task Struct
     memory_task.active = true;
     memory_task.op_id = entry.op.op_id;
     memory_task.type = type;
 
-    memory_task.fine_grained =
-        (mode == SimMode::FINE_GRAINED);
-
-    memory_task.visit_end_cycle =
-        cycle + addr + visit;
-
-    memory_task.completion_cycle =
-        cycle + total_latency;
-
+    memory_task.fine_grained = (mode == SimMode::FINE_GRAINED);
+    memory_task.addr_end_cycle = cycle + addr;
+    memory_task.visit_end_cycle = cycle + addr + visit;
+    memory_task.addr_logged = false;
+    memory_task.visit_logged = false;
+    memory_task.completion_cycle = cycle + total_latency;
     memory_task.writeback_reserved = false;
 
-    // Coarse-grained modes occupy the memory
+    // for baseline, pipelined and renaming architectures, the memory phase occupies the shared memory
     // port for the complete memory phase.
     if (mode != SimMode::FINE_GRAINED) {
         port0_busy_until =
             memory_task.completion_cycle;
     }
-    else {
+    else { // for FINE GRAIN ARCHITECTURE
         // Fine-grained mode initially occupies
         // Port 0 only for address generation.
         port0_busy_until = cycle + addr;
@@ -575,10 +659,10 @@ bool Engine::try_issue_calc(size_t i) {
     auto& entry = op_table[i];
 
     if (
-        entry.op.has_calc &&
-        entry.loads_completed >= entry.loads_needed &&
-        !entry.calc_done &&
-        !entry.calc_on_fly
+        entry.op.has_calc && // needs calculaton
+        entry.loads_completed >= entry.loads_needed && // all loads are completed
+        !entry.calc_done && // calculation is not yet done
+        !entry.calc_on_fly // calculation is not already running
     ) {
         bool sources_ready = true;
 
@@ -704,6 +788,13 @@ bool Engine::pick_calc_port(
                     completion_cycle <=
                     memory_task.visit_end_cycle;
             }
+            // With Port 0 idle, a calculation may borrow it only if no
+            // memory phase is waiting for it; otherwise a long calculation
+            // (e.g. a 105-cycle MUL) would block the next load/store and
+            // make fine-grained issue slower than plain pipelining.
+            else if (memory_phase_waiting()) {
+                fits = false;
+            }
 
             if (fits) {
                 selected_port = 0;
@@ -713,6 +804,23 @@ bool Engine::pick_calc_port(
     }
 
     return scheduled;
+}
+
+// True if some operation in the table could start a memory phase
+// (a load, or a store whose calculation is finished) right now.
+bool Engine::memory_phase_waiting() const {
+    for (const auto& e : op_table) {
+        const bool loads_left = e.loads_completed < e.loads_needed;
+
+        if (loads_left && !e.load_on_fly)
+            return true;
+
+        if (e.op.has_store && !loads_left &&
+            (!e.op.has_calc || e.calc_done) &&
+            !e.store_done && !e.store_on_fly)
+            return true;
+    }
+    return false;
 }
 
 // ============================================================
@@ -744,7 +852,7 @@ void Engine::complete_calculations() {
                 // The REAL computation happens now, after the calculation cycles have elapsed.
                 std::string detail;
                 if (data)
-                    detail = compute_values(entry);
+                    detail = execute_alu(entry);
 
                 if (log_out) {
                     *log_out
@@ -771,7 +879,7 @@ void Engine::complete_calculations() {
 //     register number the engine uses: architectural, or physical with renaming)
 //   * a store operation keeps its result until its store phase writes memory
 // ------------------------------------------------------------
-std::string Engine::compute_values(TableEntry& entry) {
+std::string Engine::execute_alu(TableEntry& entry) {
     const InSramOp& op = entry.op;
 
     if (op.type == OpType::BRANCH && op.real_branch) {
@@ -798,17 +906,8 @@ std::string Engine::compute_values(TableEntry& entry) {
                     : op.has_load2 ? entry.ld2
                                    : val[entry.phys_src2];
 
-    uint32_t ua = static_cast<uint32_t>(a), ub = static_cast<uint32_t>(b);
-    int32_t r = 0;
     const char* sym = "?";
-    switch (op.type) {
-        case OpType::ADD:   r = static_cast<int32_t>(ua + ub); sym = "+"; break;
-        case OpType::SUB:   r = static_cast<int32_t>(ua - ub); sym = "-"; break;
-        case OpType::MUL:   r = static_cast<int32_t>(ua * ub); sym = "*"; break;
-        case OpType::DIV:   r = (b == 0) ? -1 : a / b;         sym = "/"; break;
-        case OpType::LOGIC: r = static_cast<int32_t>(ua & ub); sym = "&"; break;
-        default: break;
-    }
+    const int32_t r = alu(op.type, a, b, sym);
 
     entry.result = r;
     if (entry.phys_dest > 0)
@@ -824,6 +923,23 @@ std::string Engine::compute_values(TableEntry& entry) {
 void Engine::complete_memory() {
     if (!memory_task.active)
         return;
+
+    const char* kind =
+        (memory_task.type == EventType::LOAD_COMPLETE) ? "LOAD" : "STORE";
+
+    if (!memory_task.addr_logged && cycle >= memory_task.addr_end_cycle) {
+        memory_task.addr_logged = true;
+        if (log_out)
+            *log_out << "Cycle " << cycle << " | [" << kind
+                     << " ADDR-GEN DONE] Op " << memory_task.op_id << "\n";
+    }
+
+    if (!memory_task.visit_logged && cycle >= memory_task.visit_end_cycle) {
+        memory_task.visit_logged = true;
+        if (log_out)
+            *log_out << "Cycle " << cycle << " | [" << kind
+                     << " MEM-VISIT DONE] Op " << memory_task.op_id << "\n";
+    }
 
     // In fine-grained mode, reserve Port 0 for the
     // writeback interval after memory visiting.
@@ -957,7 +1073,7 @@ void Engine::commit() {
             break;
         }
 
-        if (log_out && head.op.op_id <= 10) {
+        if (log_out) {
             *log_out
                 << "Cycle " << cycle
                 << " | [COMMIT] Op "

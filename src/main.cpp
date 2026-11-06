@@ -197,8 +197,12 @@ int main(int argc, char* argv[]) {
              << "INPUT VALUES (signed 32-bit words read from memory by the load phases):\n";
     for (const auto& line : data.input_lines)
         log_file << "  " << line << "\n";
-    log_file << "\nEach line below is one clock-cycle event. At [CALC COMPLETE] the real arithmetic is done\n"
-             << "(operands => result); [LOAD COMPLETE] shows the value read; [STORE COMPLETE] the value written.\n\n";
+    log_file << "\nEach line below is one clock-cycle event, in this order for every operation:\n"
+             << "  [FETCH]            op enters the operation table (with its real values; renamed registers if enabled)\n"
+             << "  [LOAD ...]         memory phase: ADDR-GEN (2) -> MEM-VISIT (16) -> writeback (2) = LOAD COMPLETE\n"
+             << "  [CALC START/COMPLETE]  calculation phase with Table III latency; the ALU result is shown at COMPLETE\n"
+             << "  [STORE ...]        memory phase that writes the result: ADDR-GEN -> MEM-VISIT -> writeback\n"
+             << "  [COMMIT]           op retires in program order once all its phases are done\n\n";
 
     std::ostream* out_stream = &log_file;
 

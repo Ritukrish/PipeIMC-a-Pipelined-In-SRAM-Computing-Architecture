@@ -1,0 +1,21 @@
+
+========================================================
+       PipeIMC Simulator Results
+========================================================
+Kernel           : kmeans
+Iterations       : 256
+Total Operations : 899
+--------------------------------------------------------
+Architectural Design                Cycles          Speedup
+--------------------------------------------------------
+Design 1: In-Order Baseline         51998           1.00x
+Design 2: Pipelined                 38152           1.36x
+Design 3: Pipelined + Renaming      37768           1.38x
+Design 4: Fine-Grained Issue        28234           1.84x
+========================================================
+Result check (simulated arithmetic vs plain C++ reference):
+  Design 1: In-Order Baseline: PASS (1/1)
+  Design 2: Pipelined: PASS (1/1)
+  Design 3: Pipelined + Renaming: PASS (1/1)
+  Design 4: Fine-Grained Issue: PASS (1/1)
+========================================================

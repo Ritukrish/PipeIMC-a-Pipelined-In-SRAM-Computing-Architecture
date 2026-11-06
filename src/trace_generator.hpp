@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <vector>
 
-// Builds one operation with the PipeIMC latencies (also used by the functional execution)
+// Builds one operation with the PipeIMC latencies
 InSramOp make_op(uint64_t id, OpType type, int src1, int src2, int dest,
                  bool load1, bool load2, bool calc, bool store, bool branch = false);
 
