@@ -7,8 +7,12 @@ import math
 import re
 import sys
 from pathlib import Path
-from xml.sax.saxutils import escape
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
 DESIGN_SHADES = ("#111111", "#555555", "#999999", "#d9d9d9")
 DESIGN_LABELS = ("Baseline", "Pipelined", "Renaming", "Fine-grained")
@@ -107,7 +111,9 @@ def write_csvs(results_dir, rows):
         "correctness",
     )
     with (results_dir / "metrics.csv").open("w", newline="", encoding="utf-8") as output:
-        writer = csv.DictWriter(output, fieldnames=fields)
+        writer = csv.DictWriter(
+            output, fieldnames=fields, lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -120,7 +126,7 @@ def write_csvs(results_dir, rows):
         with (results_dir / filename).open(
             "w", newline="", encoding="utf-8"
         ) as output:
-            writer = csv.writer(output)
+            writer = csv.writer(output, lineterminator="\n")
             writer.writerow(("kernel", *DESIGN_LABELS))
             for kernel in sorted({row["kernel"] for row in rows}):
                 by_design = {row["design"]: row[metric] for row in rows if row["kernel"] == kernel}
@@ -147,11 +153,7 @@ def write_bar_chart(
     results_dir, rows, metric, filename, title, unit, log_scale=False
 ):
     kernels = sorted({row["kernel"] for row in rows})
-    values = [
-        row[metric]
-        for row in rows
-        if row[metric] is not None
-    ]
+    values = [row[metric] for row in rows if row[metric] is not None]
     if not values:
         return False
 
@@ -159,95 +161,87 @@ def write_bar_chart(
         values = [value for value in values if value > 0]
         if not values:
             return False
-        axis_min = math.floor(math.log10(min(values)))
-        axis_max = math.ceil(math.log10(max(values)))
-        if axis_min == axis_max:
-            axis_max += 1
-        value_position = lambda value: math.log10(value)
-        axis_label = lambda position: f"{10 ** position:.0e}"
+        baseline = 10 ** math.floor(math.log10(min(values)))
     else:
-        axis_min = 0.0
-        axis_max = max(values) * 1.12 or 1.0
-        value_position = lambda value: value
-        axis_label = lambda position: f"{position:.2f}"
+        baseline = 0
 
-    width = max(1080, 150 * len(kernels) + 100)
-    height = 480
-    left, right, top, bottom = 72, 30, 55, 112
-    plot_width = width - left - right
-    plot_height = height - top - bottom
-    group_width = plot_width / max(len(kernels), 1)
-    bar_width = min(36, group_width / 6)
-    design_names = (
+    designs = (
         "Design 1: In-Order Baseline",
         "Design 2: Pipelined",
         "Design 3: Pipelined + Renaming",
         "Design 4: Fine-Grained Issue",
     )
-
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
-        '<rect width="100%" height="100%" fill="white"/>',
-        f'<text x="{width / 2}" y="28" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold">{escape(title)}</text>',
-    ]
-
-    for tick in range(5):
-        position = axis_min + (axis_max - axis_min) * tick / 4
-        y = top + plot_height * (1 - tick / 4)
-        parts.append(
-            f'<line x1="{left}" y1="{y:.1f}" x2="{width-right}" y2="{y:.1f}" stroke="#dddddd"/>'
-        )
-        parts.append(
-            f'<text x="{left-10}" y="{y+4:.1f}" text-anchor="end" font-family="sans-serif" font-size="11">{axis_label(position)}</text>'
-        )
-
     row_lookup = {
         (row["kernel"], row["design"]): row[metric]
         for row in rows
         if row[metric] is not None and (not log_scale or row[metric] > 0)
     }
-    for group_index, kernel in enumerate(kernels):
-        center = left + group_width * (group_index + 0.5)
-        for design_index, design in enumerate(design_names):
-            value = row_lookup.get((kernel, design))
+
+    fig, ax = plt.subplots(figsize=(17, 9))
+    x_positions = list(range(len(kernels)))
+    group_width = 0.8
+    bar_width = group_width / len(designs)
+    for design_index, (design, label) in enumerate(zip(designs, DESIGN_LABELS)):
+        offsets = [
+            x + (design_index - (len(designs) - 1) / 2) * bar_width
+            for x in x_positions
+        ]
+        design_values = [row_lookup.get((kernel, design)) for kernel in kernels]
+        bars = ax.bar(
+            offsets,
+            [
+                value - baseline if value is not None else 0
+                for value in design_values
+            ],
+            width=bar_width * 0.92,
+            bottom=baseline,
+            color=DESIGN_SHADES[design_index],
+            edgecolor="black",
+            linewidth=0.8,
+            label=label,
+        )
+        for bar, value in zip(bars, design_values):
             if value is None:
+                bar.set_visible(False)
                 continue
-            x = center + (design_index - 1.5) * (bar_width + 3) - bar_width / 2
-            bar_height = plot_height * (
-                value_position(value) - axis_min
-            ) / (axis_max - axis_min)
-            y = top + plot_height - bar_height
-            parts.append(
-                f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_width:.1f}" height="{bar_height:.1f}" fill="{DESIGN_SHADES[design_index]}" stroke="#000000" stroke-width="0.8"/>'
+            ax.annotate(
+                format_bar_value(value, metric),
+                (bar.get_x() + bar.get_width() / 2, baseline + bar.get_height()),
+                xytext=(0, 4),
+                textcoords="offset points",
+                ha="center",
+                va="bottom",
+                rotation=90,
+                fontsize=9,
+                clip_on=False,
             )
-            parts.append(
-                f'<text x="{x + bar_width/2:.1f}" y="{y-4:.1f}" text-anchor="middle" font-family="sans-serif" font-size="8">{format_bar_value(value, metric)}</text>'
-            )
-        parts.append(
-            f'<text x="{center:.1f}" y="{top + plot_height + 22}" text-anchor="middle" font-family="sans-serif" font-size="13">{escape(kernel)}</text>'
-        )
 
-    legend_y = height - 48
-    for index, label in enumerate(DESIGN_LABELS):
-        x = left + index * 235
-        parts.append(
-            f'<rect x="{x}" y="{legend_y}" width="12" height="12" fill="{DESIGN_SHADES[index]}" stroke="#000000" stroke-width="0.8"/>'
+    if log_scale:
+        ax.set_yscale("log")
+        ax.set_ylim(bottom=baseline, top=max(values) * 2)
+    else:
+        ax.set_ylim(bottom=0, top=max(values) * 1.35 or 1)
+    if metric == "cycles":
+        ax.yaxis.set_major_formatter(
+            FuncFormatter(lambda value, _: f"{value:,.0f}")
         )
-        parts.append(
-            f'<text x="{x+18}" y="{legend_y+11}" font-family="sans-serif" font-size="12">{escape(label)}</text>'
-        )
-
-    parts.append(
-        f'<text x="18" y="{top + plot_height/2}" transform="rotate(-90 18 {top + plot_height/2})" text-anchor="middle" font-family="sans-serif" font-size="12">{escape(unit)}</text>'
-    )
-    parts.append("</svg>")
-    (results_dir / filename).write_text("\n".join(parts) + "\n", encoding="utf-8")
+    ax.set_xticks(x_positions, kernels)
+    ax.set_ylabel(unit, fontsize=14)
+    ax.set_title(title, fontsize=19, pad=18)
+    ax.tick_params(axis="both", labelsize=12)
+    ax.grid(axis="y", color="#b0b0b0", linewidth=0.7, alpha=0.7)
+    ax.set_axisbelow(True)
+    ax.legend(fontsize=12, ncol=len(designs), loc="upper center",
+              bbox_to_anchor=(0.5, -0.10), frameon=False)
+    fig.tight_layout()
+    fig.savefig(results_dir / filename, format="pdf", bbox_inches="tight")
+    plt.close(fig)
     return True
 
 
 def format_bar_value(value, metric):
-    if metric == "cycles" and value >= 1000:
-        return f"{value / 1000:.0f}k"
+    if metric == "cycles":
+        return f"{value:,.0f}"
     if metric == "runtime_ms":
         return f"{value:.2g}"
     return f"{value:.2f}"
@@ -269,10 +263,10 @@ def main():
         write_csvs(results_dir, rows)
         print(f"CSV metrics written to {results_dir / 'metrics.csv'}")
         for metric, filename, title, unit, log_scale in (
-            ("cycles", "cycles.svg", "Simulation cycles by workload (log scale)", "Cycles (log scale, lower is better)", True),
-            ("speedup", "speedup.svg", "Speedup vs. in-order baseline", "Speedup (higher is better)", False),
-            ("runtime_ms", "runtime.svg", "Measured host execution time by workload (log scale)", "Host time in ms (log scale)", True),
-            ("operations_per_cycle", "throughput.svg", "Operations per simulated cycle", "Operations per cycle (higher is better)", False),
+            ("cycles", "cycles.pdf", "Simulation cycles by workload (log scale)", "Cycles (log scale, lower is better)", True),
+            ("speedup", "speedup.pdf", "Speedup vs. in-order baseline", "Speedup (higher is better)", False),
+            ("runtime_ms", "runtime.pdf", "Measured host execution time by workload (log scale)", "Host time in ms (log scale)", True),
+            ("operations_per_cycle", "throughput.pdf", "Operations per simulated cycle", "Operations per cycle (higher is better)", False),
         ):
             if write_bar_chart(
                 results_dir,

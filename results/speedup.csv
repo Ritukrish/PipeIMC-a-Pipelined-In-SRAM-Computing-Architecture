@@ -1,0 +1,6 @@
+kernel,Baseline,Pipelined,Renaming,Fine-grained
+backprop,1.0,1.38,1.38,2.04
+kmeans,1.0,1.36,1.38,1.84
+matmul,1.0,1.47,1.48,2.14
+matvec,1.0,1.54,1.57,2.13
+stencil,1.0,1.53,1.54,1.81

@@ -15,8 +15,8 @@ hardware or benchmark environment.
 ## Requirements
 
 - GNU Make
-- A C++ compiler (the makefile defaults to `g++`)
-- Python 3 for CSV and SVG reports
+- A C++17 compiler (the makefile defaults to `g++`)
+- Python 3 and Matplotlib for CSV and PDF reports
 
 ## Build and run
 
@@ -77,11 +77,14 @@ Runs write summary and cycle logs under `results/`. `make` also generates:
   speedup, host time, throughput, and correctness.
 - `cycles.csv`, `speedup.csv`, `runtime.csv`, `throughput.csv`: chart-oriented
   tables.
-- Corresponding SVG charts.
+- Corresponding PDF charts.
 
 Cycle and host-runtime charts use logarithmic y-axes so workloads with
 different scales remain visible together. Charts use distinct grayscale
 shades with black outlines for color-blind-friendly viewing and printing.
+Cycle counts are shown as full numbers with thousands separators. Chart titles,
+axis labels, ticks, and legends use larger fonts; value labels are vertical to
+fit all digits. Charts are saved as PDF only.
 Host runtime includes simulator and logging overhead and is machine-dependent;
 use simulated cycles for architecture comparisons.
 

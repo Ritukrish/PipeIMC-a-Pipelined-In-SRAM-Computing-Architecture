@@ -113,7 +113,7 @@
 #   make stencil      256 loop trips (4 points/trip)
 #   make kmeans       256 loop trips (4 features/trip)
 #   make paper-sample bounded samples of paper workloads in results/paper_sample/
-#   make clean        remove build/ and results/
+#   make clean        remove build/ and generated results/
 #
 # Example: make matmul N=16
 # ============================================================
@@ -148,7 +148,7 @@ all: matmul stencil kmeans matvec backprop
 	@echo ""
 	@echo "========================================"
 	@echo " All simulations and reports completed"
-	@echo " Check the results/ directory for logs, CSV files, and SVG graphs"
+	@echo " Check the results/ directory for logs, CSV files, and PDF graphs"
 	@echo "========================================"
 
 compile: $(TARGET)
@@ -189,7 +189,7 @@ clean:
 help:
 	@echo "PipeIMC Simulator Commands"
 	@echo "--------------------------"
-	@echo "make              - Run all kernels and generate CSV/SVG reports"
+	@echo "make              - Run all kernels and generate CSV/PDF reports"
 	@echo "make matmul       - Run output tile N=$(N), reduction iterations=$(ITERATIONS)"
 	@echo "make stencil      - Run $(ITERATIONS) loop trips (4 points each)"
 	@echo "make kmeans       - Run $(ITERATIONS) loop trips (4 features each)"
@@ -198,5 +198,5 @@ help:
 	@echo "make paper-sample - Run bounded samples of all five workloads"
 	@echo "                    matmul 512x512, stencil3d 128^3, k-means 8192x16"
 	@echo "                    matvec 4096x4096, backprop 16384 elements"
-	@echo "make analyze      - Generate CSV/SVG reports from existing logs"
+	@echo "make analyze      - Generate CSV/PDF reports from existing logs"
 	@echo "make clean        - Remove build/ and results/"
