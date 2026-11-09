@@ -151,9 +151,27 @@ int32_t alu(OpType type, int32_t a, int32_t b, const char*& sym) {
     }
 }
 
-// Check hazzard between operations in the op_table 
-// Check whether an operation can safely read/write architectural
-// registers when explicit physical-register renaming is disabled.
+bool reads_src1(const InSramOp& op) {
+    return op.type == OpType::BARRIER || !op.has_load1;
+}
+
+bool reads_src2(const InSramOp& op) {
+    if (op.type == OpType::BRANCH)
+        return true;
+    if (op.type == OpType::BARRIER)
+        return false;
+    return !op.has_imm && !op.has_load2;
+}
+
+bool writes_dest(const InSramOp& op) {
+    return op.has_calc &&
+           op.type != OpType::BRANCH &&
+           op.type != OpType::BARRIER &&
+           op.dest != 0;
+}
+
+// Check whether an operation can safely access architectural registers
+// when explicit physical-register renaming is disabled.
 bool has_register_hazard(
     const std::deque<TableEntry>& table,
     size_t current_index
@@ -169,20 +187,28 @@ bool has_register_hazard(
         if (table[i].calc_done)
             continue;
 
-        // RAW: older operation must produce a source first.
-        if (older.dest == current.src1 ||
-            older.dest == current.src2) {
+        const bool older_writes = writes_dest(older);
+        const bool current_writes = writes_dest(current);
+        const bool raw =
+            older_writes &&
+            ((reads_src1(current) && older.dest == current.src1) ||
+             (reads_src2(current) && older.dest == current.src2));
+        if (raw) {
             return true;
         }
 
         // WAR: older operation must read before current overwrites.
-        if (older.src1 == current.dest ||
-            older.src2 == current.dest) {
+        const bool war =
+            current_writes &&
+            ((reads_src1(older) && older.src1 == current.dest) ||
+             (reads_src2(older) && older.src2 == current.dest));
+        if (war) {
             return true;
         }
 
         // WAW: older write must finish before current write.
-        if (older.dest == current.dest) {
+        if (older_writes && current_writes &&
+            older.dest == current.dest) {
             return true;
         }
     }
@@ -503,10 +529,10 @@ void Engine::rename_operands(
         }
 
         if (can_fetch) {
-            if (entry.phys_src1 > 0)
+            if (reads_src1(next_op) && entry.phys_src1 > 0)
                 usage_counter[entry.phys_src1]++;
 
-            if (entry.phys_src2 > 0)
+            if (reads_src2(next_op) && entry.phys_src2 > 0)
                 usage_counter[entry.phys_src2]++;
         }
     }
@@ -668,8 +694,10 @@ bool Engine::try_issue_calc(size_t i) {
 
         if (uses_renaming) {
             sources_ready =
-                phys_ready[entry.phys_src1] &&
-                phys_ready[entry.phys_src2];
+                (!reads_src1(entry.op) ||
+                 phys_ready[entry.phys_src1]) &&
+                (!reads_src2(entry.op) ||
+                 phys_ready[entry.phys_src2]);
         }
         else {
             sources_ready =
@@ -1083,8 +1111,10 @@ void Engine::commit() {
 
         if (uses_renaming) {
             // Release source references first.
-            release_source_usage(head.phys_src1);
-            release_source_usage(head.phys_src2);
+            if (reads_src1(head.op))
+                release_source_usage(head.phys_src1);
+            if (reads_src2(head.op))
+                release_source_usage(head.phys_src2);
 
             // The previous architectural mapping is no
             // longer needed by this committed instruction.

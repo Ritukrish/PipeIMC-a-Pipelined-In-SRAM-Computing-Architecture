@@ -106,10 +106,13 @@
 # ============================================================
 # PipeIMC Simulator Makefile - everything runs from here, results go to results/
 #
-#   make              run matmul, stencil, kmeans
-#   make matmul       full N x N matrix multiplication   (N=8, max 16)
-#   make stencil      stencil kernel                     (ITERATIONS=256)
-#   make kmeans       k-means kernel                     (ITERATIONS=256)
+#   make              run all five available workloads
+#   make matvec       bounded 256x256 tile from the 4096x4096 paper workload
+#   make backprop     bounded 256-element one-layer sample
+#   make matmul       N x N output tile, 256 reduction iterations (N=8, max 16)
+#   make stencil      256 loop trips (4 points/trip)
+#   make kmeans       256 loop trips (4 features/trip)
+#   make paper-sample bounded samples of paper workloads in results/paper_sample/
 #   make clean        remove build/ and results/
 #
 # Example: make matmul N=16
@@ -117,6 +120,7 @@
 
 CXX      = g++
 CXXFLAGS = -O3 -std=c++17 -Wall -Wextra
+PYTHON   ?= python3
 
 TARGET     = build/pipeimc
 SRC_DIR    = src
@@ -135,14 +139,16 @@ HEADERS = $(wildcard $(SRC_DIR)/*.hpp)
 
 N          = 8
 ITERATIONS = 256
+SAMPLE_SIZE = $(ITERATIONS)
 
-.PHONY: all compile matmul stencil kmeans clean help
+.PHONY: all compile matmul stencil kmeans matvec backprop paper-sample analyze clean help
 
-all: matmul stencil kmeans
+all: matmul stencil kmeans matvec backprop
+	$(PYTHON) scripts/analyze_results.py
 	@echo ""
 	@echo "========================================"
-	@echo " All simulations completed"
-	@echo " Check the results/ directory"
+	@echo " All simulations and reports completed"
+	@echo " Check the results/ directory for logs, CSV files, and SVG graphs"
 	@echo "========================================"
 
 compile: $(TARGET)
@@ -152,16 +158,45 @@ $(TARGET): $(SOURCES) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET)
 
 matmul: $(TARGET)
-	./$(TARGET) matmul $(N)
+	./$(TARGET) matmul $(N) --reduction-iterations $(ITERATIONS) --summary-only
 
 stencil: $(TARGET)
-	./$(TARGET) stencil $(ITERATIONS)
+	./$(TARGET) stencil $(ITERATIONS) --summary-only
 
 kmeans: $(TARGET)
-	./$(TARGET) kmeans $(ITERATIONS)
+	./$(TARGET) kmeans $(ITERATIONS) --summary-only
+
+matvec: $(TARGET)
+	./$(TARGET) matvec $(SAMPLE_SIZE) --summary-only
+
+backprop: $(TARGET)
+	./$(TARGET) backprop $(SAMPLE_SIZE) --summary-only
+
+paper-sample: $(TARGET)
+	./$(TARGET) matmul --paper-sample --summary-only
+	./$(TARGET) stencil --paper-sample --summary-only
+	./$(TARGET) kmeans --paper-sample --summary-only
+	./$(TARGET) matvec --paper-sample --summary-only
+	./$(TARGET) backprop --paper-sample --summary-only
+	$(PYTHON) scripts/analyze_results.py --results-dir results/paper_sample
+
+analyze:
+	$(PYTHON) scripts/analyze_results.py
 
 clean:
 	rm -rf build $(RESULT_DIR)
 
 help:
-	@sed -n '3,10p' makefile
+	@echo "PipeIMC Simulator Commands"
+	@echo "--------------------------"
+	@echo "make              - Run all kernels and generate CSV/SVG reports"
+	@echo "make matmul       - Run output tile N=$(N), reduction iterations=$(ITERATIONS)"
+	@echo "make stencil      - Run $(ITERATIONS) loop trips (4 points each)"
+	@echo "make kmeans       - Run $(ITERATIONS) loop trips (4 features each)"
+	@echo "make matvec       - Run bounded matvec sample (dimension=$(SAMPLE_SIZE))"
+	@echo "make backprop     - Run bounded backprop sample (elements=$(SAMPLE_SIZE))"
+	@echo "make paper-sample - Run bounded samples of all five workloads"
+	@echo "                    matmul 512x512, stencil3d 128^3, k-means 8192x16"
+	@echo "                    matvec 4096x4096, backprop 16384 elements"
+	@echo "make analyze      - Generate CSV/SVG reports from existing logs"
+	@echo "make clean        - Remove build/ and results/"

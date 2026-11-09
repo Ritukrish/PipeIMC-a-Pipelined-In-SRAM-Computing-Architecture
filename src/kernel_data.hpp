@@ -10,6 +10,9 @@
 // this struct holds the memory contents, the starting register values and the expected answer.
 struct KernelData {
     std::string name;
+    std::string reference_workload_shape;
+    std::string simulated_sample_shape;
+    std::string sample_note;
 
     std::vector<int32_t> memory;        // word-addressed memory
     int32_t init_reg[32] = {};          // starting value of r0..r31
