@@ -1,6 +1,6 @@
 # PipeIMC Simulator
 
-A small C++17 cycle-level simulator for comparing four execution models:
+A cycle-level simulator for comparing four execution models:
 
 1. In-order baseline
 2. Pipelined
@@ -15,7 +15,7 @@ hardware or benchmark environment.
 ## Requirements
 
 - GNU Make
-- A C++17 compiler (the makefile defaults to `g++`)
+- A C++ compiler (the makefile defaults to `g++`)
 - Python 3 for CSV and SVG reports
 
 ## Build and run
