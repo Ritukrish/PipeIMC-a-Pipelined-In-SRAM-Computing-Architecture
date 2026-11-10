@@ -1,0 +1,22 @@
+
+========================================================
+       PipeIMC Simulator Results
+========================================================
+Kernel           : matvec
+Iterations       : 256
+Cycle log mode       : summary-only
+Total Operations : 131328
+--------------------------------------------------------
+Architectural Design                Cycles          Speedup     Host time (ms)
+--------------------------------------------------------
+Design 1: In-Order Baseline         11733504        1.00x       161.583
+Design 2: Pipelined                 7604535         1.54x        968.393
+Design 3: Pipelined + Renaming      7473476         1.57x        690.709
+Design 4: Fine-Grained Issue        5507431         2.13x        542.453
+========================================================
+Result check (simulated arithmetic vs plain C++ reference):
+  Design 1: In-Order Baseline: PASS (256/256)
+  Design 2: Pipelined: PASS (256/256)
+  Design 3: Pipelined + Renaming: PASS (256/256)
+  Design 4: Fine-Grained Issue: PASS (256/256)
+========================================================

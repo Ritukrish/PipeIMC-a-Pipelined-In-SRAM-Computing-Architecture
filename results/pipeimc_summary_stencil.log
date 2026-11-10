@@ -4,18 +4,19 @@
 ========================================================
 Kernel           : stencil
 Iterations       : 256
-Total Operations : 1154
+Cycle log mode       : summary-only
+Total Operations : 4610
 --------------------------------------------------------
-Architectural Design                Cycles          Speedup
+Architectural Design                Cycles          Speedup     Host time (ms)
 --------------------------------------------------------
-Design 1: In-Order Baseline         63252           1.00x
-Design 2: Pipelined                 41282           1.53x
-Design 3: Pipelined + Renaming      41026           1.54x
-Design 4: Fine-Grained Issue        34890           1.81x
+Design 1: In-Order Baseline         252948          1.00x       2.552
+Design 2: Pipelined                 165122          1.53x        13.798
+Design 3: Pipelined + Renaming      164098          1.54x        9.517
+Design 4: Fine-Grained Issue        139530          1.81x        9.018
 ========================================================
 Result check (simulated arithmetic vs plain C++ reference):
-  Design 1: In-Order Baseline: PASS (256/256)
-  Design 2: Pipelined: PASS (256/256)
-  Design 3: Pipelined + Renaming: PASS (256/256)
-  Design 4: Fine-Grained Issue: PASS (256/256)
+  Design 1: In-Order Baseline: PASS (1024/1024)
+  Design 2: Pipelined: PASS (1024/1024)
+  Design 3: Pipelined + Renaming: PASS (1024/1024)
+  Design 4: Fine-Grained Issue: PASS (1024/1024)
 ========================================================

@@ -4,14 +4,15 @@
 ========================================================
 Kernel           : kmeans
 Iterations       : 256
-Total Operations : 899
+Cycle log mode       : summary-only
+Total Operations : 3587
 --------------------------------------------------------
-Architectural Design                Cycles          Speedup
+Architectural Design                Cycles          Speedup     Host time (ms)
 --------------------------------------------------------
-Design 1: In-Order Baseline         51998           1.00x
-Design 2: Pipelined                 38152           1.36x
-Design 3: Pipelined + Renaming      37768           1.38x
-Design 4: Fine-Grained Issue        28234           1.84x
+Design 1: In-Order Baseline         207902          1.00x       3.015
+Design 2: Pipelined                 152584          1.36x        12.839
+Design 3: Pipelined + Renaming      151048          1.38x        8.680
+Design 4: Fine-Grained Issue        112906          1.84x        6.441
 ========================================================
 Result check (simulated arithmetic vs plain C++ reference):
   Design 1: In-Order Baseline: PASS (1/1)

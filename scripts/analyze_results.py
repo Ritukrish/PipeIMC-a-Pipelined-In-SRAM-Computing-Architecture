@@ -204,17 +204,18 @@ def write_bar_chart(
             if value is None:
                 bar.set_visible(False)
                 continue
-            ax.annotate(
-                format_bar_value(value, metric),
-                (bar.get_x() + bar.get_width() / 2, baseline + bar.get_height()),
-                xytext=(0, 4),
-                textcoords="offset points",
-                ha="center",
-                va="bottom",
-                rotation=90,
-                fontsize=9,
-                clip_on=False,
-            )
+            # ax.annotate(
+            #     format_bar_value(value, metric),
+            #     (bar.get_x() + bar.get_width() / 2, baseline + bar.get_height()),
+            #     xytext=(0, 4),
+            #     textcoords="offset points",
+            #     ha="center",
+            #     va="bottom",
+            #     rotation=90,
+            #     fontsize=25,
+            #     bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5},
+            #     clip_on=False,
+            # )
 
     if log_scale:
         ax.set_yscale("log")
@@ -223,15 +224,15 @@ def write_bar_chart(
         ax.set_ylim(bottom=0, top=max(values) * 1.35 or 1)
     if metric == "cycles":
         ax.yaxis.set_major_formatter(
-            FuncFormatter(lambda value, _: f"{value:,.0f}")
+            FuncFormatter(lambda value, _: format_cycle_count(value))
         )
     ax.set_xticks(x_positions, kernels)
-    ax.set_ylabel(unit, fontsize=14)
-    ax.set_title(title, fontsize=19, pad=18)
-    ax.tick_params(axis="both", labelsize=12)
+    ax.set_ylabel(unit, fontsize=25, labelpad=12)
+    ax.set_title(title, fontsize=25, pad=22)
+    ax.tick_params(axis="both", labelsize=17, pad=8)
     ax.grid(axis="y", color="#b0b0b0", linewidth=0.7, alpha=0.7)
     ax.set_axisbelow(True)
-    ax.legend(fontsize=12, ncol=len(designs), loc="upper center",
+    ax.legend(fontsize=25, ncol=len(designs), loc="upper center",
               bbox_to_anchor=(0.5, -0.10), frameon=False)
     fig.tight_layout()
     fig.savefig(results_dir / filename, format="pdf", bbox_inches="tight")
@@ -241,10 +242,19 @@ def write_bar_chart(
 
 def format_bar_value(value, metric):
     if metric == "cycles":
-        return f"{value:,.0f}"
+        return format_cycle_count(value)
     if metric == "runtime_ms":
         return f"{value:.2g}"
     return f"{value:.2f}"
+
+
+def format_cycle_count(value):
+    if value >= 100_000:
+        thousands = value / 1_000
+        if thousands.is_integer():
+            return f"{thousands:.0f}k"
+        return f"{thousands:.1f}k"
+    return f"{value:,.0f}"
 
 
 def main():

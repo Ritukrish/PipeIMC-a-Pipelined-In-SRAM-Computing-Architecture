@@ -1,0 +1,48 @@
+============================================================
+             PipeIMC Simulation Cycle Trace
+============================================================
+Kernel      : matvec
+Iterations  : 256
+Operations  : 131328
+Cycle log mode : summary-only
+============================================================
+
+WHAT IS COMPUTED: sampled matrix-vector multiplication
+
+INPUT VALUES (signed 32-bit words read from memory by the load phases):
+  Sampled matrix tile: 256 x 256
+  Input vector length: 256
+  matrix row 0 = -5 2 -8 -1 6 -4 3 -7 0 7 -3 4 -6 1 8 -2
+  vector = -5 0 5 -3 2 -6 -1 4 -4 1 6 -2 3 -5 0 5
+
+Each line below is one clock-cycle event, in this order for every operation:
+  [FETCH]            op enters the operation table (with its real values; renamed registers if enabled)
+  [LOAD ...]         memory phase: ADDR-GEN (2) -> MEM-VISIT (16) -> writeback (2) = LOAD COMPLETE
+  [CALC START/COMPLETE]  calculation phase with Table III latency; the ALU result is shown at COMPLETE
+  [STORE ...]        memory phase that writes the result: ADDR-GEN -> MEM-VISIT -> writeback
+  [COMMIT]           op retires in program order once all its phases are done
+
+
+################ Design 1: In-Order Baseline ################
+
+---------------- FINAL RESULT (Design 1: In-Order Baseline) ----------------
+  (256 outputs; only mismatches are listed)
+  Result check: PASS (256/256 outputs correct, 0 branch disagreements)   total cycles: 11733504
+
+################ Design 2: Pipelined ################
+
+---------------- FINAL RESULT (Design 2: Pipelined) ----------------
+  (256 outputs; only mismatches are listed)
+  Result check: PASS (256/256 outputs correct, 0 branch disagreements)   total cycles: 7604535
+
+################ Design 3: Pipelined + Renaming ################
+
+---------------- FINAL RESULT (Design 3: Pipelined + Renaming) ----------------
+  (256 outputs; only mismatches are listed)
+  Result check: PASS (256/256 outputs correct, 0 branch disagreements)   total cycles: 7473476
+
+################ Design 4: Fine-Grained Issue ################
+
+---------------- FINAL RESULT (Design 4: Fine-Grained Issue) ----------------
+  (256 outputs; only mismatches are listed)
+  Result check: PASS (256/256 outputs correct, 0 branch disagreements)   total cycles: 5507431

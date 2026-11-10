@@ -82,9 +82,10 @@ Runs write summary and cycle logs under `results/`. `make` also generates:
 Cycle and host-runtime charts use logarithmic y-axes so workloads with
 different scales remain visible together. Charts use distinct grayscale
 shades with black outlines for color-blind-friendly viewing and printing.
-Cycle counts are shown as full numbers with thousands separators. Chart titles,
-axis labels, ticks, and legends use larger fonts; value labels are vertical to
-fit all digits. Charts are saved as PDF only.
+Cycle counts above 100,000 are abbreviated in charts using a `k` suffix; lower
+counts remain full numbers with thousands separators. Chart titles, axis
+labels, ticks, and legends use larger fonts; value labels are vertical. Charts
+are saved as PDF only.
 Host runtime includes simulator and logging overhead and is machine-dependent;
 use simulated cycles for architecture comparisons.
 
